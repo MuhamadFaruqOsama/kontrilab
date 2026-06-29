@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The custom server intentionally stays in CommonJS for Node runtime use.
+    "server.js",
   ]),
 ]);
 

@@ -2,7 +2,9 @@ const { createServer } = require('node:http');
 const next = require('next');
 const { Server } = require('socket.io');
 
-const dev = process.env.NODE_ENV !== 'production';
+const dev =
+  process.env.NODE_ENV !== 'production' &&
+  process.env.npm_lifecycle_event !== 'start';
 const hostname = process.env.HOST || 'localhost';
 const port = Number(process.env.PORT || 3000);
 

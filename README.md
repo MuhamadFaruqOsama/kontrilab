@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kontrilab
 
-## Getting Started
+Kontrilab is a mobile-first platform for evaluating each student's individual
+contribution to group projects.
 
-First, run the development server:
+## Technology
+
+The project is set up with the stack declared in `package.json` and
+`components.json`:
+
+- Next.js 16 App Router, React 19, and TypeScript
+- Tailwind CSS v4 through `@tailwindcss/postcss`
+- shadcn using the `radix-nova` style, React Server Components, CSS variables,
+  and lucide icons
+- Socket.IO on a custom Next.js server for real-time app events
+- Zod, React Hook Form, and `@hookform/resolvers` for form validation
+- Supabase project structure under `supabase/`
+
+## Setup
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local` and fill in real values as services are
+connected.
 
-## Learn More
+```bash
+PORT=3000
+HOST=localhost
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3000
+CORS_ORIGIN=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` starts the custom Next.js and Socket.IO server.
+- `npm run build` creates a production build.
+- `npm run start` serves the production build with the custom server.
+- `npm run lint` runs ESLint.
