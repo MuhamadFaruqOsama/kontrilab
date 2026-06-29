@@ -7,6 +7,13 @@ Kontrilab currently separates the product surface into two route areas:
 
 This is only setup scaffolding. Detailed screens and flows should be implemented later from the provided designs.
 
+## Interaction Patterns
+
+- Student/mobile flows should use bottom sheets for project details, join project, confirmations, and short focused actions instead of centered modals.
+- All users should receive toast feedback after meaningful actions such as joining a project, creating an assignment, or opening an action concept.
+- Clickable elements should provide subtle pressed feedback through scale, color, border, or shadow changes.
+- Motion should stay soft and functional: quick entrance, no dramatic bounce, no distracting decorative animation.
+
 ## Style Guardrails
 
 - Student screens should stay mobile-first and use the saved preview in `docs/design/kontrilab-app-preview.png` as the baseline mood.

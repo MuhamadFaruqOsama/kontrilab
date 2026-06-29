@@ -1,4 +1,10 @@
-import { ArrowRight, ClipboardCheck, FolderKanban, MessageCircle, UsersRound } from "lucide-react";
+"use client";
+
+import { ArrowRight, CheckCircle2, ClipboardCheck, FolderKanban, MessageCircle, UsersRound } from "lucide-react";
+import { toast } from "sonner";
+
+import { BottomSheet, BottomSheetClose, BottomSheetContent, BottomSheetDescription, BottomSheetFooter, BottomSheetHeader, BottomSheetTitle, BottomSheetTrigger } from "@/components/ui/bottom-sheet";
+import { Button } from "@/components/ui/button";
 
 const quickActions = [
   { title: "Gabung Proyek", description: "Masukkan kode dari guru.", icon: FolderKanban },
@@ -7,6 +13,12 @@ const quickActions = [
 ];
 
 export default function StudentPage() {
+  function showConceptToast(action: string) {
+    toast.success(action, {
+      description: "Konsep feedback aksi sudah disiapkan.",
+    });
+  }
+
   return (
     <main className="min-h-screen px-4 pb-6 pt-5">
       <header className="flex items-start justify-between gap-4 pt-5">
@@ -14,34 +26,75 @@ export default function StudentPage() {
           <p className="text-base leading-ktr-snug text-ktr-text-secondary">Selamat datang kembali,</p>
           <h1 className="text-2xl font-semibold leading-ktr-tight text-ktr-text-primary">Akagami!</h1>
         </div>
-        <div className="size-11 rounded-full border-2 border-ktr-surface-card bg-ktr-secondary-bg-info-card" aria-hidden="true" />
+        <button
+          className="size-11 rounded-full border-2 border-ktr-surface-card bg-ktr-secondary-bg-info-card"
+          type="button"
+          aria-label="Buka profil"
+          onClick={() => showConceptToast("Profil dibuka")}
+        />
       </header>
 
-      <section className="mt-7 rounded-lg border border-ktr-border-light bg-ktr-surface-card p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium leading-ktr-snug text-ktr-text-primary">Proyek Aktif</p>
-            <p className="mt-1 text-xs leading-ktr-snug text-ktr-text-tertiary">Website Profil Sekolah</p>
+      <BottomSheet>
+        <BottomSheetTrigger asChild>
+          <button className="mt-7 w-full rounded-lg border border-ktr-border-light bg-ktr-surface-card p-4 text-left" type="button">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium leading-ktr-snug text-ktr-text-primary">Proyek Aktif</p>
+                <p className="mt-1 text-xs leading-ktr-snug text-ktr-text-tertiary">Website Profil Sekolah</p>
+              </div>
+              <span className="rounded-full bg-ktr-primary-soft px-2.5 py-1 text-xs font-medium leading-ktr-snug text-ktr-primary-hover">
+                Sedang Berjalan
+              </span>
+            </div>
+            <div className="mt-4 flex items-center justify-between rounded-lg bg-ktr-primary-bg-form px-3 py-3 text-sm text-ktr-text-secondary">
+              <span className="flex items-center gap-2">
+                <UsersRound className="size-4 text-ktr-primary-hover" aria-hidden="true" />
+                Kelompok 3
+              </span>
+              <span>6 Anggota</span>
+            </div>
+          </button>
+        </BottomSheetTrigger>
+        <BottomSheetContent>
+          <BottomSheetHeader>
+            <BottomSheetTitle>Detail Proyek</BottomSheetTitle>
+            <BottomSheetDescription>
+              Bottom sheet menjadi pola utama untuk detail proyek, konfirmasi, dan aksi pendek pada antarmuka siswa.
+            </BottomSheetDescription>
+          </BottomSheetHeader>
+          <div className="mt-5 space-y-3 rounded-lg bg-ktr-surface-soft p-4 text-sm leading-ktr-normal text-ktr-text-secondary">
+            <p className="font-medium text-ktr-text-primary">Website Profil Sekolah</p>
+            <p>Kelompok 3 berisi 6 anggota dan sedang berada dalam tahap berjalan.</p>
           </div>
-          <span className="rounded-full bg-ktr-primary-soft px-2.5 py-1 text-xs font-medium leading-ktr-snug text-ktr-primary-hover">
-            Sedang Berjalan
-          </span>
-        </div>
-        <div className="mt-4 flex items-center justify-between rounded-lg bg-ktr-primary-bg-form px-3 py-3 text-sm text-ktr-text-secondary">
-          <span className="flex items-center gap-2">
-            <UsersRound className="size-4 text-ktr-primary-hover" aria-hidden="true" />
-            Kelompok 3
-          </span>
-          <span>6 Anggota</span>
-        </div>
-      </section>
+          <BottomSheetFooter>
+            <Button
+              className="w-full"
+              type="button"
+              onClick={() => showConceptToast("Detail proyek dibuka")}
+            >
+              Lanjutkan Proyek
+              <ArrowRight aria-hidden="true" />
+            </Button>
+            <BottomSheetClose asChild>
+              <Button className="w-full" variant="outline" type="button">
+                Tutup
+              </Button>
+            </BottomSheetClose>
+          </BottomSheetFooter>
+        </BottomSheetContent>
+      </BottomSheet>
 
       <section className="mt-5 rounded-lg bg-ktr-primary p-4 text-primary-foreground">
         <p className="text-sm font-semibold leading-ktr-snug">Kontribusimu Hari Ini</p>
         <p className="mt-2 text-base font-semibold leading-ktr-snug">
           Keren, kamu sudah mengirim 2 update hari ini.
         </p>
-        <button className="mt-4 flex size-10 items-center justify-center rounded-full bg-ktr-surface-card text-ktr-primary-hover" type="button" aria-label="Lihat kontribusi hari ini">
+        <button
+          className="mt-4 flex size-10 items-center justify-center rounded-full bg-ktr-surface-card text-ktr-primary-hover"
+          type="button"
+          aria-label="Lihat kontribusi hari ini"
+          onClick={() => showConceptToast("Kontribusi hari ini dibuka")}
+        >
           <ArrowRight className="size-5" aria-hidden="true" />
         </button>
       </section>
@@ -49,11 +102,11 @@ export default function StudentPage() {
       <section className="mt-6">
         <h2 className="text-lg font-semibold leading-ktr-tight text-ktr-text-primary">Aksi Cepat</h2>
         <div className="mt-3 space-y-2">
-          {quickActions.map((action) => {
+          {quickActions.map((action, index) => {
             const Icon = action.icon;
-
-            return (
-              <article key={action.title} className="flex items-center gap-3 rounded-lg border border-ktr-border-light bg-ktr-surface-card p-3">
+            const isJoinProject = index === 0;
+            const actionCard = (
+              <article className="flex w-full items-center gap-3 rounded-lg border border-ktr-border-light bg-ktr-surface-card p-3 text-left">
                 <span className="flex size-10 items-center justify-center rounded-lg bg-ktr-primary-soft text-ktr-primary-hover">
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
@@ -63,6 +116,66 @@ export default function StudentPage() {
                 </div>
                 <ArrowRight className="size-4 text-ktr-text-tertiary" aria-hidden="true" />
               </article>
+            );
+
+            if (!isJoinProject) {
+              return (
+                <button
+                  key={action.title}
+                  className="w-full"
+                  type="button"
+                  onClick={() => showConceptToast(action.title)}
+                >
+                  {actionCard}
+                </button>
+              );
+            }
+
+            return (
+              <BottomSheet key={action.title}>
+                <BottomSheetTrigger asChild>
+                  <button className="w-full" type="button">
+                    {actionCard}
+                  </button>
+                </BottomSheetTrigger>
+                <BottomSheetContent>
+                  <BottomSheetHeader>
+                    <BottomSheetTitle>Gabung Proyek</BottomSheetTitle>
+                    <BottomSheetDescription>
+                      Masukkan kode proyek dari guru untuk bergabung dengan kelompok yang sesuai.
+                    </BottomSheetDescription>
+                  </BottomSheetHeader>
+                  <label className="mt-5 block text-sm font-medium leading-ktr-snug text-ktr-text-primary" htmlFor="join-code">
+                    Kode Proyek
+                  </label>
+                  <input
+                    id="join-code"
+                    className="mt-2 h-11 w-full rounded-lg border border-ktr-border-input bg-ktr-surface-card px-3 text-sm outline-none transition-colors focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20"
+                    placeholder="Contoh: KTR-2026"
+                  />
+                  <BottomSheetFooter>
+                    <BottomSheetClose asChild>
+                      <Button
+                        className="w-full"
+                        type="button"
+                        onClick={() =>
+                          toast.success("Berhasil bergabung", {
+                            description: "Konfirmasi akan memakai toast seperti ini.",
+                            icon: <CheckCircle2 className="size-4" aria-hidden="true" />,
+                          })
+                        }
+                      >
+                        Gabung Proyek
+                      </Button>
+                    </BottomSheetClose>
+                    <BottomSheetClose asChild>
+                      <Button className="w-full" variant="outline" type="button">
+                        Batal
+                      </Button>
+                    </BottomSheetClose>
+                  </BottomSheetFooter>
+                </BottomSheetContent>
+              </BottomSheet>
             );
           })}
         </div>

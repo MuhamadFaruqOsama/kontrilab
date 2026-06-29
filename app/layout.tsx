@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import SocketProvider from "./components/providers/SocketProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 const nunitoSans = Nunito_Sans({
   variable: "--font-nunito-sans",
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="en" className={`${nunitoSans.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <SocketProvider>{children}</SocketProvider>
+        <Toaster />
       </body>
     </html>
   );

@@ -23,6 +23,9 @@ Kontrilab uses a soft mobile-first interface with rounded cards, calm green prim
 - Primary actions use Kontrilab green with rounded pill-like buttons.
 - Status chips use soft background colors with small icons and compact text.
 - Bottom navigation uses icon plus label, with the active item in primary green.
+- Use bottom sheets for mobile detail, join project, and confirmation patterns instead of centered modals.
+- Use toast feedback for completed actions across student and teacher surfaces.
+- Apply subtle pressed states to clickable elements so actions feel responsive without becoming playful or noisy.
 - Use clear spacing between grouped content, but keep information dense enough for repeated student workflows.
 
 ## Future Implementation Notes
