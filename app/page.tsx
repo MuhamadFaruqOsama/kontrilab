@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ClipboardCheck, UsersRound } from "lucide-react";
+import { ArrowRight, MonitorCog, Smartphone, UsersRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -9,53 +9,53 @@ export default function HomePage() {
       <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center gap-10 px-6 py-12 sm:px-8">
         <div className="max-w-3xl space-y-6">
           <p className="text-sm font-medium text-muted-foreground">
-            Kontrilab platform setup
+            Kontrilab Platform Setup
           </p>
-          <h1 className="text-4xl font-semibold tracking-normal sm:text-5xl">
-            Evaluate each student&apos;s contribution with a mobile-first
-            workflow.
+          <h1 className="text-4xl font-semibold tracking-ktr-ui sm:text-5xl">
+            Separate teacher workspace and student mobile app foundations.
           </h1>
-          <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-            The base stack is ready for a Next.js App Router interface,
-            shadcn/radix-nova components, Tailwind CSS v4 tokens, Socket.IO
-            collaboration events, and Supabase-backed project data.
+          <p className="max-w-2xl text-base leading-ktr-relaxed text-muted-foreground sm:text-lg">
+            Kontrilab is prepared as two connected surfaces: teachers use a desktop website to assign and review project work, while students use a mobile-first app to join groups, submit updates, and follow project activity.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link href="/login">
-                Masuk
+              <Link href="/teacher">
+                Teacher Website
                 <ArrowRight aria-hidden="true" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="/register">Daftar</Link>
+              <Link href="/student">Student App</Link>
             </Button>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border bg-card p-5 text-card-foreground">
-            <UsersRound
+          <Link href="/teacher" className="rounded-lg border bg-card p-5 text-card-foreground transition-colors hover:border-ktr-border-active">
+            <MonitorCog
               className="size-5 text-muted-foreground"
               aria-hidden="true"
             />
-            <h2 className="mt-4 text-lg font-medium">Role-aware evaluations</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Prepare student, lecturer, and admin experiences without changing
-              the current route-group structure.
+            <h2 className="mt-4 text-lg font-medium">Teacher Website</h2>
+            <p className="mt-2 text-sm leading-ktr-normal text-muted-foreground">
+              A desktop-first area for assignments, classes, project oversight, and contribution review.
             </p>
-          </div>
-          <div className="rounded-lg border bg-card p-5 text-card-foreground">
-            <ClipboardCheck
+          </Link>
+          <Link href="/student" className="rounded-lg border bg-card p-5 text-card-foreground transition-colors hover:border-ktr-border-active">
+            <Smartphone
               className="size-5 text-muted-foreground"
               aria-hidden="true"
             />
-            <h2 className="mt-4 text-lg font-medium">Contribution evidence</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Keep future peer reviews, rubrics, and project activity in one
-              consistent mobile app surface.
+            <h2 className="mt-4 text-lg font-medium">Student App</h2>
+            <p className="mt-2 text-sm leading-ktr-normal text-muted-foreground">
+              A mobile-first area for group projects, contribution updates, activity, and profile access.
             </p>
-          </div>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-lg border border-ktr-border-light bg-ktr-primary-soft px-4 py-3 text-sm leading-ktr-normal text-ktr-primary-dark">
+          <UsersRound className="size-5 shrink-0" aria-hidden="true" />
+          Both areas are setup scaffolds only. Screen details will follow the designs provided during development.
         </div>
       </section>
     </main>

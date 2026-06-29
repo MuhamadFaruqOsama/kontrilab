@@ -7,9 +7,16 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--ktr-font-family-sans);
+  --font-mono: var(--ktr-font-family-sans);
+  --font-heading: var(--ktr-font-family-sans);
+  --leading-ktr-tight: var(--ktr-leading-tight);
+  --leading-ktr-snug: var(--ktr-leading-snug);
+  --leading-ktr-normal: var(--ktr-leading-normal);
+  --leading-ktr-relaxed: var(--ktr-leading-relaxed);
+  --tracking-ktr-ui: var(--ktr-tracking-ui);
+  --tracking-ktr-body: var(--ktr-tracking-body);
+  --tracking-ktr-label: var(--ktr-tracking-label);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,6 +46,59 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-ktr-primary: var(--ktr-primary-main);
+  --color-ktr-primary-soft: var(--ktr-primary-soft);
+  --color-ktr-primary-light: var(--ktr-primary-light);
+  --color-ktr-primary-hover: var(--ktr-primary-hover);
+  --color-ktr-primary-pressed: var(--ktr-primary-pressed);
+  --color-ktr-primary-dark: var(--ktr-primary-dark);
+  --color-ktr-primary-bg-form: var(--ktr-primary-bg-form);
+  --color-ktr-secondary: var(--ktr-secondary-main);
+  --color-ktr-secondary-bg-info-card: var(--ktr-secondary-bg-info-card);
+  --color-ktr-secondary-section-info: var(--ktr-secondary-section-info);
+  --color-ktr-secondary-hover: var(--ktr-secondary-hover);
+  --color-ktr-secondary-pressed: var(--ktr-secondary-pressed);
+  --color-ktr-secondary-dark: var(--ktr-secondary-dark);
+  --color-ktr-neutral-100: var(--ktr-neutral-100);
+  --color-ktr-neutral-200: var(--ktr-neutral-200);
+  --color-ktr-neutral-300: var(--ktr-neutral-300);
+  --color-ktr-neutral-400: var(--ktr-neutral-400);
+  --color-ktr-neutral-500: var(--ktr-neutral-500);
+  --color-ktr-neutral-600: var(--ktr-neutral-600);
+  --color-ktr-neutral-700: var(--ktr-neutral-700);
+  --color-ktr-neutral-800: var(--ktr-neutral-800);
+  --color-ktr-neutral-900: var(--ktr-neutral-900);
+  --color-ktr-neutral-1000: var(--ktr-neutral-1000);
+  --color-ktr-text-primary: var(--ktr-text-primary);
+  --color-ktr-text-secondary: var(--ktr-text-secondary);
+  --color-ktr-text-tertiary: var(--ktr-text-tertiary);
+  --color-ktr-text-disabled: var(--ktr-text-disabled);
+  --color-ktr-text-white: var(--ktr-text-white);
+  --color-ktr-surface-bg-app: var(--ktr-surface-bg-app);
+  --color-ktr-surface-card: var(--ktr-surface-card);
+  --color-ktr-surface-soft: var(--ktr-surface-soft);
+  --color-ktr-surface-highlight-area: var(--ktr-surface-highlight-area);
+  --color-ktr-surface-info-ai-summary-card: var(--ktr-surface-info-ai-summary-card);
+  --color-ktr-border-light: var(--ktr-border-light);
+  --color-ktr-border-input: var(--ktr-border-input);
+  --color-ktr-border-active: var(--ktr-border-active);
+  --color-ktr-border-focus: var(--ktr-border-focus);
+  --color-ktr-success: var(--ktr-status-success-main);
+  --color-ktr-success-bg: var(--ktr-status-success-bg);
+  --color-ktr-warning: var(--ktr-status-warning-main);
+  --color-ktr-warning-bg: var(--ktr-status-warning-bg);
+  --color-ktr-info: var(--ktr-status-info-main);
+  --color-ktr-info-bg: var(--ktr-status-info-bg);
+  --color-ktr-project-not-started: var(--ktr-project-not-started);
+  --color-ktr-project-not-started-bg: var(--ktr-project-not-started-bg);
+  --color-ktr-project-in-progress: var(--ktr-project-in-progress);
+  --color-ktr-project-in-progress-bg: var(--ktr-project-in-progress-bg);
+  --color-ktr-project-revision: var(--ktr-project-revision);
+  --color-ktr-project-revision-bg: var(--ktr-project-revision-bg);
+  --color-ktr-project-finished: var(--ktr-project-finished);
+  --color-ktr-project-finished-bg: var(--ktr-project-finished-bg);
+  --color-ktr-project-need-attention: var(--ktr-project-need-attention);
+  --color-ktr-project-need-attention-bg: var(--ktr-project-need-attention-bg);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -49,72 +109,147 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --ktr-font-family-sans: var(--font-nunito-sans), "Nunito Sans", system-ui, sans-serif;
+  --ktr-font-size-xs: 0.75rem;
+  --ktr-font-size-sm: 0.875rem;
+  --ktr-font-size-base: 1rem;
+  --ktr-font-size-lg: 1.125rem;
+  --ktr-font-size-xl: 1.25rem;
+  --ktr-font-size-2xl: 1.5rem;
+  --ktr-font-size-3xl: 1.875rem;
+  --ktr-font-size-4xl: 2.25rem;
+  --ktr-leading-tight: 1.2;
+  --ktr-leading-snug: 1.35;
+  --ktr-leading-normal: 1.5;
+  --ktr-leading-relaxed: 1.65;
+  --ktr-tracking-ui: 0;
+  --ktr-tracking-body: 0.005em;
+  --ktr-tracking-label: 0.01em;
+  --ktr-font-weight-regular: 400;
+  --ktr-font-weight-medium: 500;
+  --ktr-font-weight-semibold: 600;
+  --ktr-font-weight-bold: 700;
+
+  --ktr-primary-main: #57c186;
+  --ktr-primary-soft: #eaf4ee;
+  --ktr-primary-light: #f4faf6;
+  --ktr-primary-hover: #3f7a5a;
+  --ktr-primary-pressed: #33664b;
+  --ktr-primary-dark: #254d38;
+  --ktr-primary-bg-form: #f0fff6;
+  --ktr-secondary-main: #5b8fb9;
+  --ktr-secondary-bg-info-card: #eaf3fa;
+  --ktr-secondary-section-info: #f5fafd;
+  --ktr-secondary-hover: #4a7ea8;
+  --ktr-secondary-pressed: #3d6a8f;
+  --ktr-secondary-dark: #2f536f;
+  --ktr-neutral-100: #ffffff;
+  --ktr-neutral-200: #e8e8e8;
+  --ktr-neutral-300: #d2d2d2;
+  --ktr-neutral-400: #bbbbbb;
+  --ktr-neutral-500: #a4a4a4;
+  --ktr-neutral-600: #8e8e8e;
+  --ktr-neutral-700: #777777;
+  --ktr-neutral-800: #606060;
+  --ktr-neutral-900: #4a4a4a;
+  --ktr-neutral-1000: #333333;
+  --ktr-text-primary: #2b3033;
+  --ktr-text-secondary: #5f6b70;
+  --ktr-text-tertiary: #879196;
+  --ktr-text-disabled: #b8c0c4;
+  --ktr-text-white: #ffffff;
+  --ktr-surface-bg-app: #f7faf8;
+  --ktr-surface-card: #ffffff;
+  --ktr-surface-soft: #f1f6f3;
+  --ktr-surface-highlight-area: #eaf4ee;
+  --ktr-surface-info-ai-summary-card: #eaf3fa;
+  --ktr-border-light: #eeeeee;
+  --ktr-border-input: #d3dcd7;
+  --ktr-border-active: #a8b5ae;
+  --ktr-border-focus: #4f8f6b;
+  --ktr-status-success-main: #4caf50;
+  --ktr-status-success-bg: #eaf7ec;
+  --ktr-status-warning-main: #f5a623;
+  --ktr-status-warning-bg: #fff5e5;
+  --ktr-status-info-main: #4285f4;
+  --ktr-status-info-bg: #eaf2ff;
+  --ktr-project-not-started: #879196;
+  --ktr-project-not-started-bg: #f1f3f4;
+  --ktr-project-in-progress: #4285f4;
+  --ktr-project-in-progress-bg: #eaf2ff;
+  --ktr-project-revision: #f5a623;
+  --ktr-project-revision-bg: #fff5e5;
+  --ktr-project-finished: #4caf50;
+  --ktr-project-finished-bg: #eaf7ec;
+  --ktr-project-need-attention: #e05252;
+  --ktr-project-need-attention-bg: #fdecec;
+
+  --background: var(--ktr-surface-bg-app);
+  --foreground: var(--ktr-text-primary);
+  --card: var(--ktr-surface-card);
+  --card-foreground: var(--ktr-text-primary);
+  --popover: var(--ktr-surface-card);
+  --popover-foreground: var(--ktr-text-primary);
+  --primary: var(--ktr-primary-main);
+  --primary-foreground: var(--ktr-text-white);
+  --secondary: var(--ktr-secondary-main);
+  --secondary-foreground: var(--ktr-text-white);
+  --muted: var(--ktr-surface-soft);
+  --muted-foreground: var(--ktr-text-secondary);
+  --accent: var(--ktr-primary-soft);
+  --accent-foreground: var(--ktr-primary-dark);
+  --destructive: var(--ktr-project-need-attention);
+  --border: var(--ktr-border-light);
+  --input: var(--ktr-border-input);
+  --ring: var(--ktr-border-focus);
+  --chart-1: var(--ktr-primary-main);
+  --chart-2: var(--ktr-secondary-main);
+  --chart-3: var(--ktr-status-success-main);
+  --chart-4: var(--ktr-status-warning-main);
+  --chart-5: var(--ktr-status-info-main);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: var(--ktr-surface-card);
+  --sidebar-foreground: var(--ktr-text-primary);
+  --sidebar-primary: var(--ktr-primary-main);
+  --sidebar-primary-foreground: var(--ktr-text-white);
+  --sidebar-accent: var(--ktr-primary-soft);
+  --sidebar-accent-foreground: var(--ktr-primary-dark);
+  --sidebar-border: var(--ktr-border-light);
+  --sidebar-ring: var(--ktr-border-focus);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #18221d;
+  --foreground: var(--ktr-text-white);
+  --card: #1f2d26;
+  --card-foreground: var(--ktr-text-white);
+  --popover: #1f2d26;
+  --popover-foreground: var(--ktr-text-white);
+  --primary: var(--ktr-primary-main);
+  --primary-foreground: var(--ktr-primary-dark);
+  --secondary: var(--ktr-secondary-main);
+  --secondary-foreground: var(--ktr-text-white);
+  --muted: #24352b;
+  --muted-foreground: #d3dcd7;
+  --accent: var(--ktr-primary-dark);
+  --accent-foreground: var(--ktr-text-white);
+  --destructive: var(--ktr-project-need-attention);
+  --border: rgb(255 255 255 / 12%);
+  --input: rgb(255 255 255 / 16%);
+  --ring: var(--ktr-primary-main);
+  --chart-1: var(--ktr-primary-main);
+  --chart-2: var(--ktr-secondary-main);
+  --chart-3: var(--ktr-status-success-main);
+  --chart-4: var(--ktr-status-warning-main);
+  --chart-5: var(--ktr-status-info-main);
+  --sidebar: #1f2d26;
+  --sidebar-foreground: var(--ktr-text-white);
+  --sidebar-primary: var(--ktr-primary-main);
+  --sidebar-primary-foreground: var(--ktr-primary-dark);
+  --sidebar-accent: #24352b;
+  --sidebar-accent-foreground: var(--ktr-text-white);
+  --sidebar-border: rgb(255 255 255 / 12%);
+  --sidebar-ring: var(--ktr-primary-main);
 }
 
 @layer base {
@@ -123,8 +258,35 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--ktr-font-family-sans);
+    font-size: var(--ktr-font-size-base);
+    font-weight: var(--ktr-font-weight-regular);
+    line-height: var(--ktr-leading-normal);
+    letter-spacing: var(--ktr-tracking-body);
   }
   html {
     @apply font-sans;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--ktr-font-family-sans);
+    line-height: var(--ktr-leading-tight);
+    letter-spacing: var(--ktr-tracking-ui);
+  }
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    letter-spacing: var(--ktr-tracking-ui);
+  }
+  small {
+    line-height: var(--ktr-leading-snug);
+    letter-spacing: var(--ktr-tracking-label);
   }
 }
