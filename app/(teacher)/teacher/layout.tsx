@@ -1,12 +1,20 @@
-import Link from "next/link";
-import { BarChart3, BookOpenCheck, ClipboardList, Home, Settings, UsersRound } from "lucide-react";
+﻿import Link from "next/link";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  AssignmentsIcon,
+  BarChartIcon,
+  BookOpenCheckIcon,
+  Home01Icon,
+  Settings02Icon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons";
 
 const teacherNavItems = [
-  { label: "Overview", icon: Home },
-  { label: "Assignments", icon: ClipboardList },
-  { label: "Classes", icon: UsersRound },
-  { label: "Reports", icon: BarChart3 },
-  { label: "Settings", icon: Settings },
+  { label: "Overview", icon: Home01Icon },
+  { label: "Assignments", icon: AssignmentsIcon },
+  { label: "Classes", icon: UserGroupIcon },
+  { label: "Reports", icon: BarChartIcon },
+  { label: "Settings", icon: Settings02Icon },
 ];
 
 export default function TeacherLayout({
@@ -20,7 +28,7 @@ export default function TeacherLayout({
         <aside className="hidden border-r border-ktr-border-light bg-ktr-surface-card px-4 py-5 lg:block">
           <Link href="/teacher" className="flex items-center gap-3 rounded-lg px-2 py-2">
             <span className="flex size-9 items-center justify-center rounded-lg bg-ktr-primary text-primary-foreground">
-              <BookOpenCheck className="size-5" aria-hidden="true" />
+              <HugeiconsIcon icon={BookOpenCheckIcon} size={20} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
             </span>
             <span>
               <span className="block text-base font-semibold leading-ktr-snug">Kontrilab</span>
@@ -29,20 +37,16 @@ export default function TeacherLayout({
           </Link>
 
           <nav className="mt-8 space-y-1" aria-label="Teacher navigation">
-            {teacherNavItems.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.label}
-                  href="/teacher"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ktr-text-secondary transition-colors hover:bg-ktr-primary-soft hover:text-ktr-primary-dark"
-                >
-                  <Icon className="size-4" aria-hidden="true" />
-                  {item.label}
-                </Link>
-              );
-            })}
+            {teacherNavItems.map((item) => (
+              <Link
+                key={item.label}
+                href="/teacher"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ktr-text-secondary transition-colors hover:bg-ktr-primary-soft hover:text-ktr-primary-dark"
+              >
+                <HugeiconsIcon icon={item.icon} size={16} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
+                {item.label}
+              </Link>
+            ))}
           </nav>
         </aside>
 

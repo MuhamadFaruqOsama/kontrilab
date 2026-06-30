@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { Dialog } from "radix-ui";
-import { X } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import { cn } from "@/lib/utils";
 
@@ -57,7 +58,7 @@ function BottomSheetContent({
         {children}
         {showCloseButton && (
           <Dialog.Close className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-full text-ktr-text-tertiary transition-colors hover:bg-ktr-surface-soft hover:text-ktr-text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
-            <X className="size-4" aria-hidden="true" />
+            <HugeiconsIcon icon={Cancel01Icon} size={16} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
             <span className="sr-only">Tutup</span>
           </Dialog.Close>
         )}
@@ -128,3 +129,5 @@ export {
   BottomSheetTitle,
   BottomSheetTrigger,
 };
+
+

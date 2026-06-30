@@ -11,7 +11,7 @@ This is only setup scaffolding. Detailed screens and flows should be implemented
 
 - Student/mobile flows should use bottom sheets for project details, join project, confirmations, and short focused actions instead of centered modals.
 - All users should receive toast feedback after meaningful actions such as joining a project, creating an assignment, or opening an action concept.
-- Clickable elements should provide subtle pressed feedback through scale, color, border, or shadow changes.
+- Clickable elements should provide subtle pressed feedback through scale, color, or border changes.
 - Motion should stay soft and functional: quick entrance, no dramatic bounce, no distracting decorative animation.
 
 ## Style Guardrails

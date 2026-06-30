@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Toaster as SonnerToaster } from "sonner";
 
@@ -9,7 +9,7 @@ function Toaster() {
       toastOptions={{
         classNames: {
           toast:
-            "border-ktr-border-light bg-ktr-surface-card text-ktr-text-primary shadow-lg",
+            "border-ktr-border-light bg-ktr-surface-card text-ktr-text-primary",
           title: "text-sm font-semibold text-ktr-text-primary",
           description: "text-xs text-ktr-text-secondary",
           actionButton: "bg-ktr-primary text-primary-foreground",

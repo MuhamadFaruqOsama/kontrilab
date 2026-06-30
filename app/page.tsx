@@ -1,61 +1,41 @@
 import Link from "next/link";
-import { ArrowRight, MonitorCog, Smartphone, UsersRound } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
 
-import { Button } from "@/components/ui/button";
-
-export default function HomePage() {
+export default function OnboardingPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center gap-10 px-6 py-12 sm:px-8">
-        <div className="max-w-3xl space-y-6">
-          <p className="text-sm font-medium text-muted-foreground">
-            Kontrilab Platform Setup
-          </p>
-          <h1 className="text-4xl font-semibold tracking-ktr-ui sm:text-5xl">
-            Separate teacher workspace and student mobile app foundations.
-          </h1>
-          <p className="max-w-2xl text-base leading-ktr-relaxed text-muted-foreground sm:text-lg">
-            Kontrilab is prepared as two connected surfaces: teachers use a desktop website to assign and review project work, while students use a mobile-first app to join groups, submit updates, and follow project activity.
-          </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/teacher">
-                Teacher Website
-                <ArrowRight aria-hidden="true" />
+    <main className="min-h-screen bg-ktr-neutral-1000 text-foreground sm:py-6">
+      <section className="relative mx-auto min-h-screen w-full max-w-[430px] overflow-hidden bg-ktr-surface-bg-app sm:rounded-[32px]">
+
+        <div className="absolute inset-x-0 top-0 h-full w-full bg-[url('/vectors/student-onboarding.svg')] bg-cover bg-top" />
+        <div className="absolute inset-x-0 bottom-0 h-[38%] bg-gradient-to-t from-white via-white/95 to-white/0" />
+
+        <div className="relative z-10 flex min-h-screen flex-col justify-end px-4 pb-6 pt-10">
+          <div className="space-y-5">
+            <div className="space-y-3">
+              <h1 className="text-[28px] font-bold leading-ktr-tight text-ktr-primary sm:text-[32px]">
+                Belajar Lebih Kompak, Berkarya Lebih Berdampak
+              </h1>
+              <p className="max-w-[330px] text-base leading-ktr-relaxed text-ktr-text-tertiary">
+                Semua kontribusi tercatat agar kerja sama terasa lebih adil dan transparan.
+              </p>
+            </div>
+
+            <Link
+              href="/login"
+              className="flex h-[52px] w-full items-center justify-center gap-3 rounded-2xl bg-ktr-primary px-4 text-base font-medium text-white shadow-[0_12px_24px_rgba(87,193,133,0.28)] hover:bg-ktr-primary-hover"
+            >
+              Mulai Sekarang
+              <HugeiconsIcon icon={ArrowRight02Icon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
+            </Link>
+
+            <p className="text-center text-sm text-ktr-text-secondary">
+              Sudah punya akun?{" "}
+              <Link href="/login" className="font-semibold text-ktr-primary-dark hover:text-ktr-primary-hover">
+                Masuk
               </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/student">Student App</Link>
-            </Button>
+            </p>
           </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Link href="/teacher" className="rounded-lg border bg-card p-5 text-card-foreground transition-colors hover:border-ktr-border-active">
-            <MonitorCog
-              className="size-5 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <h2 className="mt-4 text-lg font-medium">Teacher Website</h2>
-            <p className="mt-2 text-sm leading-ktr-normal text-muted-foreground">
-              A desktop-first area for assignments, classes, project oversight, and contribution review.
-            </p>
-          </Link>
-          <Link href="/student" className="rounded-lg border bg-card p-5 text-card-foreground transition-colors hover:border-ktr-border-active">
-            <Smartphone
-              className="size-5 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <h2 className="mt-4 text-lg font-medium">Student App</h2>
-            <p className="mt-2 text-sm leading-ktr-normal text-muted-foreground">
-              A mobile-first area for group projects, contribution updates, activity, and profile access.
-            </p>
-          </Link>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-lg border border-ktr-border-light bg-ktr-primary-soft px-4 py-3 text-sm leading-ktr-normal text-ktr-primary-dark">
-          <UsersRound className="size-5 shrink-0" aria-hidden="true" />
-          Both areas are setup scaffolds only. Screen details will follow the designs provided during development.
         </div>
       </section>
     </main>
