@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -110,6 +110,7 @@
 }
 
 :root {
+  --ktr-mobile-frame-width: 430px;
   --ktr-font-family-sans: var(--font-nunito-sans), "Nunito Sans", system-ui, sans-serif;
   --ktr-font-size-xs: 0.75rem;
   --ktr-font-size-sm: 0.875rem;
@@ -266,6 +267,9 @@
   }
   html,
   body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
@@ -356,10 +360,21 @@
 
 @layer components {
 
+  .ktr-app-shell {
+    position: relative;
+    isolation: isolate;
+    max-width: var(--ktr-mobile-frame-width);
+    overflow-x: clip;
+  }
+
   .ktr-bottom-sheet-overlay {
     position: fixed;
-    inset: 0;
+    inset-block: 0;
+    left: 50%;
     z-index: 50;
+    width: min(100vw, var(--ktr-mobile-frame-width));
+    overflow: hidden;
+    transform: translate3d(-50%, 0, 0);
     background: rgb(43 48 51 / 38%);
     backdrop-filter: blur(2px);
   }
@@ -377,14 +392,16 @@
     left: 50%;
     bottom: 0;
     z-index: 50;
-    width: min(100%, 430px);
+    width: min(100vw, var(--ktr-mobile-frame-width));
     max-height: min(85vh, 42rem);
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transform: translate3d(-50%, 0, 0);
     border: 1px solid var(--ktr-border-light);
     border-bottom: 0;
     border-radius: 1.5rem 1.5rem 0 0;
     background: var(--ktr-surface-card);
-    padding: 0.75rem 1rem 1rem;
+    padding: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom));
     outline: none;
   }
 
@@ -394,6 +411,20 @@
 
   .ktr-bottom-sheet-content[data-state="closed"] {
     animation: ktr-bottom-sheet-out 160ms ease-in;
+  }
+
+  @media (min-width: 640px) {
+    .ktr-bottom-sheet-overlay {
+      inset-block: 1.5rem;
+      border-radius: 32px;
+    }
+
+    .ktr-bottom-sheet-content {
+      bottom: 1.5rem;
+      max-height: min(calc(100dvh - 3rem), 42rem);
+      border-bottom: 1px solid var(--ktr-border-light);
+      border-radius: 1.5rem 1.5rem 2rem 2rem;
+    }
   }
 }
 

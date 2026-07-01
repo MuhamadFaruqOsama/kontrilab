@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +8,7 @@ const navItems = [
   {
     name: "Beranda",
     href: "/student",
-    icon: "/icons/student-nav/home-smile-angle.svg",
+    icon: "/icons/student-nav/home-inactive.svg",
     activeIcon: "/icons/student-nav/home-smile-angle.svg",
   },
   {

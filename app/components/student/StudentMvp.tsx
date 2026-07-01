@@ -1,0 +1,327 @@
+"use client";
+
+import Link from "next/link";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Activity03Icon,
+  AddTeamIcon,
+  ArrowRight02Icon,
+  BubbleChatIcon,
+  Calendar03Icon,
+  CallIcon,
+  CheckmarkCircle02Icon,
+  Clock01Icon,
+  Copy01Icon,
+  CopyLinkIcon,
+  Edit02Icon,
+  FileCheckIcon,
+  Folder01Icon,
+  Link05Icon,
+  MessageDone02Icon,
+  StarIcon,
+  Upload04Icon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons";
+import { toast } from "sonner";
+import * as React from "react";
+
+import BottomNav from "@/app/components/student/BottomNav";
+import {
+  BottomSheet,
+  BottomSheetClose,
+  BottomSheetContent,
+  BottomSheetDescription,
+  BottomSheetFooter,
+  BottomSheetHeader,
+  BottomSheetTitle,
+  BottomSheetTrigger,
+} from "@/components/ui/bottom-sheet";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+type Status = "Belum Dimulai" | "Sedang Berjalan" | "Revisi" | "Selesai";
+
+type Project = {
+  title: string;
+  className: string;
+  group: string;
+  members: string;
+  deadline: string;
+  status: Status;
+};
+
+const projects: Project[] = [
+  {
+    title: "Website Profil Sekolah",
+    className: "XII - Pemrograman Web",
+    group: "Kelompok 3",
+    members: "6 anggota",
+    deadline: "20 Juni 2026",
+    status: "Sedang Berjalan",
+  },
+  {
+    title: "Landing Page UMKM",
+    className: "XI - Desain Web",
+    group: "Belum berkelompok",
+    members: "0 anggota",
+    deadline: "25 Juni 2026",
+    status: "Belum Dimulai",
+  },
+  {
+    title: "Poster Kampanye Digital",
+    className: "X - Informatika",
+    group: "Kelompok 2",
+    members: "5 anggota",
+    deadline: "18 Juni 2026",
+    status: "Revisi",
+  },
+  {
+    title: "Video Profil Kelas",
+    className: "XI - Multimedia",
+    group: "Kelompok 1",
+    members: "4 anggota",
+    deadline: "10 Juni 2026",
+    status: "Selesai",
+  },
+];
+
+const statusClass: Record<Status, string> = {
+  "Belum Dimulai": "bg-ktr-project-not-started-bg text-ktr-project-not-started",
+  "Sedang Berjalan": "bg-ktr-project-in-progress-bg text-ktr-project-in-progress",
+  Revisi: "bg-ktr-project-revision-bg text-ktr-project-revision",
+  Selesai: "bg-ktr-project-finished-bg text-ktr-project-finished",
+};
+
+function Icon({ icon, className }: { icon: Parameters<typeof HugeiconsIcon>[0]["icon"]; className?: string }) {
+  return <HugeiconsIcon icon={icon} size={18} strokeWidth={1.8} color="currentColor" className={className} aria-hidden="true" />;
+}
+
+function ScreenShell({ title, subtitle, children, action }: { title: string; subtitle?: string; children: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <main className="relative min-h-screen bg-background pb-[112px] pt-[18px] text-foreground">
+      <div className="mx-auto w-full max-w-[430px] px-4">
+        <header className="mb-5 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-[28px] font-bold leading-[36px] text-ktr-text-primary">{title}</h1>
+            {subtitle ? <p className="mt-1 text-[14px] leading-[22px] text-ktr-text-secondary">{subtitle}</p> : null}
+          </div>
+          {action}
+        </header>
+        {children}
+      </div>
+      <BottomNav />
+    </main>
+  );
+}
+
+function Card({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <section className={cn("rounded-[14px] border border-ktr-border-light bg-ktr-surface-card p-[14px]", className)}>{children}</section>;
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="mb-3 text-[16px] font-semibold leading-[22px] text-ktr-text-primary">{children}</h2>;
+}
+
+function StatusChip({ status }: { status: Status }) {
+  return <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-medium leading-4", statusClass[status])}><Icon icon={Clock01Icon} />{status}</span>;
+}
+
+function PrimaryButton({ href, children, className }: { href?: string; children: React.ReactNode; className?: string }) {
+  const content = <>{children}<Icon icon={ArrowRight02Icon} /></>;
+  if (href) {
+    return <Button asChild className={cn("h-11 rounded-[10px] text-[14px] font-semibold leading-5", className)}><Link href={href}>{content}</Link></Button>;
+  }
+  return <Button className={cn("h-11 rounded-[10px] text-[14px] font-semibold leading-5", className)}>{content}</Button>;
+}
+
+function QuietButton({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
+  return <Button variant="outline" className={cn("h-11 rounded-[10px] border-transparent bg-ktr-primary-soft text-[14px] font-semibold leading-5 text-ktr-primary hover:bg-ktr-primary-light hover:text-ktr-primary", className)} type="button" onClick={onClick}>{children}</Button>;
+}
+
+function Field({ label, placeholder, as = "input" }: { label: string; placeholder: string; as?: "input" | "textarea" }) {
+  return (
+    <label className="block">
+      <span className="text-[12px] font-medium leading-4 text-ktr-text-primary">{label}</span>
+      {as === "textarea" ? (
+        <textarea className="mt-2 min-h-28 w-full resize-none rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 py-3 text-[14px] leading-[22px] outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20" placeholder={placeholder} />
+      ) : (
+        <input className="mt-2 h-12 w-full rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 text-[14px] leading-[22px] outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20" placeholder={placeholder} />
+      )}
+    </label>
+  );
+}
+
+function Segments({ items }: { items: string[] }) {
+  return <div className="flex flex-wrap gap-2">{items.map((item, index) => <button key={item} className={cn("rounded-full border px-3 py-2 text-[13px] font-medium leading-5", index === 0 ? "border-ktr-primary bg-ktr-primary-soft text-ktr-primary" : "border-ktr-border-light bg-ktr-surface-card text-ktr-text-secondary")} type="button">{item}</button>)}</div>;
+}
+
+export function JoinProjectSheet({ trigger }: { trigger: React.ReactNode }) {
+  const [code, setCode] = React.useState("");
+  const [message, setMessage] = React.useState<{ type: "error" | "success"; text: string } | null>(null);
+
+  function submit() {
+    const normalized = code.trim().toUpperCase();
+    if (!normalized) {
+      setMessage({ type: "error", text: "Kode join belum diisi." });
+      return;
+    }
+    if (normalized !== "WEB12A") {
+      setMessage({ type: "error", text: "Kode tidak ditemukan. Coba cek kembali kode dari gurumu." });
+      return;
+    }
+    setMessage({ type: "success", text: "Kamu berhasil bergabung ke proyek!" });
+    toast.success("Kamu berhasil bergabung ke proyek!", { description: "Yuk lanjutkan progressmu bersama kelompok." });
+  }
+
+  return (
+    <BottomSheet>
+      <BottomSheetTrigger asChild>{trigger}</BottomSheetTrigger>
+      <BottomSheetContent className="pb-7">
+        <BottomSheetHeader>
+          <BottomSheetTitle className="text-[18px] font-bold leading-[28px]">Gabung Proyek</BottomSheetTitle>
+          <BottomSheetDescription>Masukkan kode join dari gurumu untuk mulai bergabung ke proyek kelas.</BottomSheetDescription>
+        </BottomSheetHeader>
+        <div className="mt-5 space-y-3">
+          <label className="block">
+            <span className="text-[12px] font-medium leading-4 text-ktr-text-primary">Kode Join</span>
+            <input value={code} onChange={(event) => setCode(event.target.value)} className="mt-2 h-12 w-full rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 text-[14px] leading-[22px] outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20" placeholder="Contoh: WEB12A" />
+          </label>
+          <p className="text-[12px] leading-[18px] text-ktr-text-secondary">Kode join biasanya dibagikan oleh guru melalui kelas atau grup belajar.</p>
+          {message ? <p className={cn("rounded-[10px] px-3 py-2 text-[13px] leading-5", message.type === "success" ? "bg-ktr-success-bg text-ktr-success" : "bg-ktr-project-need-attention-bg text-ktr-project-need-attention")}>{message.text}</p> : null}
+        </div>
+        <BottomSheetFooter>
+          <Button className="h-11 w-full rounded-[10px]" type="button" onClick={submit}>Gabung Sekarang</Button>
+          <BottomSheetClose asChild><QuietButton className="w-full">Batal</QuietButton></BottomSheetClose>
+        </BottomSheetFooter>
+      </BottomSheetContent>
+    </BottomSheet>
+  );
+}
+
+function ProjectDetailSheet({ project, trigger }: { project: Project; trigger: React.ReactNode }) {
+  const noGroup = project.title === "Landing Page UMKM";
+  return (
+    <BottomSheet>
+      <BottomSheetTrigger asChild>{trigger}</BottomSheetTrigger>
+      <BottomSheetContent className="max-h-[92vh] pb-7">
+        <BottomSheetHeader className="pr-0">
+          <BottomSheetTitle className="text-[18px] font-bold leading-[28px]">Detail Proyek</BottomSheetTitle>
+        </BottomSheetHeader>
+        <Card className="mt-4 p-3.5">
+          <div className="flex min-w-0 items-start justify-between gap-3">
+            <h3 className="min-w-0 break-words text-[18px] font-bold leading-[28px] text-ktr-text-primary">{project.title}</h3>
+            <p className="shrink-0 text-right text-[14px] font-semibold leading-5 text-ktr-text-primary">{project.className}</p>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-3 text-[12px] font-medium leading-4">
+            <span className="flex items-center gap-1 text-ktr-primary"><Icon icon={Calendar03Icon} />{project.deadline}</span>
+            <StatusChip status={project.status} />
+          </div>
+          <div className="my-4 border-t border-ktr-border-light" />
+          <div className="space-y-4 text-[13px] leading-5 text-ktr-text-secondary">
+            <div><h4 className="mb-1 text-[14px] font-medium leading-[22px] text-ktr-text-primary">Deskripsi Proyek</h4><p>Buat landing page sederhana untuk membantu UMKM menampilkan profil usaha, produk unggulan, dan kontak pemesanan.</p></div>
+            <div><h4 className="mb-1 text-[14px] font-medium leading-[22px] text-ktr-text-primary">Kriteria Kontribusi</h4><p>Kontribusimu akan terlihat dari diskusi, progress yang kamu unggah, bukti kerja, dan umpan balik anggota kelompok.</p></div>
+            <div><h4 className="mb-1 text-[14px] font-medium leading-[22px] text-ktr-text-primary">Kelompok</h4><p>{noGroup ? "Kamu belum masuk kelompok." : `${project.group} - ${project.members}`}</p></div>
+          </div>
+        </Card>
+        <BottomSheetFooter className="grid grid-cols-2">
+          <BottomSheetClose asChild><QuietButton className="min-w-0 whitespace-normal px-2">Batal</QuietButton></BottomSheetClose>
+          <Button asChild className="h-11 min-w-0 whitespace-normal rounded-[10px] px-2 text-center"><Link href={noGroup ? "/student/projects/group/start" : "/student/group"}>{noGroup ? "Buat / Gabung Kelompok" : "Masuk Ruang Kelompok"}</Link></Button>
+        </BottomSheetFooter>
+      </BottomSheetContent>
+    </BottomSheet>
+  );
+}
+
+function ProjectCard({ project }: { project: Project }) {
+  return <ProjectDetailSheet project={project} trigger={<button className="w-full text-left" type="button"><Card className="p-3.5"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><h3 className="break-words text-[16px] font-semibold leading-[22px] text-ktr-text-primary">{project.title}</h3><p className="mt-1 text-[13px] leading-5 text-ktr-text-secondary">{project.className}</p></div><span className="shrink-0"><StatusChip status={project.status} /></span></div><div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] leading-5 text-ktr-text-secondary"><span className="flex items-center gap-1"><Icon icon={UserGroupIcon} />{project.group}</span><span>{project.members}</span><span className="flex items-center gap-1"><Icon icon={Calendar03Icon} />Deadline: {project.deadline}</span></div><div className="mt-4 inline-flex items-center gap-1 text-[14px] font-semibold leading-5 text-ktr-primary">Lanjutkan Proyek<Icon icon={ArrowRight02Icon} /></div></Card></button>} />;
+}
+
+export function ProjectsPage() {
+  return (
+    <ScreenShell title="Proyek Saya" action={<JoinProjectSheet trigger={<Button className="mt-1 h-11 rounded-[10px] px-3 text-[14px]">Gabung Proyek</Button>} />}>
+      <div className="mb-5 grid grid-cols-3 gap-2">
+        {["1 Proyek Aktif", "0 Perlu Revisi", "2 Selesai"].map((item) => <Card key={item} className="p-3 text-center"><p className="text-[18px] font-bold leading-[28px] text-ktr-text-primary">{item.split(" ")[0]}</p><p className="text-[12px] leading-[18px] text-ktr-text-secondary">{item.substring(2)}</p></Card>)}
+      </div>
+      <SectionTitle>Daftar Proyek</SectionTitle>
+      <div className="space-y-3">{projects.map((project) => <ProjectCard key={project.title} project={project} />)}</div>
+    </ScreenShell>
+  );
+}
+
+export function ProjectDetailPage() {
+  return (
+    <ScreenShell title="Detail Proyek" subtitle="Bantu kelompokmu tetap terarah dari satu ruang proyek.">
+      <Card className="space-y-4">
+        <div className="flex items-start justify-between gap-3"><div><h2 className="text-[18px] font-bold leading-[28px] text-ktr-text-primary">Website Profil Sekolah</h2><p className="text-[14px] leading-[22px] text-ktr-text-secondary">XII - Pemrograman Web</p></div><StatusChip status="Sedang Berjalan" /></div>
+        <div className="flex flex-wrap gap-3 text-[13px] leading-5 text-ktr-text-secondary"><span className="flex items-center gap-1"><Icon icon={Calendar03Icon} />Deadline: 20 Juni 2026</span><span className="flex items-center gap-1"><Icon icon={UserGroupIcon} />Kelompok 3, 6 anggota</span></div>
+        <p className="text-[14px] leading-[22px] text-ktr-text-secondary">Buat website sederhana yang menampilkan profil sekolah, informasi jurusan, dan halaman kontak.</p>
+        <Card className="bg-ktr-primary-light p-3"><p className="text-[13px] leading-5 text-ktr-text-secondary">Kontribusimu akan terlihat dari diskusi, progress yang kamu unggah, bukti kerja, dan umpan balik anggota kelompok.</p></Card>
+        <PrimaryButton href="/student/group" className="w-full">Masuk Ruang Kelompok</PrimaryButton>
+      </Card>
+      <Card className="mt-3 space-y-3"><p className="text-[14px] leading-[22px] text-ktr-text-secondary">Kamu belum masuk kelompok.</p><PrimaryButton href="/student/projects/group/start" className="w-full">Buat atau Gabung Kelompok</PrimaryButton></Card>
+    </ScreenShell>
+  );
+}
+
+export function GroupStartPage() {
+  return (
+    <ScreenShell title="Mulai Bersama Kelompokmu" subtitle="Pilih cara bergabung agar kamu bisa mulai berdiskusi dan mencatat progress proyek.">
+      <Card className="mb-4"><div className="flex items-start justify-between gap-3"><div><h2 className="text-[18px] font-bold leading-[28px] text-ktr-text-primary">Landing Page UMKM</h2><p className="text-[14px] leading-[22px] text-ktr-text-secondary">XI - Desain Web</p></div><StatusChip status="Belum Dimulai" /></div></Card>
+      <div className="space-y-3">
+        <Card><Icon icon={UserGroupIcon} className="mb-3 text-ktr-primary" /><h3 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Buat Kelompok Baru</h3><p className="mt-1 text-[14px] leading-[22px] text-ktr-text-secondary">Kamu akan menjadi ketua kelompok dan bisa mengundang anggota.</p><PrimaryButton href="/student/group" className="mt-4 w-full">Buat Kelompok</PrimaryButton></Card>
+        <Card><Icon icon={Link05Icon} className="mb-3 text-ktr-primary" /><h3 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Gabung Kelompok yang Ada</h3><p className="mt-1 text-[14px] leading-[22px] text-ktr-text-secondary">Pilih kelompok yang sudah dibuat oleh temanmu.</p><QuietButton className="mt-4 w-full" onClick={() => toast("Daftar kelompok dibuka", { description: "Pilih kelompok sesuai arahan guru." })}>Pilih Kelompok</QuietButton></Card>
+      </div>
+    </ScreenShell>
+  );
+}
+
+export function InviteMemberSheet({ trigger }: { trigger: React.ReactNode }) {
+  return <BottomSheet><BottomSheetTrigger asChild>{trigger}</BottomSheetTrigger><BottomSheetContent className="pb-7"><BottomSheetHeader><BottomSheetTitle className="text-[18px] font-bold leading-[28px]">Undang Anggota</BottomSheetTitle><BottomSheetDescription>Bagikan kode atau link ini agar temanmu bisa bergabung ke kelompok.</BottomSheetDescription></BottomSheetHeader><div className="mt-5 rounded-[14px] border border-ktr-border-light bg-ktr-primary-bg-form p-4 text-center"><p className="text-[12px] font-medium leading-4 text-ktr-text-secondary">Kode Kelompok</p><p className="mt-1 text-[28px] font-bold leading-[36px] text-ktr-text-primary">KLP4UMKM</p></div><div className="mt-4 grid grid-cols-2 gap-2"><Button className="h-11 rounded-[10px]" onClick={() => toast.success("Kode disalin")}><Icon icon={Copy01Icon} />Salin Kode</Button><QuietButton onClick={() => toast.success("Link siap dibagikan")}><Icon icon={CopyLinkIcon} />Bagikan Link</QuietButton></div><p className="mt-3 text-[12px] leading-[18px] text-ktr-text-secondary">Pastikan anggota bergabung ke kelompok yang sesuai arahan guru.</p></BottomSheetContent></BottomSheet>;
+}
+
+export function GroupDetailPage() {
+  const members = [["Alya", "Ketua"], ["Bima", "Anggota"], ["Raka", "Anggota"], ["Nadia", "Anggota"]];
+  return (
+    <ScreenShell title="Ruang Kelompok" subtitle="Ajak anggota bergabung dan mulai diskusi agar progress kelompok lebih terarah.">
+      <Card className="mb-4"><p className="text-[13px] font-medium leading-5 text-ktr-primary">Kamu adalah Ketua Kelompok</p><h2 className="mt-1 text-[18px] font-bold leading-[28px] text-ktr-text-primary">Landing Page UMKM</h2><p className="text-[14px] leading-[22px] text-ktr-text-secondary">Kelompok 4</p></Card>
+      <SectionTitle>Anggota Kelompok</SectionTitle>
+      <Card className="mb-5"><p className="mb-3 text-[14px] leading-[22px] text-ktr-text-secondary">4 anggota sudah bergabung</p><div className="space-y-2">{members.map(([name, role]) => <div key={name} className="flex items-center justify-between rounded-[12px] bg-ktr-primary-light px-3 py-2"><span className="text-[14px] font-semibold leading-[22px] text-ktr-text-primary">{name}</span><span className="text-[12px] leading-[18px] text-ktr-text-secondary">{role}</span></div>)}</div><InviteMemberSheet trigger={<Button className="mt-4 h-11 w-full rounded-[10px]"><Icon icon={AddTeamIcon} />Undang Anggota</Button>} /></Card>
+      <SectionTitle>Diskusi Kelompok</SectionTitle>
+      <Card className="mb-5"><p className="text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Belum ada diskusi</p><p className="mt-1 text-[14px] leading-[22px] text-ktr-text-secondary">Mulai diskusi pertama untuk membahas ide, kendala, atau rencana pengerjaan proyek.</p><PrimaryButton href="/student/discussions/new" className="mt-4 w-full">Buat Diskusi Baru</PrimaryButton></Card>
+      <SectionTitle>Progress Anggota</SectionTitle>
+      <Card><p className="text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Belum ada progress yang diunggah</p><p className="mt-1 text-[14px] leading-[22px] text-ktr-text-secondary">Setelah diskusi berjalan, setiap anggota bisa mengunggah progress dan bukti kerja masing-masing.</p></Card>
+    </ScreenShell>
+  );
+}
+
+export function NewDiscussionPage() {
+  return <ScreenShell title="Buat Diskusi Baru" subtitle="Mulai ruang diskusi untuk membahas ide, progress, kendala, atau revisi kelompokmu."><Card className="space-y-4"><Field label="Judul Diskusi" placeholder="Contoh: Pembahasan Konsep Landing Page" /><div><p className="mb-2 text-[12px] font-medium leading-4 text-ktr-text-primary">Topik Diskusi</p><Segments items={["Ide Proyek", "Progress", "Kendala", "Revisi", "Lainnya"]} /></div><Field label="Catatan Awal" placeholder="Tulis hal pertama yang ingin dibahas bersama kelompok." as="textarea" /><PrimaryButton href="/student/discussions/current" className="w-full">Buat Diskusi</PrimaryButton></Card></ScreenShell>;
+}
+
+export function DiscussionDetailPage() {
+  const messages = [["Alya", "Kita mulai dari konsep hero section dulu ya."], ["Bima", "Aku setuju, bisa pakai visual produk UMKM di bagian atas."], ["Raka", "Nanti aku coba bantu susun copy produknya."]];
+  return <ScreenShell title="Pembahasan Konsep Landing Page" subtitle="Kelompok 4 - 4 peserta" action={<span className="mt-2"><StatusChip status="Sedang Berjalan" /></span>}><Card className="mb-4 space-y-3">{messages.map(([name, text]) => <div key={name} className="rounded-[12px] bg-ktr-primary-light p-3"><p className="text-[13px] font-semibold leading-5 text-ktr-text-primary">{name}</p><p className="text-[14px] leading-[22px] text-ktr-text-secondary">{text}</p></div>)}</Card><div className="sticky bottom-[92px] space-y-3 rounded-[16px] border border-ktr-border-light bg-ktr-surface-card p-3"><input className="h-11 w-full rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 text-[14px] outline-none" placeholder="Tulis pesan diskusi..." /><div className="grid grid-cols-2 gap-2"><PrimaryButton href="/student/progress/new" className="w-full"><Icon icon={Upload04Icon} />Upload Progress</PrimaryButton><QuietButton className="w-full" onClick={() => toast("Telepon dimulai", { description: "Bantu kelompokmu tetap terarah." })}><Icon icon={CallIcon} />Mulai Telepon</QuietButton></div></div></ScreenShell>;
+}
+
+export function ProgressInputPage() {
+  return <ScreenShell title="Upload Progress" subtitle="Ceritakan progress yang kamu kerjakan setelah diskusi. Progress ini akan membantu kontribusimu terlihat lebih jelas."><Card className="space-y-4"><Field label="Progress yang Dikerjakan" placeholder="Contoh: Saya membuat draft layout hero section dan menyesuaikan warna utama." as="textarea" /><div className="rounded-[14px] border border-dashed border-ktr-border-input bg-ktr-primary-bg-form p-4 text-center"><Icon icon={FileCheckIcon} className="mx-auto text-ktr-primary" /><p className="mt-2 text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Tambahkan Bukti Kerja</p><p className="text-[13px] leading-5 text-ktr-text-secondary">Upload foto, file, atau link jika ada.</p></div><Field label="Link Bukti Kerja" placeholder="Tempel link Figma, Drive, atau dokumen" /><div><p className="mb-2 text-[12px] font-medium leading-4 text-ktr-text-primary">Status Progress</p><Segments items={["Sedang Dikerjakan", "Selesai", "Terkendala"]} /></div><Button className="h-11 w-full rounded-[10px]" onClick={() => toast.success("Progress berhasil diunggah!", { description: "Keren, kontribusimu sudah tercatat." })}>Kirim Progress</Button></Card></ScreenShell>;
+}
+
+export function PeerAssessmentPage() {
+  return <ScreenShell title="Umpan Balik Anggota" subtitle="Bantu guru memahami proses kerja kelompok dari sudut pandangmu. Berikan umpan balik dengan jujur dan tetap menghargai temanmu."><Card className="space-y-5"><label className="block"><span className="text-[12px] font-medium leading-4 text-ktr-text-primary">Pilih Anggota</span><select className="mt-2 h-12 w-full rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 text-[14px] outline-none"><option>Bima</option><option>Raka</option><option>Nadia</option></select></label>{["Keaktifan Diskusi", "Kerja Sama", "Progress yang Dibagikan"].map((item) => <div key={item}><p className="mb-2 text-[14px] font-semibold leading-[22px] text-ktr-text-primary">{item}</p><Segments items={["Kurang Terlihat", "Cukup Terlihat", "Sangat Terlihat"]} /></div>)}<Field label="Catatan Tambahan" placeholder="Tulis dengan sopan dan jelas." as="textarea" /><p className="rounded-[12px] bg-ktr-secondary-bg-info-card p-3 text-[13px] leading-5 text-ktr-text-secondary">Umpan balikmu digunakan sebagai data pembanding. Guru tetap meninjau keputusan akhir.</p><Button className="h-11 w-full rounded-[10px]" onClick={() => toast.success("Umpan balik terkirim", { description: "Terima kasih sudah menghargai proses temanmu." })}>Kirim Umpan Balik</Button></Card></ScreenShell>;
+}
+
+export function ActivitiesPage() {
+  const items = [["Bima mengirim progress desain hero section", "Website Profil Sekolah - 5 menit lalu", Upload04Icon], ["Alya memulai diskusi baru", "Pembahasan Konsep Landing Page - 18 menit lalu", BubbleChatIcon], ["Raka mengunggah bukti kerja", "Website Profil Sekolah - 1 jam lalu", FileCheckIcon], ["Nadia memberi umpan balik anggota", "Kelompok 4 - Kemarin", MessageDone02Icon]] as const;
+  return <ScreenShell title="Aktivitas" subtitle="Lihat perkembangan diskusi dan progress kelompokmu." action={<Button asChild className="mt-1 h-11 rounded-[10px] px-3 text-[14px]"><Link href="/student/activities/contribution">Ringkasan</Link></Button>}><Segments items={["Semua", "Diskusi", "Progress", "Umpan Balik"]} /><div className="mt-4 space-y-3">{items.map(([title, meta, icon]) => <Card key={title} className="flex items-start gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-ktr-primary-soft text-ktr-primary"><Icon icon={icon} /></span><div><p className="text-[14px] font-semibold leading-[22px] text-ktr-text-primary">{title}</p><p className="text-[13px] leading-5 text-ktr-text-secondary">{meta}</p></div></Card>)}</div></ScreenShell>;
+}
+
+export function ContributionSummaryPage() {
+  const members = [["Alya", "Ketua Kelompok", "2 diskusi dimulai", "2 progress diunggah"], ["Bima", "Anggota", "3 pesan diskusi", "1 bukti kerja"], ["Raka", "Anggota", "2 pesan diskusi", "1 progress diunggah"], ["Nadia", "Anggota", "1 progress diunggah", "1 umpan balik diberikan"]];
+  return <ScreenShell title="Ringkasan Kontribusi" subtitle="Lihat gambaran kontribusi anggota berdasarkan diskusi, progress, bukti kerja, dan umpan balik."><Card className="mb-4 bg-ktr-primary text-ktr-text-white"><p className="text-[14px] font-semibold leading-[22px] text-ktr-accent-lime">Minggu Ini</p><div className="mt-3 grid grid-cols-2 gap-3 text-[13px] leading-5"><span>4 anggota aktif</span><span>6 progress diunggah</span><span>3 bukti kerja ditambahkan</span><span>2 sesi diskusi berlangsung</span></div></Card><div className="space-y-3">{members.map(([name, role, a, b]) => <Card key={name}><div className="flex items-start justify-between"><div><h3 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">{name}</h3><p className="text-[13px] leading-5 text-ktr-text-secondary">{role}</p></div><Icon icon={StarIcon} className="text-ktr-warning" /></div><div className="mt-3 flex flex-wrap gap-2"><span className="rounded-full bg-ktr-primary-soft px-3 py-1 text-[12px] text-ktr-primary">{a}</span><span className="rounded-full bg-ktr-secondary-bg-info-card px-3 py-1 text-[12px] text-ktr-secondary">{b}</span></div></Card>)}</div><Card className="mt-4 bg-ktr-secondary-bg-info-card"><p className="text-[13px] leading-5 text-ktr-text-secondary">Ringkasan ini membantu membaca aktivitas kelompok, bukan menentukan nilai akhir.</p></Card></ScreenShell>;
+}
+
+export function MvpLauncherPage() {
+  const screens = [["Proyek Saya", "/student/projects", Folder01Icon], ["Detail Proyek", "/student/projects/detail", Folder01Icon], ["Buat/Gabung Kelompok", "/student/projects/group/start", UserGroupIcon], ["Ruang Kelompok", "/student/group", UserGroupIcon], ["Buat Diskusi", "/student/discussions/new", BubbleChatIcon], ["Diskusi Berjalan", "/student/discussions/current", BubbleChatIcon], ["Upload Progress", "/student/progress/new", Edit02Icon], ["Umpan Balik", "/student/peer-assessment", StarIcon], ["Aktivitas", "/student/activities", Activity03Icon], ["Ringkasan", "/student/activities/contribution", CheckmarkCircle02Icon]] as const;
+  return <ScreenShell title="MVP KontriLab" subtitle="Pilih layar student MVP untuk ditinjau."><div className="grid gap-3">{screens.map(([title, href, icon]) => <Button key={href} asChild variant="outline" className="h-11 justify-start rounded-[14px] border-ktr-border-light bg-ktr-surface-card px-4 text-ktr-text-primary"><Link href={href}><Icon icon={icon} />{title}</Link></Button>)}</div></ScreenShell>;
+}
