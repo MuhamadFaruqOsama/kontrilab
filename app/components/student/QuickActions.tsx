@@ -46,8 +46,8 @@ const quickActions: QuickAction[] = [
 
 function ActionCard({ action }: { action: QuickAction }) {
   return (
-    <div className="flex h-16 w-full items-center justify-between rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3 py-2.5 text-left">
-      <div className="flex min-w-0 items-center gap-3">
+    <div className="relative flex h-16 w-full items-center justify-between overflow-hidden rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3 py-2.5 text-left">
+      <div className="relative z-10 flex min-w-0 items-center gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px]">
           <Image src={action.icon} alt="" width={40} height={40} aria-hidden="true" />
         </span>
@@ -60,7 +60,7 @@ function ActionCard({ action }: { action: QuickAction }) {
           </span>
         </span>
       </div>
-      <HugeiconsIcon icon={ArrowRight02Icon} size={20} strokeWidth={1.8} color="currentColor" className="shrink-0 text-ktr-text-primary" aria-hidden="true" />
+      <HugeiconsIcon icon={ArrowRight02Icon} size={20} strokeWidth={1.8} color="currentColor" className="relative z-10 shrink-0 text-ktr-text-primary" aria-hidden="true" />
     </div>
   );
 }

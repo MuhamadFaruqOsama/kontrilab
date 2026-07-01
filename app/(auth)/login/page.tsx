@@ -85,7 +85,7 @@ export default function LoginPage() {
 
             {error ? <p className="text-sm font-semibold text-destructive">{error}</p> : null}
 
-            <button className="flex h-[52px] w-full items-center justify-center gap-3 rounded-2xl bg-ktr-primary px-4 text-base font-medium text-white shadow-[0_12px_24px_rgba(87,193,133,0.25)] hover:bg-ktr-primary-hover">
+            <button className="flex h-[52px] w-full items-center justify-center gap-3 rounded-2xl bg-ktr-primary px-4 text-base font-medium text-white hover:bg-ktr-primary-hover">
               Masuk
               <HugeiconsIcon icon={ArrowRight02Icon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
             </button>

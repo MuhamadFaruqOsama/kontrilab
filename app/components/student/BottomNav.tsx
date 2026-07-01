@@ -36,7 +36,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] border-t border-ktr-border-light bg-ktr-surface-card pt-4"
+      className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] bg-ktr-surface-card pt-4"
       aria-label="Navigasi siswa"
     >
       <div className="mx-auto flex w-full max-w-[398px] items-start justify-between">

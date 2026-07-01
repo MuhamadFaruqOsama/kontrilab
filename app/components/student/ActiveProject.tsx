@@ -39,7 +39,7 @@ export default function ActiveProject() {
             className="relative w-full overflow-hidden rounded-[16px] border border-ktr-border-light bg-ktr-surface-card px-[14px] py-3 text-left"
             type="button"
           >
-            <div className="relative flex items-start justify-between gap-3">
+            <div className="relative z-10 flex items-start justify-between gap-3">
               <h3 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">
                 Website Profil Sekolah
               </h3>
@@ -48,7 +48,7 @@ export default function ActiveProject() {
               </p>
             </div>
 
-            <div className="relative mt-2 flex items-center gap-3 text-[14px] leading-[22px]">
+            <div className="relative z-10 mt-2 flex items-center gap-3 text-[14px] leading-[22px]">
               <span className="font-medium text-ktr-text-primary">Kelompok 3</span>
               <span className="flex items-center gap-1 text-[13px] text-ktr-primary">
                 <HugeiconsIcon icon={UserGroupIcon} size={16} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
@@ -56,7 +56,7 @@ export default function ActiveProject() {
               </span>
             </div>
 
-            <div className="relative mt-4 flex items-center justify-between gap-3">
+            <div className="relative z-10 mt-4 flex items-center justify-between gap-3">
               <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-medium leading-4">
                 <span className="flex items-center gap-1 text-ktr-primary">
                   <HugeiconsIcon icon={Calendar03Icon} size={16} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
