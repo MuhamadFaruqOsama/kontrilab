@@ -278,10 +278,11 @@
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    overflow-x: visible !important;`r`n    overflow-y: auto !important;
+    overflow-x: visible !important;
+    overflow-y: auto !important;
   }
-  body[data-scroll-locked] > .ktr-app-shell,
-  body[data-scroll-locked] > div > .ktr-app-shell {
+  html body[data-scroll-locked] > .ktr-app-shell,
+  html body[data-scroll-locked] > div > .ktr-app-shell {
     width: 100% !important;
     max-width: var(--ktr-mobile-frame-width) !important;
   }
@@ -329,7 +330,9 @@
   :where(button:disabled, [aria-disabled="true"]):active {
     transform: none;
   }
-}@keyframes ktr-bottom-sheet-overlay-in {
+}
+
+@keyframes ktr-bottom-sheet-overlay-in {
   from {
     opacity: 0;
   }
@@ -350,22 +353,22 @@
 @keyframes ktr-bottom-sheet-in {
   from {
     opacity: 0;
-    transform: translate3d(-50%, 1.5rem, 0) scale(0.98);
+    transform: translateY(1.5rem);
   }
   to {
     opacity: 1;
-    transform: translate3d(-50%, 0, 0) scale(1);
+    transform: translateY(0);
   }
 }
 
 @keyframes ktr-bottom-sheet-out {
   from {
     opacity: 1;
-    transform: translate3d(-50%, 0, 0) scale(1);
+    transform: translateY(0);
   }
   to {
     opacity: 0;
-    transform: translate3d(-50%, 1.5rem, 0) scale(0.98);
+    transform: translateY(1.5rem);
   }
 }
 
@@ -393,14 +396,19 @@
 
   .ktr-bottom-sheet-overlay {
     position: fixed;
-    inset-block: 0;
-    left: 50%;
-    z-index: 50;
-    width: min(100vw, var(--ktr-mobile-frame-width));
-    overflow: hidden;
-    transform: translate3d(-50%, 0, 0);
-    background: rgb(43 48 51 / 38%);
-    backdrop-filter: blur(2px);
+    inset: 0;
+    z-index: 40;
+    background: rgb(15 23 42 / 22%);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .ktr-bottom-sheet-overlay {
+      background: rgb(0 0 0 / 18%);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   .ktr-bottom-sheet-overlay[data-state="open"] {
@@ -413,14 +421,16 @@
 
   .ktr-bottom-sheet-content {
     position: fixed;
-    left: 50%;
+    inset-inline: 0;
     bottom: 0;
     z-index: 50;
     width: min(100vw, var(--ktr-mobile-frame-width));
+    margin-inline: auto;
     max-height: min(85vh, 42rem);
     overflow-x: hidden;
     overflow-y: auto;
-    transform: translate3d(-50%, 0, 0);
+    transform: translateY(0);
+    will-change: transform;
     border: 1px solid var(--ktr-border-light);
     border-bottom: 0;
     border-radius: 1.5rem 1.5rem 0 0;
@@ -435,20 +445,6 @@
 
   .ktr-bottom-sheet-content[data-state="closed"] {
     animation: ktr-bottom-sheet-out 160ms ease-in;
-  }
-
-  @media (min-width: 640px) {
-    .ktr-bottom-sheet-overlay {
-      inset-block: 1.5rem;
-      border-radius: 32px;
-    }
-
-    .ktr-bottom-sheet-content {
-      bottom: 1.5rem;
-      max-height: min(calc(100dvh - 3rem), 42rem);
-      border-bottom: 1px solid var(--ktr-border-light);
-      border-radius: 1.5rem 1.5rem 2rem 2rem;
-    }
   }
 }
 

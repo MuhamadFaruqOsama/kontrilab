@@ -73,7 +73,7 @@ function BottomSheetContent({
 
     dragDistance.current = Math.max(0, event.clientY - dragStartY.current);
     contentRef.current.style.transition = "none";
-    contentRef.current.style.transform = `translate3d(-50%, ${dragDistance.current}px, 0)`;
+    contentRef.current.style.transform = `translateY(${dragDistance.current}px)`;
   }
 
   function handlePointerUp(event: React.PointerEvent<HTMLDivElement>) {
