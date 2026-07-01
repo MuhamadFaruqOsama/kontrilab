@@ -1,5 +1,5 @@
-import { MvpLauncherPage } from "@/app/components/student/StudentMvp";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <MvpLauncherPage />;
+  redirect("/student/projects");
 }

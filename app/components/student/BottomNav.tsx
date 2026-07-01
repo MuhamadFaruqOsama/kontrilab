@@ -36,7 +36,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] rounded-b-[32px] border-t border-ktr-border-light bg-ktr-surface-card pt-4"
+      className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] border-t border-ktr-border-light bg-ktr-surface-card pt-4"
       aria-label="Navigasi siswa"
     >
       <div className="mx-auto flex w-full max-w-[398px] items-start justify-between">
@@ -57,7 +57,7 @@ export default function BottomNav() {
           );
         })}
       </div>
-      <div className="mx-auto mb-2 h-1.5 w-[148px] rounded-full bg-ktr-text-primary" />
+
     </nav>
   );
 }

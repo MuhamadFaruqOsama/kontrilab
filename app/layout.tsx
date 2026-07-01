@@ -10,6 +10,19 @@ const nunitoSans = Nunito_Sans({
   display: "swap",
 });
 
+const hideNextDevToolsScript = `
+(() => {
+  const hide = () => {
+    document.querySelectorAll("nextjs-portal").forEach((element) => {
+      element.style.setProperty("display", "none", "important");
+      element.style.setProperty("visibility", "hidden", "important");
+      element.style.setProperty("pointer-events", "none", "important");
+    });
+  };
+  hide();
+  new MutationObserver(hide).observe(document.documentElement, { childList: true, subtree: true });
+})();
+`;
 export const metadata: Metadata = {
   title: "Kontrilab",
   description:
@@ -24,6 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${nunitoSans.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        <script dangerouslySetInnerHTML={{ __html: hideNextDevToolsScript }} />
         <SocketProvider>{children}</SocketProvider>
         <Toaster />
       </body>

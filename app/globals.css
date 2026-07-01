@@ -269,9 +269,21 @@
   body {
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
+    min-width: 0;
+    overflow-x: visible;
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  html body[data-scroll-locked] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: visible !important;`r`n    overflow-y: auto !important;
+  }
+  body[data-scroll-locked] > .ktr-app-shell,
+  body[data-scroll-locked] > div > .ktr-app-shell {
+    width: 100% !important;
+    max-width: var(--ktr-mobile-frame-width) !important;
   }
   body {
     @apply bg-background text-foreground;
@@ -317,8 +329,7 @@
   :where(button:disabled, [aria-disabled="true"]):active {
     transform: none;
   }
-}
-@keyframes ktr-bottom-sheet-overlay-in {
+}@keyframes ktr-bottom-sheet-overlay-in {
   from {
     opacity: 0;
   }
@@ -363,8 +374,21 @@
   .ktr-app-shell {
     position: relative;
     isolation: isolate;
+    width: 100%;
     max-width: var(--ktr-mobile-frame-width);
-    overflow-x: clip;
+    overflow: visible;
+  }
+
+  .ktr-app-shell :where(section, article, div, header, footer, form, label, nav) {
+    min-width: 0;
+  }
+
+  .ktr-app-shell :where(a, button, input, textarea, select) {
+    max-width: 100%;
+  }
+
+  nextjs-portal {
+    display: none !important;
   }
 
   .ktr-bottom-sheet-overlay {

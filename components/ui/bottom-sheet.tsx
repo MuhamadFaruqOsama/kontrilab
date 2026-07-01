@@ -146,7 +146,7 @@ function BottomSheetFooter({
   return (
     <div
       data-slot="bottom-sheet-footer"
-      className={cn("mt-6 flex flex-col gap-2 sm:flex-row", className)}
+      className={cn("mt-6 grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2", className)}
       {...props}
     />
   );

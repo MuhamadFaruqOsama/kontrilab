@@ -5,7 +5,7 @@ import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
 export default function OnboardingPage() {
   return (
     <main className="min-h-screen bg-ktr-neutral-1000 text-foreground sm:py-6">
-      <section className="relative ktr-app-shell mx-auto min-h-screen w-full max-w-[430px] overflow-hidden bg-ktr-surface-bg-app sm:rounded-[32px]">
+      <section className="relative ktr-app-shell mx-auto min-h-screen w-full max-w-[430px] bg-ktr-surface-bg-app sm:rounded-[32px]">
 
         <div className="absolute inset-x-0 top-0 h-full w-full bg-[url('/vectors/student-onboarding.svg')] bg-cover bg-top" />
         <div className="absolute inset-x-0 bottom-0 h-[38%] bg-gradient-to-t from-white via-white/95 to-white/0" />

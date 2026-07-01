@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -7,7 +7,7 @@ import {
   Flag01Icon,
   UserGroupIcon,
 } from "@hugeicons/core-free-icons";
-import { toast } from "sonner";
+import Link from "next/link";
 
 import {
   BottomSheet,
@@ -84,27 +84,21 @@ export default function ActiveProject() {
           <BottomSheetHeader>
             <BottomSheetTitle>Detail Proyek</BottomSheetTitle>
             <BottomSheetDescription>
-              Website Profil Sekolah sedang berjalan bersama Kelompok 3. Gunakan area ini nanti untuk detail proyek dari desain final.
+              Website Profil Sekolah sedang berjalan bersama Kelompok 3. Pantau detail proyek, ruang kelompok, diskusi, progress, dan kontribusi dari alur MVP ini.
             </BottomSheetDescription>
           </BottomSheetHeader>
           <BottomSheetFooter>
-            <Button
-              className="w-full"
-              type="button"
-              onClick={() =>
-                toast.success("Proyek dibuka", {
-                  description: "Detail proyek siswa akan memakai bottom sheet.",
-                })
-              }
-            >
-              Lanjutkan Proyek
-              <HugeiconsIcon icon={ArrowRight02Icon} size={18} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
-            </Button>
             <BottomSheetClose asChild>
               <Button className="w-full" variant="outline" type="button">
                 Tutup
               </Button>
             </BottomSheetClose>
+            <Button asChild className="w-full">
+              <Link href="/student/projects/detail">
+                Lanjutkan Proyek
+                <HugeiconsIcon icon={ArrowRight02Icon} size={18} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
+              </Link>
+            </Button>
           </BottomSheetFooter>
         </BottomSheetContent>
       </BottomSheet>

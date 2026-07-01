@@ -32,7 +32,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="ktr-app-shell mx-auto min-h-screen w-full max-w-[430px] overflow-hidden bg-ktr-surface-bg-app px-4 py-6 sm:rounded-[32px]">
+    <main className="ktr-app-shell mx-auto min-h-screen w-full max-w-[430px] bg-ktr-surface-bg-app px-4 py-6 sm:rounded-[32px]">
       <div className="flex min-h-[calc(100vh-48px)] flex-col justify-between">
         <div className="pt-7">
           <Link href="/" className="text-sm font-semibold text-ktr-text-secondary hover:text-ktr-primary-dark">
