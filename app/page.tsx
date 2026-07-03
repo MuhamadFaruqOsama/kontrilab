@@ -1,16 +1,26 @@
+import Image from "next/image";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
 
+import { publicAppConfig } from "@/lib/env";
+
 export default function OnboardingPage() {
   return (
-    <main className="min-h-screen bg-ktr-neutral-1000 text-foreground sm:py-6">
-      <section className="relative ktr-app-shell mx-auto min-h-screen w-full max-w-[430px] bg-ktr-surface-bg-app sm:rounded-[32px]">
+    <main className="h-screen max-h-screen bg-ktr-neutral-1000 text-foreground sm:py-6">
+      <section className="relative ktr-app-shell mx-auto h-screen max-h-screen w-full max-w-[430px] overflow-hidden bg-ktr-surface-bg-app sm:rounded-[32px]">
+        <Image
+          src="/images/onboarding-hero.svg"
+          alt={`Ilustrasi siswa siap memulai proyek ${publicAppConfig.name}`}
+          fill
+          priority
+          sizes="(max-width: 430px) 100vw, 430px"
+          unoptimized
+          className="object-cover object-top"
+        />
+        <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-white via-white/98 via-75% to-white/0 backdrop-blur-[0.5px]" />
 
-        <div className="absolute inset-x-0 top-0 h-full w-full bg-[url('/vectors/student-onboarding.svg')] bg-cover bg-top" />
-        <div className="absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-white via-white/98 via-70% to-white/0 backdrop-blur-[1px]" />
-
-        <div className="relative z-10 flex min-h-screen flex-col justify-end px-4 pb-6 pt-10">
+        <div className="relative z-10 flex h-full flex-col justify-end px-4 pb-6 pt-10">
           <div className="space-y-5">
             <div className="space-y-3">
               <h1 className="text-[28px] font-bold leading-ktr-tight text-ktr-primary sm:text-[32px]">
@@ -22,8 +32,8 @@ export default function OnboardingPage() {
             </div>
 
             <Link
-              href="/login"
-              className="flex h-[52px] w-full items-center justify-center gap-3 rounded-2xl bg-ktr-primary px-4 text-base font-medium text-white hover:bg-ktr-primary-hover"
+              href="/register"
+              className="flex h-[48px] w-full items-center justify-center gap-3 rounded-[12px] bg-ktr-primary px-4 text-base font-medium text-white hover:bg-ktr-primary-hover"
             >
               Mulai Sekarang
               <HugeiconsIcon icon={ArrowRight02Icon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />

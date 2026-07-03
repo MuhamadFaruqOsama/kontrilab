@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -211,6 +211,7 @@
   --chart-4: var(--ktr-status-warning-main);
   --chart-5: var(--ktr-status-info-main);
   --radius: 0.625rem;
+  --ktr-corner-shape: squircle;
   --sidebar: var(--ktr-surface-card);
   --sidebar-foreground: var(--ktr-text-primary);
   --sidebar-primary: var(--ktr-primary-main);
@@ -394,6 +395,20 @@
     display: none !important;
   }
 
+  @supports (corner-shape: squircle) {
+    .ktr-app-shell :where(
+      [class*="rounded-"]:not([class*="rounded-full"]),
+      button:not([class*="rounded-full"]),
+      input,
+      textarea,
+      select,
+      article,
+      section,
+      nav
+    ) {
+      corner-shape: var(--ktr-corner-shape);
+    }
+  }
   .ktr-bottom-sheet-overlay {
     position: fixed;
     inset: 0;
@@ -447,6 +462,8 @@
     animation: ktr-bottom-sheet-out 160ms ease-in;
   }
 }
+
+
 
 
 

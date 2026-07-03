@@ -3,99 +3,62 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 
-import { EmailConfirmationView } from "../email-confirmation/EmailConfirmationView";
 import { Button } from "@/components/ui/button";
 import { AppFormField } from "@/components/ui/app-form-field";
 import { publicAppConfig } from "@/lib/env";
-import { registerSchema } from "@/lib/validation/auth";
+import { supabase } from "@/lib/supabase/client";
+import { resetPasswordSchema } from "@/lib/validation/auth";
 import { getFirstZodError } from "@/lib/validation/zod";
 
-export default function RegisterPage() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [pendingEmail, setPendingEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setMessage("");
 
-    const parsed = registerSchema.safeParse({
-      username,
-      email,
-      password,
-      confirmPassword,
-    });
+    const parsed = resetPasswordSchema.safeParse({ password, confirmPassword });
 
     if (!parsed.success) {
       setError(getFirstZodError(parsed.error));
       return;
     }
 
-    const payload = { username: parsed.data.username, email: parsed.data.email, password: parsed.data.password };
-
     setIsSubmitting(true);
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-    const result = (await response.json()) as { message?: string };
+    const { error: updateError } = await supabase.auth.updateUser({ password: parsed.data.password });
     setIsSubmitting(false);
 
-    if (!response.ok) {
-      setError(result.message || "Gagal membuat akun. Coba lagi sebentar lagi.");
+    if (updateError) {
+      setError(updateError.message || "Password belum bisa diperbarui. Buka ulang link reset dari email.");
       return;
     }
 
-    setPendingEmail(payload.email);
-  }
-
-  if (pendingEmail) {
-    return <EmailConfirmationView email={pendingEmail} />;
+    setMessage("Password berhasil diperbarui. Silakan masuk dengan password baru.");
   }
 
   return (
     <div className="flex min-h-full flex-col">
       <div>
         <div className="space-y-3">
-          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Mulai Perjalanan Proyekmu</h1>
+          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Buat Password Baru</h1>
           <p className="max-w-[360px] text-[14px] leading-ktr-relaxed text-ktr-text-secondary">
-            Buat akun untuk bergabung ke proyek, berdiskusi, dan mencatat kontribusimu bersama kelompok di {publicAppConfig.name}.
+            Masukkan password baru untuk akun {publicAppConfig.name}. Link reset hanya berlaku dari email yang kamu terima.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-9 space-y-5">
           <AppFormField
-            label="Nama Pengguna"
-            autoComplete="username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            placeholder="Masukkan nama pengguna"
-          />
-
-          <AppFormField
-            label="Email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Masukkan email aktifmu"
-          />
-
-          <AppFormField
-            label="Password"
+            label="Password Baru"
             type="password"
             autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            placeholder="Buat password"
+            placeholder="Buat password baru"
           />
 
           <AppFormField
@@ -104,19 +67,20 @@ export default function RegisterPage() {
             autoComplete="new-password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
-            placeholder="Ulangi password"
+            placeholder="Ulangi password baru"
           />
 
           {error ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-project-need-attention">{error}</p> : null}
+          {message ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-primary-dark">{message}</p> : null}
 
           <Button type="submit" size="lg" disabled={isSubmitting} className="h-12 w-full rounded-[10px] bg-ktr-primary text-white hover:bg-ktr-primary-hover">
-            {isSubmitting ? "Memproses..." : "Daftar Sekarang"}
+            {isSubmitting ? "Memproses..." : "Simpan Password"}
           </Button>
         </form>
       </div>
 
       <div className="mt-auto pt-10 text-center text-[14px] text-ktr-text-primary">
-        Sudah punya akun?{" "}
+        Sudah selesai?{" "}
         <Link href="/login" className="font-medium text-ktr-primary hover:text-ktr-primary-hover">
           Masuk
         </Link>
