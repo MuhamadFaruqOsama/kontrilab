@@ -1,4 +1,5 @@
-﻿import { HugeiconsIcon } from "@hugeicons/react";
+import Link from "next/link";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Briefcase01Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 
 const activities = [
@@ -25,8 +26,8 @@ const activities = [
 export default function RecentActivities() {
   return (
     <section className="mb-7">
-      <h2 className="mb-3 text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Aktivitas Terbaru</h2>
-      <div className="overflow-hidden rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-[14px] py-3">
+      <div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Aktivitas Terbaru</h2><Link href="/student/activities" className="text-[13px] font-semibold leading-5 text-ktr-primary">Lihat Semua</Link></div>
+      <div className="rounded-[18px] border border-ktr-border-light bg-ktr-surface-card px-[14px] py-3">
         {activities.map((activity, index) => (
           <article
             key={activity.id}

@@ -15,6 +15,7 @@ The project is set up with the stack declared in `package.json` and
 - Socket.IO on a custom Next.js server for real-time app events
 - Zod, React Hook Form, and `@hookform/resolvers` for form validation
 - Supabase project structure under `supabase/`
+- Prisma ORM 7 with a PostgreSQL adapter and generated client under `lib/generated/prisma`
 
 ## Setup
 
@@ -37,6 +38,7 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:3000
 CORS_ORIGIN=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/kontrilab?schema=public"
 ```
 
 ## Scripts
@@ -45,3 +47,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 - `npm run build` creates a production build.
 - `npm run start` serves the production build with the custom server.
 - `npm run lint` runs ESLint.
+- `npm run prisma:generate` generates the Prisma client.
+- `npm run prisma:migrate` creates and applies a development migration.
+- `npm run db:push` pushes the Prisma schema without creating a migration.
+- `npm run prisma:studio` opens Prisma Studio.

@@ -1,0 +1,246 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum ProjectStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  REVISION
+  FINISHED
+}
+
+enum GroupRole {
+  LEADER
+  MEMBER
+}
+
+enum DiscussionTopic {
+  PROJECT_IDEA
+  PROGRESS
+  BLOCKER
+  REVISION
+  OTHER
+}
+
+enum DiscussionStatus {
+  DRAFT
+  RUNNING
+  FINISHED
+}
+
+enum ProgressStatus {
+  IN_PROGRESS
+  FINISHED
+  BLOCKED
+}
+
+enum VisibilityLevel {
+  LESS_VISIBLE
+  VISIBLE_ENOUGH
+  VERY_VISIBLE
+}
+
+model User {
+  id                     String           @id @default(cuid())
+  email                  String           @unique
+  name                   String
+  role                   UserRole         @default(STUDENT)
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  profile                UserProfile?
+  ownedProjects          Project[]        @relation("ProjectOwner")
+  groupMemberships       GroupMember[]
+  discussionParticipants Participant[]
+  discussionMessages     DiscussionChat[]
+  progressUploads        ProgressUpload[]
+  assessmentsGiven       PeerAssessment[] @relation("AssessmentAuthor")
+  assessmentsReceived    PeerAssessment[] @relation("AssessmentSubject")
+
+  @@map("users")
+}
+
+model UserProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  className String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profile")
+}
+
+model Project {
+  id            String          @id @default(cuid())
+  title         String
+  className     String
+  description   String
+  joinCode      String          @unique
+  deadline      DateTime?
+  status        ProjectStatus   @default(NOT_STARTED)
+  ownerId       String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  owner         User?           @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  groups        ProjectGroup[]
+  mergedSources MergedProject[] @relation("MergedProjectSource")
+  mergedTargets MergedProject[] @relation("MergedProjectTarget")
+
+  @@map("project")
+}
+
+model Merge {
+  id        String          @id @default(cuid())
+  title     String
+  notes     String?
+  createdAt DateTime        @default(now())
+  projects  MergedProject[]
+
+  @@map("merge")
+}
+
+model MergedProject {
+  id              String   @id @default(cuid())
+  mergeId         String
+  sourceProjectId String
+  targetProjectId String
+  createdAt       DateTime @default(now())
+  merge           Merge    @relation(fields: [mergeId], references: [id], onDelete: Cascade)
+  sourceProject   Project  @relation("MergedProjectSource", fields: [sourceProjectId], references: [id], onDelete: Cascade)
+  targetProject   Project  @relation("MergedProjectTarget", fields: [targetProjectId], references: [id], onDelete: Cascade)
+
+  @@unique([mergeId, sourceProjectId, targetProjectId])
+  @@map("merged_project")
+}
+
+model ProjectGroup {
+  id          String              @id @default(cuid())
+  projectId   String
+  name        String
+  inviteCode  String              @unique
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  project     Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  members     GroupMember[]
+  discussions DiscussionSession[]
+  progress    ProgressUpload[]
+  assessments PeerAssessment[]
+
+  @@map("project_group")
+}
+
+model GroupMember {
+  id       String       @id @default(cuid())
+  groupId  String
+  userId   String
+  role     GroupRole    @default(MEMBER)
+  joinedAt DateTime     @default(now())
+  group    ProjectGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("group_member")
+}
+
+model DiscussionSession {
+  id           String           @id @default(cuid())
+  groupId      String
+  title        String
+  topic        DiscussionTopic  @default(PROJECT_IDEA)
+  initialNote  String?
+  status       DiscussionStatus @default(RUNNING)
+  startedAt    DateTime         @default(now())
+  endedAt      DateTime?
+  group        ProjectGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  participants Participant[]
+  chats        DiscussionChat[]
+  progress     ProgressUpload[]
+
+  @@map("discussion_session")
+}
+
+model Participant {
+  id           String             @id @default(cuid())
+  discussionId String
+  userId       String
+  joinedAt     DateTime           @default(now())
+  discussion   DiscussionSession  @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scores       ParticipantScore[]
+
+  @@unique([discussionId, userId])
+  @@map("participant")
+}
+
+model DiscussionChat {
+  id           String            @id @default(cuid())
+  discussionId String
+  authorId     String
+  message      String
+  createdAt    DateTime          @default(now())
+  discussion   DiscussionSession @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  author       User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("discussion_chat")
+}
+
+model ProgressUpload {
+  id           String             @id @default(cuid())
+  groupId      String
+  discussionId String?
+  authorId     String
+  description  String
+  evidenceUrl  String?
+  status       ProgressStatus     @default(IN_PROGRESS)
+  createdAt    DateTime           @default(now())
+  group        ProjectGroup       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  discussion   DiscussionSession? @relation(fields: [discussionId], references: [id], onDelete: SetNull)
+  author       User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("progress_upload")
+}
+
+model PeerAssessment {
+  id                 String             @id @default(cuid())
+  groupId            String
+  authorId           String
+  subjectId          String
+  discussionActivity VisibilityLevel
+  teamwork           VisibilityLevel
+  sharedProgress     VisibilityLevel
+  note               String?
+  createdAt          DateTime           @default(now())
+  group              ProjectGroup       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  author             User               @relation("AssessmentAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  subject            User               @relation("AssessmentSubject", fields: [subjectId], references: [id], onDelete: Cascade)
+  scores             ParticipantScore[]
+
+  @@unique([groupId, authorId, subjectId])
+  @@map("peer_assessment")
+}
+
+model ParticipantScore {
+  id               String         @id @default(cuid())
+  participantId    String
+  peerAssessmentId String
+  score            Int
+  note             String?
+  createdAt        DateTime       @default(now())
+  participant      Participant    @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  peerAssessment   PeerAssessment @relation(fields: [peerAssessmentId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, peerAssessmentId])
+  @@map("participant_score")
+}

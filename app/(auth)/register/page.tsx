@@ -2,107 +2,100 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  ArrowRight02Icon,
-  LockPasswordIcon,
-  UserIcon,
-  UserAdd01Icon,
-} from "@hugeicons/core-free-icons";
 
-const DUMMY_USERNAME = "student";
-const DUMMY_PASSWORD = "kontrilab123";
+import { EmailConfirmationView } from "../email-confirmation/EmailConfirmationView";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
+import { AppFormField } from "@/components/ui/app-form-field";
+import { publicAppConfig } from "@/lib/env";
+import { registerSchema } from "@/lib/validation/auth";
+import { getFirstZodError } from "@/lib/validation/zod";
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [name, setName] = useState("Siswa Kontrilab");
-  const [username, setUsername] = useState(DUMMY_USERNAME);
-  const [password, setPassword] = useState(DUMMY_PASSWORD);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    router.push("/student");
+    setError("");
+
+    const parsed = registerSchema.safeParse({
+      username,
+      email,
+      password,
+      confirmPassword,
+    });
+
+    if (!parsed.success) {
+      const message = getFirstZodError(parsed.error);
+      setError(message);
+      toast.warning("Data daftar belum lengkap", { description: message });
+      return;
+    }
+
+    const payload = { username: parsed.data.username, email: parsed.data.email, password: parsed.data.password };
+
+    setIsSubmitting(true);
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    const result = (await response.json()) as { message?: string };
+    setIsSubmitting(false);
+
+    if (!response.ok) {
+      const message = result.message || "Gagal membuat akun. Coba lagi sebentar lagi.";
+      setError(message);
+      toast.danger("Akun belum bisa dibuat", { description: message });
+      return;
+    }
+
+    toast.success("Akun berhasil dibuat", { description: "Link verifikasi sudah dikirim ke emailmu." });
+    setPendingEmail(payload.email);
+  }
+
+  if (pendingEmail) {
+    return <EmailConfirmationView email={pendingEmail} onBack={() => setPendingEmail("")} />;
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-[430px] overflow-hidden bg-ktr-surface-bg-app px-4 py-6 sm:rounded-[32px]">
-      <div className="flex min-h-[calc(100vh-48px)] flex-col justify-between">
-        <div className="pt-7">
-          <Link href="/" className="text-sm font-semibold text-ktr-text-secondary hover:text-ktr-primary-dark">
-            Kembali
-          </Link>
-
-          <div className="mt-9 space-y-3">
-            <p className="text-sm font-semibold text-ktr-primary-dark">Mulai sebagai student</p>
-            <h1 className="text-[32px] font-bold leading-ktr-tight text-ktr-text-primary">
-              Buat Akun Student
-            </h1>
-            <p className="max-w-[330px] text-base leading-ktr-relaxed text-ktr-text-tertiary">
-              Untuk sementara form ini memakai akun dummy agar flow onboarding sampai home bisa diuji.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="mt-7 space-y-4">
-            <label className="block space-y-2">
-              <span className="text-sm font-semibold text-ktr-text-primary">Nama</span>
-              <span className="flex h-12 items-center gap-3 rounded-2xl border border-ktr-border-input bg-white px-4 text-ktr-text-primary focus-within:border-ktr-border-focus focus-within:ring-3 focus-within:ring-ktr-primary/15">
-                <HugeiconsIcon icon={UserAdd01Icon} size={20} strokeWidth={1.8} color="currentColor" className="text-ktr-text-tertiary" aria-hidden="true" />
-                <input
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-ktr-text-disabled"
-                  placeholder="Nama lengkap"
-                />
-              </span>
-            </label>
-
-            <label className="block space-y-2">
-              <span className="text-sm font-semibold text-ktr-text-primary">Username</span>
-              <span className="flex h-12 items-center gap-3 rounded-2xl border border-ktr-border-input bg-white px-4 text-ktr-text-primary focus-within:border-ktr-border-focus focus-within:ring-3 focus-within:ring-ktr-primary/15">
-                <HugeiconsIcon icon={UserIcon} size={20} strokeWidth={1.8} color="currentColor" className="text-ktr-text-tertiary" aria-hidden="true" />
-                <input
-                  value={username}
-                  onChange={(event) => setUsername(event.target.value)}
-                  className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-ktr-text-disabled"
-                  placeholder="student"
-                />
-              </span>
-            </label>
-
-            <label className="block space-y-2">
-              <span className="text-sm font-semibold text-ktr-text-primary">Password</span>
-              <span className="flex h-12 items-center gap-3 rounded-2xl border border-ktr-border-input bg-white px-4 text-ktr-text-primary focus-within:border-ktr-border-focus focus-within:ring-3 focus-within:ring-ktr-primary/15">
-                <HugeiconsIcon icon={LockPasswordIcon} size={20} strokeWidth={1.8} color="currentColor" className="text-ktr-text-tertiary" aria-hidden="true" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-ktr-text-disabled"
-                  placeholder="kontrilab123"
-                />
-              </span>
-            </label>
-
-            <div className="rounded-lg border border-ktr-border-light bg-white px-4 py-3 text-sm text-ktr-text-secondary">
-              <p>Dummy login yang aktif:</p>
-              <p className="mt-1 font-semibold text-ktr-primary-dark">student / kontrilab123</p>
-            </div>
-
-            <button className="flex h-[52px] w-full items-center justify-center gap-3 rounded-2xl bg-ktr-primary px-4 text-base font-medium text-white shadow-[0_12px_24px_rgba(87,193,133,0.25)] hover:bg-ktr-primary-hover">
-              Daftar dan Masuk
-              <HugeiconsIcon icon={ArrowRight02Icon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
-            </button>
-          </form>
+    <div className="flex min-h-full flex-col">
+      <div>
+        <div className="space-y-3">
+          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Mulai Perjalanan Proyekmu</h1>
+          <p className="max-w-[360px] text-[14px] leading-ktr-relaxed text-ktr-text-secondary">
+            Buat akun untuk bergabung ke proyek, berdiskusi, dan mencatat kontribusimu bersama kelompok di {publicAppConfig.name}.
+          </p>
         </div>
 
-        <p className="pb-3 text-center text-sm text-ktr-text-secondary">
-          Sudah punya akun?{" "}
-          <Link href="/login" className="font-semibold text-ktr-primary-dark hover:text-ktr-primary-hover">
-            Masuk
-          </Link>
-        </p>
+        <form onSubmit={handleSubmit} className="mt-9 space-y-5">
+          <AppFormField label="Nama Pengguna" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Masukkan nama pengguna" />
+          <AppFormField label="Email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Masukkan email aktifmu" />
+          <AppFormField label="Password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Buat password" />
+          <AppFormField label="Konfirmasi Password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Ulangi password" />
+
+          {error ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-project-need-attention">{error}</p> : null}
+
+          <Button type="submit" size="lg" disabled={isSubmitting} className="h-12 w-full rounded-[10px] bg-ktr-primary text-white hover:bg-ktr-primary-hover">
+            {isSubmitting ? "Memproses..." : "Daftar Sekarang"}
+          </Button>
+        </form>
       </div>
-    </main>
+
+      <div className="mt-auto pt-10 text-center text-[14px] text-ktr-text-primary">
+        Sudah punya akun?{" "}
+        <Link href="/login" className="font-medium text-ktr-primary hover:text-ktr-primary-hover">
+          Masuk
+        </Link>
+      </div>
+    </div>
   );
 }

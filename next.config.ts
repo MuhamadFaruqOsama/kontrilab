@@ -1,8 +1,9 @@
-﻿import path from "node:path";
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   distDir: '.next-local',
+  devIndicators: false,
   turbopack: {
     root: path.resolve(__dirname),
   },

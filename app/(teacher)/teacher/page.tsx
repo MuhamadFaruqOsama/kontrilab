@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -7,7 +7,7 @@ import {
   PlusSignIcon,
   UserGroupIcon,
 } from "@hugeicons/core-free-icons";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { Button } from "@/components/ui/button";
 
@@ -62,7 +62,7 @@ export default function TeacherPage() {
           {setupCards.map((card) => (
             <button
               key={card.title}
-              className="rounded-lg border border-ktr-border-light bg-ktr-surface-card p-5 text-left"
+              className="rounded-[10px] border border-ktr-border-light bg-ktr-surface-card p-5 text-left"
               type="button"
               onClick={() =>
                 toast(card.title, {
@@ -70,7 +70,7 @@ export default function TeacherPage() {
                 })
               }
             >
-              <span className="flex size-10 items-center justify-center rounded-lg bg-ktr-primary-soft text-ktr-primary-hover">
+              <span className="flex size-10 items-center justify-center rounded-[10px] bg-ktr-primary-soft text-ktr-primary-hover">
                 <HugeiconsIcon icon={card.icon} size={20} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
               </span>
               <h3 className="mt-5 text-lg font-semibold leading-ktr-tight text-ktr-text-primary">
