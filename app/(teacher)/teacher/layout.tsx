@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   AssignmentsIcon,
@@ -26,8 +26,8 @@ export default function TeacherLayout({
     <div className="min-h-screen bg-ktr-surface-bg-app text-foreground">
       <div className="grid min-h-screen lg:grid-cols-[17rem_1fr]">
         <aside className="hidden border-r border-ktr-border-light bg-ktr-surface-card px-4 py-5 lg:block">
-          <Link href="/teacher" className="flex items-center gap-3 rounded-lg px-2 py-2">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-ktr-primary text-primary-foreground">
+          <Link href="/teacher" className="flex items-center gap-3 rounded-[10px] px-2 py-2">
+            <span className="flex size-9 items-center justify-center rounded-[10px] bg-ktr-primary text-primary-foreground">
               <HugeiconsIcon icon={BookOpenCheckIcon} size={20} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
             </span>
             <span>
@@ -41,7 +41,7 @@ export default function TeacherLayout({
               <Link
                 key={item.label}
                 href="/teacher"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ktr-text-secondary transition-colors hover:bg-ktr-primary-soft hover:text-ktr-primary-dark"
+                className="flex items-center gap-3 rounded-[10px] px-3 py-2 text-sm font-medium text-ktr-text-secondary transition-colors hover:bg-ktr-primary-soft hover:text-ktr-primary-dark"
               >
                 <HugeiconsIcon icon={item.icon} size={16} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
                 {item.label}
@@ -58,7 +58,7 @@ export default function TeacherLayout({
               </p>
               <h1 className="text-lg font-semibold leading-ktr-tight">Kontrilab Teacher</h1>
             </div>
-            <div className="rounded-lg border border-ktr-border-light bg-ktr-surface-soft px-3 py-1.5 text-sm text-ktr-text-secondary">
+            <div className="rounded-[10px] border border-ktr-border-light bg-ktr-surface-soft px-3 py-1.5 text-sm text-ktr-text-secondary">
               Desktop First
             </div>
           </header>

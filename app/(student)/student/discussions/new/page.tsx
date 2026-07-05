@@ -1,5 +1,5 @@
-import { NewDiscussionPage } from "@/app/components/student/StudentMvp";
+﻿import { NewDiscussionPage } from "@/app/components/student/StudentMvp";
 
 export default function Page() {
-  return <NewDiscussionPage />;
+  return <NewDiscussionPage role="leader" />;
 }

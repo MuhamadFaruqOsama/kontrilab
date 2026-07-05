@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { EmailConfirmationView } from "../email-confirmation/EmailConfirmationView";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import { AppFormField } from "@/components/ui/app-form-field";
 import { publicAppConfig } from "@/lib/env";
 import { registerSchema } from "@/lib/validation/auth";
@@ -31,7 +32,9 @@ export default function RegisterPage() {
     });
 
     if (!parsed.success) {
-      setError(getFirstZodError(parsed.error));
+      const message = getFirstZodError(parsed.error);
+      setError(message);
+      toast.warning("Data daftar belum lengkap", { description: message });
       return;
     }
 
@@ -49,15 +52,18 @@ export default function RegisterPage() {
     setIsSubmitting(false);
 
     if (!response.ok) {
-      setError(result.message || "Gagal membuat akun. Coba lagi sebentar lagi.");
+      const message = result.message || "Gagal membuat akun. Coba lagi sebentar lagi.";
+      setError(message);
+      toast.danger("Akun belum bisa dibuat", { description: message });
       return;
     }
 
+    toast.success("Akun berhasil dibuat", { description: "Link verifikasi sudah dikirim ke emailmu." });
     setPendingEmail(payload.email);
   }
 
   if (pendingEmail) {
-    return <EmailConfirmationView email={pendingEmail} />;
+    return <EmailConfirmationView email={pendingEmail} onBack={() => setPendingEmail("")} />;
   }
 
   return (
@@ -71,41 +77,10 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-9 space-y-5">
-          <AppFormField
-            label="Nama Pengguna"
-            autoComplete="username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            placeholder="Masukkan nama pengguna"
-          />
-
-          <AppFormField
-            label="Email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Masukkan email aktifmu"
-          />
-
-          <AppFormField
-            label="Password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Buat password"
-          />
-
-          <AppFormField
-            label="Konfirmasi Password"
-            type="password"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            placeholder="Ulangi password"
-          />
+          <AppFormField label="Nama Pengguna" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Masukkan nama pengguna" />
+          <AppFormField label="Email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Masukkan email aktifmu" />
+          <AppFormField label="Password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Buat password" />
+          <AppFormField label="Konfirmasi Password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Ulangi password" />
 
           {error ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-project-need-attention">{error}</p> : null}
 

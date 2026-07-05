@@ -4,8 +4,8 @@ export default function StudentLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-ktr-neutral-1000 text-foreground sm:py-6">
-      <div className="ktr-app-shell mx-auto min-h-screen w-full max-w-[430px] bg-background sm:rounded-[32px]">
+    <div className="min-h-dvh bg-background text-foreground">
+      <div className="ktr-app-shell mx-auto min-h-dvh w-full max-w-[430px] bg-background">
         {children}
       </div>
     </div>

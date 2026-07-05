@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import { AppFormField } from "@/components/ui/app-form-field";
 import { publicAppConfig } from "@/lib/env";
 import { forgotPasswordSchema } from "@/lib/validation/auth";
@@ -23,7 +24,9 @@ export default function ForgotPasswordPage() {
     const parsed = forgotPasswordSchema.safeParse({ email });
 
     if (!parsed.success) {
-      setError(getFirstZodError(parsed.error));
+      const message = getFirstZodError(parsed.error);
+      setError(message);
+      toast.warning("Email belum valid", { description: message });
       return;
     }
 
@@ -39,11 +42,14 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(false);
 
     if (!response.ok) {
-      setError(result.message || "Reset password belum bisa dikirim.");
+      const message = result.message || "Reset password belum bisa dikirim.";
+      setError(message);
+      toast.danger("Link reset belum terkirim", { description: message });
       return;
     }
 
     setMessage("Instruksi reset password sudah dikirim ke emailmu.");
+    toast.success("Link reset terkirim", { description: "Cek emailmu untuk membuat password baru." });
   }
 
   return (
@@ -57,15 +63,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-9 space-y-5">
-          <AppFormField
-            label="Email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Masukkan email aktifmu"
-          />
+          <AppFormField label="Email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Masukkan email aktifmu" />
 
           {error ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-project-need-attention">{error}</p> : null}
           {message ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-primary-dark">{message}</p> : null}

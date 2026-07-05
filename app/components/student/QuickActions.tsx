@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight02Icon, CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import {
   BottomSheet,
@@ -46,7 +46,7 @@ const quickActions: QuickAction[] = [
 
 function ActionCard({ action }: { action: QuickAction }) {
   return (
-    <div className="relative flex h-16 w-full items-center justify-between overflow-hidden rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3 py-2.5 text-left">
+    <div className="relative flex h-16 w-full items-center justify-between overflow-hidden rounded-[18px] border border-ktr-border-light bg-ktr-surface-card px-3 py-2.5 text-left">
       <div className="relative z-10 flex min-w-0 items-center gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px]">
           <Image src={action.icon} alt="" width={40} height={40} aria-hidden="true" />
@@ -98,7 +98,7 @@ export default function QuickActions() {
                 </label>
                 <input
                   id="join-code"
-                  className="mt-2 h-11 w-full rounded-lg border border-ktr-border-input bg-ktr-surface-card px-3 text-sm outline-none transition-colors focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20"
+                  className="mt-2 h-11 w-full rounded-[10px] border border-ktr-border-input bg-ktr-surface-card px-3 text-sm outline-none transition-colors focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20"
                   placeholder="Contoh: KTR-2026"
                 />
                 <BottomSheetFooter>
@@ -107,7 +107,7 @@ export default function QuickActions() {
                       Batal
                     </Button>
                   </BottomSheetClose>
-                  <Button asChild className="w-full" onClick={() => toast.success("Kode diterima", { description: "Pilih atau buat kelompok untuk melanjutkan.", icon: <HugeiconsIcon icon={CheckmarkCircle02Icon} size={16} strokeWidth={1.8} color="currentColor" aria-hidden="true" /> })}>
+                  <Button asChild className="w-full" onClick={() => toast.success("Kode diterima", { description: "Pilih atau buat kelompok untuk melanjutkan.", indicator: <HugeiconsIcon icon={CheckmarkCircle02Icon} size={18} strokeWidth={1.8} color="currentColor" aria-hidden="true" /> })}>
                     <Link href="/student/projects/group/start">Gabung Proyek</Link>
                   </Button>
                 </BottomSheetFooter>

@@ -7,8 +7,8 @@ import { publicAppConfig } from "@/lib/env";
 
 export default function OnboardingPage() {
   return (
-    <main className="h-screen max-h-screen bg-ktr-neutral-1000 text-foreground sm:py-6">
-      <section className="relative ktr-app-shell mx-auto h-screen max-h-screen w-full max-w-[430px] overflow-hidden bg-ktr-surface-bg-app sm:rounded-[32px]">
+    <main className="min-h-dvh bg-ktr-surface-bg-app text-foreground sm:bg-ktr-neutral-1000 sm:py-6">
+      <section className="relative ktr-app-shell mx-auto min-h-dvh w-full max-w-[430px] overflow-hidden bg-ktr-surface-bg-app rounded-[12px]">
         <Image
           src="/images/onboarding-hero.svg"
           alt={`Ilustrasi siswa siap memulai proyek ${publicAppConfig.name}`}
@@ -20,10 +20,10 @@ export default function OnboardingPage() {
         />
         <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-white via-white/98 via-75% to-white/0 backdrop-blur-[0.5px]" />
 
-        <div className="relative z-10 flex h-full flex-col justify-end px-4 pb-6 pt-10">
+        <div className="relative z-10 flex min-h-dvh flex-col justify-end px-4 pb-6 pt-10">
           <div className="space-y-5">
             <div className="space-y-3">
-              <h1 className="text-[28px] font-bold leading-ktr-tight text-ktr-primary sm:text-[32px]">
+              <h1 className="text-[28px] font-semibold leading-ktr-tight text-ktr-primary sm:text-[32px]">
                 Belajar Lebih Kompak, Berkarya Lebih Berdampak
               </h1>
               <p className="max-w-[330px] text-base leading-ktr-relaxed text-ktr-text-tertiary">

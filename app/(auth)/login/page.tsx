@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import { AppFormField } from "@/components/ui/app-form-field";
 import { publicAppConfig } from "@/lib/env";
 import { supabase } from "@/lib/supabase/client";
@@ -25,7 +26,9 @@ export default function LoginPage() {
     const parsed = loginSchema.safeParse({ email, password });
 
     if (!parsed.success) {
-      setError(getFirstZodError(parsed.error));
+      const message = getFirstZodError(parsed.error);
+      setError(message);
+      toast.warning("Data login belum lengkap", { description: message });
       return;
     }
 
@@ -34,10 +37,13 @@ export default function LoginPage() {
     setIsSubmitting(false);
 
     if (signInError) {
-      setError(signInError.message || "Gagal masuk. Periksa kembali email dan password.");
+      const message = signInError.message || "Gagal masuk. Periksa kembali email dan password.";
+      setError(message);
+      toast.danger("Login belum berhasil", { description: message });
       return;
     }
 
+    toast.success("Berhasil masuk", { description: "Selamat datang kembali di KontriLab." });
     router.push("/student");
   }
 

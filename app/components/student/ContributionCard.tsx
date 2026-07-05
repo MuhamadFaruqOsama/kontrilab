@@ -5,7 +5,7 @@ import { ArrowRight02Icon, Flag01Icon } from "@hugeicons/core-free-icons";
 
 export default function ContributionCard() {
   return (
-    <section className="relative mb-6 overflow-hidden rounded-[14px] bg-ktr-primary px-5 py-[18px] text-ktr-text-white">
+    <section className="relative mb-6 overflow-hidden rounded-[20px] bg-ktr-primary px-4 py-[14px] text-ktr-text-white">
       <div className="relative z-10">
         <p className="flex items-center gap-2 text-[14px] font-medium leading-4 text-ktr-accent-lime">
           <HugeiconsIcon icon={Flag01Icon} size={16} strokeWidth={1.8} color="currentColor" aria-hidden="true" />

@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import { AppFormField } from "@/components/ui/app-form-field";
 import { publicAppConfig } from "@/lib/env";
 import { supabase } from "@/lib/supabase/client";
@@ -25,7 +26,9 @@ export default function ResetPasswordPage() {
     const parsed = resetPasswordSchema.safeParse({ password, confirmPassword });
 
     if (!parsed.success) {
-      setError(getFirstZodError(parsed.error));
+      const message = getFirstZodError(parsed.error);
+      setError(message);
+      toast.warning("Password belum valid", { description: message });
       return;
     }
 
@@ -34,11 +37,14 @@ export default function ResetPasswordPage() {
     setIsSubmitting(false);
 
     if (updateError) {
-      setError(updateError.message || "Password belum bisa diperbarui. Buka ulang link reset dari email.");
+      const message = updateError.message || "Password belum bisa diperbarui. Buka ulang link reset dari email.";
+      setError(message);
+      toast.danger("Password belum diperbarui", { description: message });
       return;
     }
 
     setMessage("Password berhasil diperbarui. Silakan masuk dengan password baru.");
+    toast.success("Password berhasil diperbarui", { description: "Silakan masuk dengan password barumu." });
   }
 
   return (
@@ -52,23 +58,8 @@ export default function ResetPasswordPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-9 space-y-5">
-          <AppFormField
-            label="Password Baru"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Buat password baru"
-          />
-
-          <AppFormField
-            label="Konfirmasi Password"
-            type="password"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            placeholder="Ulangi password baru"
-          />
+          <AppFormField label="Password Baru" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Buat password baru" />
+          <AppFormField label="Konfirmasi Password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Ulangi password baru" />
 
           {error ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-project-need-attention">{error}</p> : null}
           {message ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-primary-dark">{message}</p> : null}
