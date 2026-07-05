@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--ktr-font-family-sans);
-  --font-mono: var(--ktr-font-family-sans);
-  --font-heading: var(--ktr-font-family-sans);
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-heading: var(--font-open-sans), "Open Sans", system-ui, sans-serif;
   --leading-ktr-tight: var(--ktr-leading-tight);
   --leading-ktr-snug: var(--ktr-leading-snug);
   --leading-ktr-normal: var(--ktr-leading-normal);
@@ -111,7 +111,7 @@
 
 :root {
   --ktr-mobile-frame-width: 430px;
-  --ktr-font-family-sans: var(--font-nunito-sans), "Nunito Sans", system-ui, sans-serif;
+  --ktr-font-family-sans: var(--font-inter), "Inter", system-ui, sans-serif;
   --ktr-font-size-xs: 0.75rem;
   --ktr-font-size-sm: 0.875rem;
   --ktr-font-size-base: 1rem;
@@ -307,7 +307,7 @@
   h4,
   h5,
   h6 {
-    font-family: var(--ktr-font-family-sans);
+    font-family: var(--font-heading);
     line-height: var(--ktr-leading-tight);
     letter-spacing: var(--ktr-tracking-ui);
   }
