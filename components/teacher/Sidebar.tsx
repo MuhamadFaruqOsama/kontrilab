@@ -17,7 +17,7 @@ import {
 } from "@hugeicons/core-free-icons";
 
 const navigation = [
-  { name: "Dashboard", href: "/teacher/dashboard", icon: DashboardSquare01Icon },
+  { name: "Dashboard", href: "/teacher", icon: DashboardSquare01Icon },
   { name: "Proyek", href: "/teacher/projects", icon: Folder01Icon },
   { name: "Siswa", href: "/teacher/students", icon: UserGroupIcon },
   { name: "Kontribusi", href: "/teacher/contributions", icon: Activity01Icon },
