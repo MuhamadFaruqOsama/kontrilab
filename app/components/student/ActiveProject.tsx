@@ -38,11 +38,16 @@ export default function ActiveProject() {
             key={discussion.title}
             href={discussion.href}
             className={cn(
-              "block rounded-[20px] border bg-ktr-surface-card p-3 transition-colors hover:border-ktr-primary/40",
-              discussion.status === "Sedang Berjalan" ? "active-discussion-card border-ktr-border-light" : "border-ktr-border-light"
+              "relative block overflow-hidden rounded-[20px] border bg-ktr-surface-card p-3 transition-colors hover:border-ktr-primary/40",
+              discussion.status === "Sedang Berjalan" ? "border-ktr-primary shadow-[0_0_15px_rgba(33,197,94,0.15)]" : "border-ktr-border-light"
             )}
           >
-            <div className="flex min-w-0 items-start justify-between gap-3">
+            {/* Animated background effect for active discussion */}
+            {discussion.status === "Sedang Berjalan" && (
+              <div className="absolute inset-0 bg-ktr-primary/5 animate-pulse rounded-[20px] pointer-events-none"></div>
+            )}
+            
+            <div className="relative flex min-w-0 items-start justify-between gap-3">
               <div className="min-w-0">
                 <h3 className="truncate text-[14px] font-normal leading-[22px] text-ktr-text-primary">{discussion.title}</h3>
                 <p className="mt-1 truncate text-[12px] leading-[18px] text-ktr-text-tertiary">{discussion.project}</p>
@@ -52,7 +57,7 @@ export default function ActiveProject() {
               </span>
             </div>
 
-            <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[12px] leading-[18px] text-ktr-text-tertiary">
+            <div className="relative mt-3 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[12px] leading-[18px] text-ktr-text-tertiary">
               <span className="flex items-center gap-1.5">
                 <HugeiconsIcon icon={BubbleChatIcon} size={16} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
                 {discussion.messages}
