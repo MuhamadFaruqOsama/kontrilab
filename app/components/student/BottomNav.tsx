@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import MinimizedCallUI from "@/app/components/student/MinimizedCallUI";
 
 const navItems = [
   {
@@ -45,7 +46,9 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav
+    <>
+      <MinimizedCallUI />
+      <nav
       className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] border-t-[0.7px] border-ktr-border-light bg-ktr-surface-card pt-4 pb-[calc(10px_+_env(safe-area-inset-bottom))]"
       aria-label="Navigasi siswa"
     >
@@ -70,5 +73,6 @@ export default function BottomNav() {
         })}
       </div>
     </nav>
+    </>
   );
 }

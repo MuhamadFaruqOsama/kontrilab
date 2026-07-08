@@ -6,24 +6,37 @@ import { useRouter } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
+  Album02Icon,
   ArrowRight02Icon,
   BubbleChatIcon,
   Briefcase01Icon,
   Calendar03Icon,
+  Call02Icon,
+  CallEnd01Icon,
+  Camera01Icon,
+  CameraAdd01Icon,
   Clock01Icon,
   Copy01Icon,
   CopyLinkIcon,
+  Download04Icon,
+  File02Icon,
   FileCheckIcon,
   Flag01Icon,
   LabelImportantIcon,
   Login02Icon,
   MessageDone02Icon,
+  Mic01Icon,
+  MicOff01Icon,
   MoreVerticalIcon,
+  SentIcon,
+  Task01Icon,
   TaskDone02Icon,
   Search01Icon,
   StarIcon,
   Upload04Icon,
   UserGroupIcon,
+  VideoOffIcon,
+  VolumeHighIcon,
 } from "@hugeicons/core-free-icons";
 import { toast } from "@/components/ui/toast";
 import * as React from "react";
@@ -835,14 +848,14 @@ export function GroupStartPage() {
         <section className="mb-10">
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
             <h1 className="min-w-0 text-[22px] font-semibold leading-[30px] text-ktr-text-primary">Landing Page UMKM</h1>
-            <p className="shrink-0 pt-1 text-right text-[13px] font-medium leading-5 text-ktr-text-primary">XI - Desain Web</p>
+            <p className="shrink-0 pt-1 text-right text-[13px] font-medium leading-5 text-ktr-text-secondary">XI - Desain Web</p>
           </div>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-[10px] border border-ktr-primary bg-ktr-success-bg px-2.5 py-1 text-[12px] font-medium leading-[18px] text-ktr-primary">
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-[13px] leading-5">
+            <span className="flex items-center gap-1.5 text-ktr-primary">
               <Icon icon={Calendar03Icon} />
               25 Juni 2026
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-[10px] border border-ktr-info bg-ktr-info-bg px-2.5 py-1 text-[12px] font-medium leading-[18px] text-ktr-info">
+            <span className="flex items-center gap-1.5 text-ktr-info">
               <Icon icon={statusIcon()} />
               Belum Dimulai
             </span>
@@ -911,23 +924,101 @@ const groupProgress: ProgressItem[] = [
   { text: "Mengunggah bukti pengerjaan layout halaman kontak.", author: "Nadia S.", time: "dikirim kemarin", avatarClass: "bg-[linear-gradient(135deg,#57c186,#2f536f)]" },
 ];
 
+const projectBriefAttachments = [
+  { name: "Brief_LandingPage_UMKM.pdf", size: "1.2 MB" },
+  { name: "Referensi_Desain.zip", size: "4.5 MB" },
+];
+
+function ProjectBriefSheet({ trigger }: { trigger: React.ReactNode }) {
+  return (
+    <BottomSheet>
+      <BottomSheetTrigger asChild>{trigger}</BottomSheetTrigger>
+      <BottomSheetContent className="pb-7">
+        <BottomSheetHeader>
+          <BottomSheetTitle className="text-[18px] font-semibold leading-[28px]">Project Brief</BottomSheetTitle>
+          <BottomSheetDescription>Informasi lengkap tentang proyek ini.</BottomSheetDescription>
+        </BottomSheetHeader>
+
+        <div className="mt-5 space-y-5">
+          {/* Header */}
+          <div className="rounded-[14px] bg-ktr-primary-bg-form px-4 py-3">
+            <h3 className="text-[16px] font-semibold leading-[24px] text-ktr-text-primary">Landing Page UMKM</h3>
+            <p className="mt-0.5 text-[13px] leading-5 text-ktr-text-secondary">XI - Desain Web</p>
+          </div>
+
+          {/* Deadline & Status */}
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-[10px] border border-ktr-primary bg-ktr-success-bg px-2.5 py-1 text-[12px] font-medium leading-[18px] text-ktr-primary">
+              <Icon icon={Calendar03Icon} />
+              25 Juni 2026
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-[10px] border border-ktr-info bg-ktr-info-bg px-2.5 py-1 text-[12px] font-medium leading-[18px] text-ktr-info">
+              <Icon icon={statusIcon()} />
+              Belum Dimulai
+            </span>
+          </div>
+
+          {/* Deskripsi */}
+          <div>
+            <p className="mb-1.5 text-[13px] font-medium leading-5 text-ktr-text-primary">Deskripsi</p>
+            <p className="text-[14px] leading-[22px] text-ktr-text-secondary">
+              Buat landing page sederhana untuk UMKM lokal yang menampilkan profil usaha, katalog produk, dan informasi kontak. Gunakan HTML, CSS, dan JavaScript dasar.
+            </p>
+          </div>
+
+          {/* File Lampiran */}
+          <div>
+            <p className="mb-2 text-[13px] font-medium leading-5 text-ktr-text-primary">File Lampiran</p>
+            <div className="space-y-2">
+              {projectBriefAttachments.map((file) => (
+                <div key={file.name} className="flex items-center justify-between gap-3 rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3 py-2.5">
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <Icon icon={FileCheckIcon} className="shrink-0 text-ktr-primary" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-[13px] font-medium leading-5 text-ktr-text-primary">{file.name}</span>
+                      <span className="block text-[11px] leading-4 text-ktr-text-tertiary">{file.size}</span>
+                    </span>
+                  </span>
+                  <button type="button" className="flex size-8 shrink-0 items-center justify-center rounded-[8px] text-ktr-primary transition-colors hover:bg-ktr-primary-soft" onClick={() => toast.info("File diunduh", { description: file.name })}>
+                    <Icon icon={Download04Icon} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </BottomSheetContent>
+    </BottomSheet>
+  );
+}
+
 function ProjectHeaderBlock() {
   return (
     <section className="mb-10">
       <div className="mb-8 flex items-center justify-between">
         <AppBackButton href="/student/projects" className="px-0" />
-        <Link href="/student/projects/detail" className="inline-flex h-11 shrink-0 items-center gap-2 rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3 text-[14px] font-medium leading-[22px] text-ktr-primary">
-          <Image src="/icons/project-brief.svg" alt="" width={24} height={24} aria-hidden="true" className="size-6 shrink-0" />
-          Project Brief
-        </Link>
+        <ProjectBriefSheet
+          trigger={
+            <button type="button" className="inline-flex h-11 shrink-0 items-center gap-2 rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3 text-[14px] font-medium leading-[22px] text-ktr-primary">
+              <Image src="/icons/project-brief.svg" alt="" width={24} height={24} aria-hidden="true" className="size-6 shrink-0" />
+              Project Brief
+            </button>
+          }
+        />
       </div>
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
         <h1 className="min-w-0 text-[20px] font-semibold leading-[28px] text-ktr-text-primary">Landing Page UMKM</h1>
-        <p className="shrink-0 pt-0.5 text-right text-[14px] font-semibold leading-[22px] text-ktr-text-primary">XI - Desain Web</p>
+        <p className="shrink-0 pt-0.5 text-right text-[14px] leading-[22px] text-ktr-text-secondary">XI - Desain Web</p>
       </div>
-      <div className="mt-4 flex flex-wrap gap-5 text-[14px] font-medium leading-[22px]">
-        <span className="flex items-center gap-1.5 text-ktr-primary"><Icon icon={Calendar03Icon} className="size-5" />25 Juni 2026</span>
-        <span className="flex items-center gap-1.5 text-ktr-info"><Icon icon={statusIcon()} className="size-5" />Belum Dimulai</span>
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-[13px] leading-5">
+        <span className="flex items-center gap-1.5 text-ktr-primary">
+          <Icon icon={Calendar03Icon} />
+          25 Juni 2026
+        </span>
+        <span className="flex items-center gap-1.5 text-ktr-info">
+          <Icon icon={statusIcon()} />
+          Belum Dimulai
+        </span>
       </div>
     </section>
   );
@@ -1112,9 +1203,9 @@ const sessionParticipants = [
 ];
 
 const sessionProgress = [
-  { author: "Bima A.", title: "Desain hero section", meta: "1 lampiran ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ 09.24", initials: "BA", avatarClass: "bg-[linear-gradient(135deg,#233046,#5b8fb9)]" },
-  { author: "Raka M.", title: "Draft konten produk", meta: "1 link ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ 09.36", initials: "RM", avatarClass: "bg-[linear-gradient(135deg,#f5a623,#5b8fb9)]" },
-  { author: "Nadia S.", title: "Layout halaman kontak", meta: "1 lampiran ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ 09.45", initials: "NS", avatarClass: "bg-[linear-gradient(135deg,#57c186,#2f536f)]" },
+  { author: "Bima A.", title: "Desain hero section", meta: "1 lampiran • 09.24", initials: "BA", avatarClass: "bg-[linear-gradient(135deg,#233046,#5b8fb9)]" },
+  { author: "Raka M.", title: "Draft konten produk", meta: "1 link • 09.36", initials: "RM", avatarClass: "bg-[linear-gradient(135deg,#f5a623,#5b8fb9)]" },
+  { author: "Nadia S.", title: "Layout halaman kontak", meta: "1 lampiran • 09.45", initials: "NS", avatarClass: "bg-[linear-gradient(135deg,#57c186,#2f536f)]" },
 ];
 
 function SessionParticipantBadge() {
@@ -1227,7 +1318,7 @@ function SessionProgressRow({ item }: { item: (typeof sessionProgress)[number] }
         <MemberAvatar member={item} size="size-8" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[14px] font-normal leading-[22px] text-ktr-text-primary">{item.title}</p>
-          <p className="text-[12px] leading-[18px] text-ktr-text-secondary">{item.author} ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ {item.meta}</p>
+          <p className="text-[12px] leading-[18px] text-ktr-text-secondary">{item.author} • {item.meta}</p>
         </div>
       </div>
       <div className="h-[0.6px] w-full bg-ktr-border-light" aria-hidden="true" />
@@ -1311,6 +1402,444 @@ function EndDiscussionSheet({ trigger }: { trigger: React.ReactNode }) {
         </BottomSheetFooter>
       </BottomSheetContent>
     </BottomSheet>
+  );
+}
+
+// ─── Chat Types & Data ────────────────────────────────────────────────────
+
+type ChatMessage = {
+  id: string;
+  author: string;
+  initials: string;
+  avatarClass: string;
+  content: string;
+  time: string;
+  isSelf?: boolean;
+  isUnreadDivider?: boolean;
+};
+
+const initialChatMessages: ChatMessage[] = [
+  {
+    id: "m1",
+    author: "Alya P.",
+    initials: "AP",
+    avatarClass: "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]",
+    content: "Kita mulai dari konsep hero section dulu ya. Nanti setiap anggota bisa kirim progress yang sudah dikerjakan.",
+    time: "11.21",
+  },
+  {
+    id: "m2",
+    author: "Alya P.",
+    initials: "AP",
+    avatarClass: "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]",
+    content: "Kita mulai dari konsep hero section dulu ya. Nanti setiap anggota bisa kirim progress yang sudah dikerjakan.",
+    time: "11.21",
+  },
+  {
+    id: "m3",
+    author: "Alya P.",
+    initials: "AP",
+    avatarClass: "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]",
+    content: "Kita mulai dari konsep hero section dulu ya. Nanti setiap anggota bisa kirim progress yang sudah dikerjakan.",
+    time: "11.21",
+    isSelf: true,
+  },
+  { id: "div1", author: "", initials: "", avatarClass: "", content: "1 pesan belum dibaca", time: "", isUnreadDivider: true },
+  {
+    id: "m4",
+    author: "Alya P.",
+    initials: "AP",
+    avatarClass: "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]",
+    content: "Kita mulai dari konsep hero section dulu ya. Nanti setiap anggota bisa kirim progress yang sudah dikerjakan.",
+    time: "11.21",
+  },
+];
+
+const callParticipantsList = [
+  { initials: "AP", name: "Alya P.", avatarClass: "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]", speaking: true },
+  { initials: "BA", name: "Bima A.", avatarClass: "bg-[linear-gradient(135deg,#233046,#5b8fb9_48%,#f5a623)]", speaking: false },
+  { initials: "RM", name: "Raka M.", avatarClass: "bg-[linear-gradient(135deg,#f7d9c4,#f5a623_42%,#5b8fb9)]", speaking: false },
+  { initials: "NS", name: "Nadia S.", avatarClass: "bg-[linear-gradient(135deg,#d8ff00,#57c186_48%,#2f536f)]", speaking: false },
+];
+
+function formatCallTime(s: number) {
+  return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+}
+
+// ─── Call UI (Zoom-style) ─────────────────────────────────────────────────
+
+function CallOverlay({ elapsed, onHangUp }: { elapsed: number; onHangUp: () => void }) {
+  const [muted, setMuted] = React.useState(false);
+  const [cameraOn, setCameraOn] = React.useState(false);
+  const [speakerOn, setSpeakerOn] = React.useState(true);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 mx-auto flex w-full flex-col bg-[#1a2026]"
+      style={{ maxWidth: "430px", left: "50%", transform: "translateX(-50%)" }}
+    >
+      {/* Header */}
+      <div className="flex shrink-0 items-start justify-between px-5 pt-14 pb-6">
+        <div>
+          <p className="text-[12px] leading-4 text-white/50">Panggilan Kelompok</p>
+          <p className="mt-1 text-[17px] font-semibold leading-[26px] text-white">Pembahasan Konsep Landing Page</p>
+        </div>
+        <p className="shrink-0 pt-1 text-[14px] font-medium tabular-nums text-white/60">{formatCallTime(elapsed)}</p>
+      </div>
+
+      {/* Participant grid */}
+      <div className="flex-1 grid grid-cols-2 gap-3 px-4">
+        {callParticipantsList.map((p) => (
+          <div key={p.initials} className="flex flex-col items-center justify-center gap-3 rounded-[20px] bg-[#252d34] py-8">
+            <MemberAvatar member={p} size="size-16" />
+            <div className="text-center">
+              <p className="text-[14px] font-medium leading-[22px] text-white">{p.name}</p>
+              {p.speaking ? (
+                <p className="mt-0.5 text-[11px] leading-4 text-ktr-primary">Berbicara...</p>
+              ) : muted && p.initials === "AP" ? (
+                <p className="mt-0.5 text-[11px] leading-4 text-white/40">Dibisukan</p>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Controls */}
+      <div className="shrink-0 flex items-end justify-around px-6 pb-16 pt-8">
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMuted((m) => !m)}
+            className={cn(
+              "flex size-[60px] items-center justify-center rounded-full transition-colors",
+              muted ? "bg-white/25" : "bg-white/[0.12]"
+            )}
+          >
+            <HugeiconsIcon icon={muted ? MicOff01Icon : Mic01Icon} size={22} strokeWidth={1.8} color="white" aria-hidden="true" />
+          </button>
+          <span className="text-[11px] leading-4 text-white/50">{muted ? "Bisu" : "Mikrofon"}</span>
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCameraOn((c) => !c)}
+            className={cn(
+              "flex size-[60px] items-center justify-center rounded-full transition-colors",
+              cameraOn ? "bg-white/25" : "bg-white/[0.12]"
+            )}
+          >
+            <HugeiconsIcon icon={cameraOn ? Camera01Icon : VideoOffIcon} size={22} strokeWidth={1.8} color="white" aria-hidden="true" />
+          </button>
+          <span className="text-[11px] leading-4 text-white/50">Kamera</span>
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSpeakerOn((s) => !s)}
+            className={cn(
+              "flex size-[60px] items-center justify-center rounded-full transition-colors",
+              speakerOn ? "bg-white/25" : "bg-white/[0.12]"
+            )}
+          >
+            <HugeiconsIcon icon={VolumeHighIcon} size={22} strokeWidth={1.8} color="white" aria-hidden="true" />
+          </button>
+          <span className="text-[11px] leading-4 text-white/50">Speaker</span>
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={onHangUp}
+            className="flex size-[60px] items-center justify-center rounded-full bg-red-500 transition-colors active:bg-red-600"
+          >
+            <HugeiconsIcon icon={CallEnd01Icon} size={22} strokeWidth={1.8} color="white" aria-hidden="true" />
+          </button>
+          <span className="text-[11px] leading-4 text-white/50">Tutup</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ActiveCallBadge({ elapsed, onJoin }: { elapsed: number; onJoin: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onJoin}
+      className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-ktr-border-light bg-white px-3 py-2 shadow-none"
+    >
+      {/* Pulse dot */}
+      <span className="relative flex size-2.5 shrink-0 items-center justify-center">
+        <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#F5A623] opacity-60" />
+        <span className="relative inline-flex size-1.5 rounded-full bg-[#F5A623]" />
+      </span>
+      {/* Stacked avatars */}
+      <div className="flex shrink-0 items-center pl-1">
+        {callParticipantsList.slice(0, 4).map((p) => (
+          <span
+            key={p.initials}
+            className={cn("-ml-2 flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-white text-[9px] font-semibold text-white", p.avatarClass)}
+          >
+            {p.initials}
+          </span>
+        ))}
+      </div>
+      <span className="text-[13px] font-semibold tabular-nums text-ktr-text-primary">{formatCallTime(elapsed)}</span>
+    </button>
+  );
+}
+
+export function DiscussionChatPage({
+  hasActiveCall = true,
+}: {
+  hasActiveCall?: boolean;
+} = {}) {
+  const [callActive, setCallActive] = React.useState(hasActiveCall);
+  const [inCall, setInCall] = React.useState(false);
+  const [callElapsed, setCallElapsed] = React.useState(0);
+  const [inputValue, setInputValue] = React.useState("");
+  const [messages, setMessages] = React.useState<ChatMessage[]>(initialChatMessages);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!callActive) return;
+    const timer = window.setInterval(() => setCallElapsed((s) => s + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [callActive]);
+
+  React.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  function sendMessage() {
+    const trimmed = inputValue.trim();
+    if (!trimmed) return;
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        author: "Alya P.",
+        initials: "AP",
+        avatarClass: "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]",
+        content: trimmed,
+        time,
+        isSelf: true,
+      },
+    ]);
+    setInputValue("");
+  }
+
+  if (inCall) {
+    return (
+      <CallOverlay
+        elapsed={callElapsed}
+        onHangUp={() => {
+          setInCall(false);
+          setCallActive(false);
+        }}
+      />
+    );
+  }
+
+  return (
+    <main className="flex h-dvh w-full flex-col overflow-hidden bg-background text-ktr-text-primary">
+      <div className="mx-auto flex h-full w-full max-w-[430px] flex-col">
+        {/* Header Block */}
+        <div className="shrink-0 border-b border-ktr-border-light bg-background pb-3">
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-4 pt-[14px] pb-1">
+            <AppBackButton href="/student/group" className="px-0" />
+            <div className="flex items-center gap-0.5">
+              <BottomSheet>
+                <BottomSheetTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex size-11 items-center justify-center rounded-[10px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
+                    aria-label="Project Brief"
+                  >
+                    <Icon icon={Task01Icon} />
+                  </button>
+                </BottomSheetTrigger>
+                <BottomSheetContent>
+                  <BottomSheetHeader className="mb-4">
+                    <BottomSheetTitle>Brief Proyek</BottomSheetTitle>
+                    <BottomSheetDescription>Detail dan persyaratan tugas yang harus diselesaikan.</BottomSheetDescription>
+                  </BottomSheetHeader>
+                  
+                  <div className="space-y-4 pb-2">
+                    <div className="flex gap-4">
+                      <div className="flex-1 rounded-[10px] border border-ktr-border-light bg-ktr-surface-soft/50 p-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-ktr-text-tertiary">Deadline</p>
+                        <p className="mt-1 text-[13px] font-medium text-ktr-text-primary">12 Agustus 2026</p>
+                      </div>
+                      <div className="flex-1 rounded-[10px] border border-ktr-border-light bg-ktr-surface-soft/50 p-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-ktr-text-tertiary">Status</p>
+                        <p className="mt-1 text-[13px] font-medium text-[#F5A623]">Sedang Berjalan</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="mb-1.5 text-[13px] font-semibold text-ktr-text-primary">Deskripsi Tugas</h4>
+                      <p className="text-[13px] leading-relaxed text-ktr-text-secondary">
+                        Buatlah landing page yang responsif dengan fokus utama pada hero section dan tombol call-to-action yang menarik. Pastikan mengikuti panduan warna dari brand.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="mb-1.5 text-[13px] font-semibold text-ktr-text-primary">Lampiran</h4>
+                      <button type="button" className="flex w-full items-center gap-3 rounded-[10px] border border-ktr-border-light p-2.5 text-left transition-colors hover:bg-ktr-surface-soft">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-[8px] bg-red-100 text-red-500">
+                          <HugeiconsIcon icon={File02Icon} size={18} strokeWidth={1.8} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[13px] font-medium text-ktr-text-primary">Panduan_Brand_Visual.pdf</p>
+                          <p className="text-[11px] text-ktr-text-tertiary">PDF • 2.4 MB</p>
+                        </div>
+                        <HugeiconsIcon icon={Download04Icon} size={18} className="text-ktr-text-tertiary" />
+                      </button>
+                    </div>
+                  </div>
+                </BottomSheetContent>
+              </BottomSheet>
+              <button
+                type="button"
+                aria-label="Mulai Panggilan"
+                className="flex size-11 items-center justify-center rounded-[10px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
+                onClick={() => {
+                  setCallActive(true);
+                  setInCall(true);
+                }}
+              >
+                <Icon icon={Call02Icon} />
+              </button>
+              <AppDropdown
+                label="Aksi diskusi"
+                placement="bottom end"
+                triggerClassName="flex size-11 items-center justify-center rounded-[10px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
+                trigger={<Icon icon={MoreVerticalIcon} />}
+                items={[
+                  {
+                    key: "progress",
+                    label: "Upload Progress",
+                    onSelect: () =>
+                      toast.info("Siapkan progressmu", { description: "Lampiran dan catatan akan tercatat di sesi ini." }),
+                  },
+                  {
+                    key: "end",
+                    label: "Akhiri Diskusi",
+                    tone: "danger" as const,
+                    onSelect: () => toast.info("Akhiri diskusi", { description: "Fitur ini akan aktif dalam versi berikutnya." }),
+                  },
+                ]}
+              />
+            </div>
+          </div>
+
+          {/* Title + active call badge */}
+          <div className="px-4">
+            <h1 className="text-[18px] font-semibold leading-[28px] text-ktr-text-primary">Pembahasan Konsep Landing Page</h1>
+            {callActive && (
+              <div className="mt-2">
+                <ActiveCallBadge elapsed={callElapsed} onJoin={() => setInCall(true)} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-4">
+          <div className="space-y-4 pb-4 pt-1">
+            {messages.map((msg) => {
+              if (msg.isUnreadDivider) {
+                return (
+                  <div key={msg.id} className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-ktr-border-light" />
+                    <span className="shrink-0 text-[12px] leading-[18px] text-ktr-text-tertiary">{msg.content}</span>
+                    <div className="h-px flex-1 bg-ktr-border-light" />
+                  </div>
+                );
+              }
+
+              if (msg.isSelf) {
+                return (
+                  <div key={msg.id} className="flex items-start justify-end gap-2.5">
+                    <div className="flex flex-col items-end min-w-0">
+                      <span className="mb-1 block text-[14px] text-ktr-text-secondary">{msg.author}</span>
+                      <div className="inline-block max-w-[100%] rounded-l-[10px] rounded-br-[10px] rounded-tr-[0px] bg-ktr-primary px-3.5 py-2">
+                        <p className="text-[14px] font-medium leading-[22px] text-white">{msg.content}</p>
+                        <p className="mt-1 text-right text-[12px] text-[#eeeeee]">{msg.time}</p>
+                      </div>
+                    </div>
+                    <MemberAvatar member={msg} size="size-8 mt-[22px] shrink-0" />
+                  </div>
+                );
+              }
+
+              return (
+                <div key={msg.id} className="flex items-start gap-2.5">
+                  <MemberAvatar member={msg} size="size-8 mt-[22px] shrink-0" />
+                  <div className="flex flex-col items-start min-w-0">
+                    <span className="mb-1 block text-[14px] text-ktr-text-secondary">{msg.author}</span>
+                    <div className="inline-block max-w-[100%] rounded-r-[10px] rounded-bl-[10px] rounded-tl-[0px] bg-[#f9f9f9] px-3.5 py-2">
+                      <p className="text-[14px] font-medium leading-[22px] text-ktr-text-primary">{msg.content}</p>
+                      <p className="mt-1 text-right text-[12px] text-[#879196]">{msg.time}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+
+        {/* Input bar */}
+        <div className="shrink-0 bg-background px-3.5 py-3">
+          <div className="flex flex-col gap-3 rounded-[14px] bg-white p-2.5 shadow-[0_-2px_12px_rgba(0,0,0,0.05)] border border-black/5">
+            <input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
+              className="w-full bg-transparent px-1 text-[14px] leading-[22px] text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary"
+              placeholder="Tuliskan pesan..."
+            />
+            <div className="flex items-center justify-between pl-1 pr-0.5">
+              <div className="flex items-center gap-4 text-ktr-text-primary">
+                <button type="button" aria-label="Kamera" className="text-[#879196] hover:text-ktr-primary transition-colors" onClick={() => toast.info("Kamera", { description: "Fitur kamera akan segera hadir" })}>
+                  <HugeiconsIcon icon={CameraAdd01Icon} size={22} strokeWidth={1.8} color="currentColor" />
+                </button>
+                <button type="button" aria-label="Galeri" className="text-[#879196] hover:text-ktr-primary transition-colors" onClick={() => toast.info("Galeri", { description: "Pilih foto dari galeri (segera hadir)" })}>
+                  <HugeiconsIcon icon={Album02Icon} size={22} strokeWidth={1.8} color="currentColor" />
+                </button>
+                <button type="button" aria-label="Dokumen" className="text-[#879196] hover:text-ktr-primary transition-colors" onClick={() => toast.info("Dokumen", { description: "Fitur unggah dokumen (segera hadir)" })}>
+                  <HugeiconsIcon icon={File02Icon} size={22} strokeWidth={1.8} color="currentColor" />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={sendMessage}
+                className={cn(
+                  "flex size-10 shrink-0 items-center justify-center rounded-[6px] transition-colors",
+                  inputValue.trim()
+                    ? "bg-ktr-primary text-white"
+                    : "bg-[#f9f9f9] text-[#879196]"
+                )}
+              >
+                <HugeiconsIcon icon={SentIcon} size={20} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
 
