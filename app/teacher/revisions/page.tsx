@@ -15,7 +15,7 @@ import SearchInput from "@/components/teacher/SearchInput";
 
 const mockRevisions = [
   { id: 1, project: "Aplikasi Kas Sederhana", group: "Kelompok 4", note: "Tambahkan fitur export PDF dan perbaiki UI form transaksi.", deadline: "2026-07-25", status: "Sedang Diperbaiki" },
-  { id: 2, project: "Landing Page UMKM", group: "Kelompok 2", note: "Logo belum responsif di mobile view.", deadline: "2026-07-16", status: "Submit Ulang" },
+  { id: 2, project: "Landing Page UMKM", group: "Kelompok 2", note: "Logo belum responsif di mobile view.", deadline: "2026-07-16", status: "Dikirim Ulang" },
   { id: 3, project: "Website Profil Sekolah", group: "Kelompok 3", note: "Lengkapi data dummy di halaman galeri.", deadline: "2026-07-10", status: "Selesai" },
 ];
 
@@ -52,7 +52,7 @@ export default function RevisionsPage() {
             options={[
               { value: "all-status", label: "Semua Status" },
               { value: "Sedang Diperbaiki", label: "Sedang Diperbaiki" },
-              { value: "Submit Ulang", label: "Submit Ulang" },
+              { value: "Dikirim Ulang", label: "Dikirim Ulang" },
               { value: "Selesai", label: "Selesai" },
             ]}
           />
@@ -90,13 +90,13 @@ export default function RevisionsPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {rev.status === "Submit Ulang" ? (
+                      {rev.status === "Dikirim Ulang" ? (
                         <Link 
-                          href={`/teacher/review/${rev.id}`}
+                          href={`/teacher/tinjauan/${rev.id}`}
                           className="inline-flex h-9 items-center justify-center rounded-md bg-warning/10 px-4 text-xs font-medium text-warning hover:bg-warning/20 transition-colors"
                         >
                           <HugeiconsIcon icon={RefreshIcon} size={14} className="mr-1.5" />
-                          Review Ulang
+                          Tinjau Ulang
                         </Link>
                       ) : (
                         <Link 

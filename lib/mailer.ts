@@ -40,7 +40,7 @@ export async function sendPasswordResetEmail({ to, actionUrl }: { to: string; ac
   await transporter.sendMail({
     from: `"${smtpConfig.fromName}" <${smtpConfig.fromEmail}>`,
     to,
-    subject: `Reset password ${appConfig.name}`,
+    subject: `Reset kata sandi ${appConfig.name}`,
     html: renderPasswordResetEmail({ actionUrl }),
   });
 }

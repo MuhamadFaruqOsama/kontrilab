@@ -21,9 +21,9 @@ export function EmailConfirmationView({ email, onBack }: { email: string; onBack
         </div>
 
         <div className="space-y-4">
-          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Cek Emailmu, Ya!</h1>
+          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Cek Emailmu</h1>
           <p className="mx-auto max-w-[260px] text-[14px] leading-ktr-relaxed text-ktr-text-secondary">
-            Kami sudah mengirim link verifikasi ke email yang kamu daftarkan.
+            Kami sudah mengirim link verifikasi. Buka emailmu untuk mengaktifkan akun.
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export function EmailConfirmationView({ email, onBack }: { email: string; onBack
           href="/login"
           className="mt-7 flex h-12 w-[202px] items-center justify-center rounded-[10px] bg-ktr-primary px-4 text-base font-medium text-white hover:bg-ktr-primary-hover"
           aria-label={`Masuk setelah konfirmasi email untuk ${email}`}
-          onClick={() => toast.info("Lanjut masuk", { description: "Gunakan akun yang sudah kamu verifikasi." })}
+          onClick={() => toast.info("Lanjut masuk", { description: "Masuk setelah akun selesai diverifikasi." })}
         >
           Masuk Sekarang
         </Link>

@@ -35,7 +35,7 @@ const mockProjects = [
 const mockIndicators = [
   { name: "Kolaborasi", status: "Tercatat Baik", desc: "Sering membantu anggota lain dan membagi tugas." },
   { name: "Komunikasi Diskusi", status: "Tercatat Baik", desc: "Aktif membalas dan memberikan ide di ruang diskusi." },
-  { name: "Tanggung Jawab Progress", status: "Tercatat Baik", desc: "Mengunggah progress tepat waktu." },
+  { name: "Tanggung Jawab Progres", status: "Tercatat Baik", desc: "Mengunggah progres tepat waktu." },
   { name: "Kualitas Bukti Kerja", status: "Cukup Terlihat", desc: "Bukti kerja relevan dengan tugas." },
   { name: "Pemecahan Masalah", status: "Cukup Terlihat", desc: "Memberikan beberapa solusi teknis saat terjadi error." },
 ];
@@ -86,7 +86,7 @@ export default function StudentDetail() {
             <StatCard title="Status Kontribusi" value="Tercatat Baik" icon={Activity01Icon} />
             <StatCard title="Sesi Diskusi" value={3} icon={MessageMultiple01Icon} />
             <StatCard title="Pesan Diskusi" value={15} icon={Message02Icon} />
-            <StatCard title="Progress Dikirim" value={2} icon={Folder01Icon} />
+            <StatCard title="Progres Dikirim" value={2} icon={Folder01Icon} />
             <StatCard title="Lampiran Kerja" value={1} icon={Attachment01Icon} />
             <StatCard title="Peer Assessment" value="Selesai" icon={CheckmarkSquare02Icon} />
           </div>
@@ -121,7 +121,7 @@ export default function StudentDetail() {
                 <div className="relative pl-6">
                   <div className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary ring-4 ring-background"></div>
                   <p className="text-xs text-default-500 mb-1">28 Jun 2026, 14:30</p>
-                  <p className="text-sm font-medium text-foreground">Mengunggah Progress: "Desain UI Selesai"</p>
+                  <p className="text-sm font-medium text-foreground">Mengunggah Progres: "Desain UI Selesai"</p>
                   <p className="text-xs text-default-500 mt-1">Siswa melampirkan file figma dan screenshot halaman utama.</p>
                 </div>
                 <div className="relative pl-6">
@@ -147,7 +147,7 @@ export default function StudentDetail() {
               </div>
               <div className="space-y-3">
                 <p className="text-sm text-primary-900/80 leading-relaxed">
-                  Bima menunjukkan kepemimpinan yang baik di kelompoknya. Secara konsisten mengunggah bukti progress dan aktif merespon rekan di ruang diskusi. Indikator kolaborasi sangat menonjol.
+                  Bima menunjukkan kepemimpinan yang baik di kelompoknya. Secara konsisten mengunggah bukti progres dan aktif merespon rekan di ruang diskusi. Indikator kolaborasi sangat menonjol.
                 </p>
                 <div className="pt-3 border-t border-primary-200/50">
                   <p className="text-[11px] italic text-primary-700/70 leading-tight">

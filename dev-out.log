@@ -1,10 +1,4 @@
-> Ready on http://localhost:3000
-Socket connected: PamPyHBFfOsjyTvIAAAB
-Socket connected: y4OcuD6jKFQtVGY6AAAD
-Socket disconnected: PamPyHBFfOsjyTvIAAAB
-Socket connected: e2DTCn8GQ1s6yV2gAAAF
-Socket disconnected: e2DTCn8GQ1s6yV2gAAAF
-Socket connected: DS7ibx_K9sY8dDg0AAAH
-Socket disconnected: DS7ibx_K9sY8dDg0AAAH
-Socket connected: NarkKsnp7xmJ1S6pAAAJ
-Socket disconnected: y4OcuD6jKFQtVGY6AAAD
+
+> kontrilab@0.1.0 dev
+> node server.js
+

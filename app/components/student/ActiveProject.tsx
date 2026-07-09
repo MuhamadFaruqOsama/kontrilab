@@ -24,7 +24,7 @@ const discussions = [
 
 export default function ActiveProject() {
   return (
-    <section className="mb-6">
+    <section className="">
       <div className="mb-3 flex items-center gap-2">
         <h2 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Diskusi Berjalan Saat Ini</h2>
         <span className="flex size-[18px] items-center justify-center rounded-[4px] bg-ktr-primary text-[12px] font-semibold leading-none text-ktr-text-white">

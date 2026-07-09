@@ -43,10 +43,10 @@ export function renderVerificationEmail({ username, actionUrl }: { username: str
 
 export function renderPasswordResetEmail({ actionUrl }: { actionUrl: string }) {
   return baseEmailTemplate({
-    title: "Reset password akunmu",
-    intro: "Kami menerima permintaan untuk mengatur ulang password akunmu. Klik tombol di bawah untuk melanjutkan.",
-    buttonLabel: "Reset Password",
+    title: "Reset kata sandi akunmu",
+    intro: "Kami menerima permintaan untuk mengatur ulang kata sandi akunmu. Klik tombol di bawah untuk melanjutkan.",
+    buttonLabel: "Reset Kata Sandi",
     actionUrl,
-    note: "Jika kamu tidak meminta reset password, abaikan email ini dan password lama tetap berlaku.",
+    note: "Jika kamu tidak meminta reset kata sandi, abaikan email ini dan kata sandi lama tetap berlaku.",
   });
 }

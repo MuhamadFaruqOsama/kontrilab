@@ -10,6 +10,7 @@ import { AppFormField } from "@/components/ui/app-form-field";
 import { publicAppConfig } from "@/lib/env";
 import { registerSchema } from "@/lib/validation/auth";
 import { getFirstZodError } from "@/lib/validation/zod";
+import { getFriendlyAuthError } from "@/lib/copy/auth";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -34,7 +35,7 @@ export default function RegisterPage() {
     if (!parsed.success) {
       const message = getFirstZodError(parsed.error);
       setError(message);
-      toast.warning("Data daftar belum lengkap", { description: message });
+      toast.warning("Data pendaftaran belum lengkap", { description: message });
       return;
     }
 
@@ -52,13 +53,13 @@ export default function RegisterPage() {
     setIsSubmitting(false);
 
     if (!response.ok) {
-      const message = result.message || "Gagal membuat akun. Coba lagi sebentar lagi.";
+      const message = getFriendlyAuthError(result.message);
       setError(message);
-      toast.danger("Akun belum bisa dibuat", { description: message });
+      toast.danger("Akun belum berhasil dibuat", { description: message });
       return;
     }
 
-    toast.success("Akun berhasil dibuat", { description: "Link verifikasi sudah dikirim ke emailmu." });
+    toast.success("Pendaftaran berhasil", { description: "Link verifikasi sudah dikirim ke emailmu." });
     setPendingEmail(payload.email);
   }
 
@@ -70,22 +71,22 @@ export default function RegisterPage() {
     <div className="flex min-h-full flex-col">
       <div>
         <div className="space-y-3">
-          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Mulai Perjalanan Proyekmu</h1>
+          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Mulai Kelola Kontribusimu</h1>
           <p className="max-w-[360px] text-[14px] leading-ktr-relaxed text-ktr-text-secondary">
-            Buat akun untuk bergabung ke proyek, berdiskusi, dan mencatat kontribusimu bersama kelompok di {publicAppConfig.name}.
+            Buat akun untuk bergabung ke proyek, berdiskusi, dan mencatat progres bersama kelompok di {publicAppConfig.name}.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-9 space-y-5">
-          <AppFormField label="Nama Pengguna" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Masukkan nama pengguna" />
+          <AppFormField label="Nama" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Masukkan nama lengkapmu" />
           <AppFormField label="Email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Masukkan email aktifmu" />
-          <AppFormField label="Password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Buat password" />
-          <AppFormField label="Konfirmasi Password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Ulangi password" />
+          <AppFormField label="Kata Sandi" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Buat kata sandi" />
+          <AppFormField label="Konfirmasi Kata Sandi" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Ulangi kata sandi" />
 
           {error ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-project-need-attention">{error}</p> : null}
 
           <Button type="submit" size="lg" disabled={isSubmitting} className="h-12 w-full rounded-[10px] bg-ktr-primary text-white hover:bg-ktr-primary-hover">
-            {isSubmitting ? "Memproses..." : "Daftar Sekarang"}
+            {isSubmitting ? "Memproses..." : "Buat Akun"}
           </Button>
         </form>
       </div>

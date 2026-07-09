@@ -23,7 +23,7 @@ const mockSubmission = {
   project: "Website Profil Sekolah",
   group: "Kelompok 1",
   submitDate: "2026-07-18",
-  status: "Menunggu Review",
+  status: "Menunggu Tinjauan",
   finalResult: {
     type: "file",
     name: "school-profile-final.zip",
@@ -34,7 +34,7 @@ const mockSubmission = {
   contributionStatus: "Tercatat Baik"
 };
 
-export default function ReviewDetailPage() {
+export default function TinjauanDetailPage() {
   const params = useParams();
 
   return (
@@ -42,18 +42,18 @@ export default function ReviewDetailPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Link href="/teacher/review" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-default-200 bg-transparent text-sm font-medium hover:bg-default-100 shrink-0">
+          <Link href="/teacher/tinjauan" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-default-200 bg-transparent text-sm font-medium hover:bg-default-100 shrink-0">
             <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
           </Link>
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold font-heading text-foreground tracking-tight">
-                Review: {mockSubmission.group}
+                Tinjauan: {mockSubmission.group}
               </h1>
               <StatusBadge status={mockSubmission.status} />
             </div>
             <p className="text-default-500 mt-1 text-sm">
-              {mockSubmission.project} • Submit: {mockSubmission.submitDate}
+              {mockSubmission.project} • Dikirim: {mockSubmission.submitDate}
             </p>
           </div>
         </div>
@@ -120,7 +120,7 @@ export default function ReviewDetailPage() {
                 <div className="p-4 rounded-xl border border-default-200 bg-default-50/50 text-center">
                   <HugeiconsIcon icon={Attachment01Icon} size={20} className="mx-auto mb-2 text-default-500" />
                   <p className="text-2xl font-bold font-heading">4</p>
-                  <p className="text-xs text-default-500 mt-1">Progress Upload</p>
+                  <p className="text-xs text-default-500 mt-1">Unggahan Progres</p>
                 </div>
                 <div className="p-4 rounded-xl border border-default-200 bg-default-50/50 text-center">
                   <HugeiconsIcon icon={CheckmarkSquare02Icon} size={20} className="mx-auto mb-2 text-default-500" />
@@ -156,11 +156,11 @@ export default function ReviewDetailPage() {
             <Card.Content className="p-5">
               <div className="flex items-center gap-2 border-b border-primary-200/50 pb-3 mb-4">
                 <HugeiconsIcon icon={BrainIcon} size={20} className="text-primary" />
-                <h3 className="font-semibold text-primary-900">AI Review Insight</h3>
+                <h3 className="font-semibold text-primary-900">AI Tinjauan Insight</h3>
               </div>
               <div className="space-y-3">
                 <p className="text-sm text-primary-900/80 leading-relaxed">
-                  Berdasarkan riwayat progress dan lampiran, hasil akhir proyek ini sesuai dengan brief yang diberikan. Kontribusi kelompok tercatat sangat baik dan peer assessment sudah diisi oleh semua anggota.
+                  Berdasarkan riwayat progres dan lampiran, hasil akhir proyek ini sesuai dengan brief yang diberikan. Kontribusi kelompok tercatat sangat baik dan peer assessment sudah diisi oleh semua anggota.
                 </p>
                 <div className="pt-3 border-t border-primary-200/50">
                   <p className="text-[11px] italic text-primary-700/70 leading-tight">

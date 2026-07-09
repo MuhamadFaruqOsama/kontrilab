@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
-  --font-mono: var(--font-inter), "Inter", system-ui, sans-serif;
-  --font-heading: var(--font-open-sans), "Open Sans", system-ui, sans-serif;
+  --font-sans: var(--font-nunito-sans), "Nunito Sans", system-ui, sans-serif;
+  --font-mono: var(--font-nunito-sans), "Nunito Sans", system-ui, sans-serif;
+  --font-heading: var(--font-nunito-sans), "Nunito Sans", system-ui, sans-serif;
   --leading-ktr-tight: var(--ktr-leading-tight);
   --leading-ktr-snug: var(--ktr-leading-snug);
   --leading-ktr-normal: var(--ktr-leading-normal);
@@ -111,7 +111,7 @@
 
 :root {
   --ktr-mobile-frame-width: 430px;
-  --ktr-font-family-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --ktr-font-family-sans: var(--font-nunito-sans), "Nunito Sans", system-ui, sans-serif;
   --ktr-font-size-xs: 0.75rem;
   --ktr-font-size-sm: 0.875rem;
   --ktr-font-size-base: 1rem;
@@ -383,6 +383,20 @@
   }
 }
 
+@keyframes call-speaking-ring-breathe {
+  0%, 100% {
+    opacity: calc(0.28 + (var(--voice-level, 0.45) * 0.18));
+    transform: scale(calc(1 + (var(--voice-level, 0.45) * 0.006)));
+  }
+  42% {
+    opacity: calc(0.54 + (var(--voice-level, 0.45) * 0.34));
+    transform: scale(calc(1.006 + (var(--voice-level, 0.45) * 0.028)));
+  }
+  70% {
+    opacity: calc(0.36 + (var(--voice-level, 0.45) * 0.22));
+    transform: scale(calc(1.002 + (var(--voice-level, 0.45) * 0.016)));
+  }
+}
 @keyframes active-discussion-dot-pulse {
   0%, 100% {
     box-shadow: 0 0 0 0 rgb(88 199 131 / 0%);
@@ -477,6 +491,16 @@
   }
 }
 
+@keyframes call-summary-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 @keyframes ktr-toast-in {
   from {
     opacity: 0;
@@ -534,6 +558,7 @@
     position: relative;
     isolation: isolate;
     overflow: visible;
+    border-radius: 20px;
     border-color: rgb(88 199 131 / 42%);
   }
 
@@ -548,6 +573,7 @@
     inset: 0;
     z-index: 0;
     border-radius: inherit;
+    corner-shape: var(--ktr-corner-shape);
     pointer-events: none;
     border: 1px solid rgb(88 199 131 / 26%);
     background: rgb(88 199 131 / 5%);
@@ -558,15 +584,43 @@
   .active-discussion-status-dot {
     animation: active-discussion-dot-pulse 2.3s ease-in-out infinite;
   }
+  .call-participant-speaking {
+    --voice-level: 0.45;
+    position: relative;
+    isolation: isolate;
+    border: 1px solid rgb(88 199 131 / calc(42% + (var(--voice-level) * 28%)));
+    box-shadow:
+      0 0 0 calc(1px + (var(--voice-level) * 2px)) rgb(88 199 131 / 16%),
+      0 14px calc(26px + (var(--voice-level) * 18px)) rgb(88 199 131 / 12%),
+      inset 0 0 0 1px rgb(255 255 255 / 5%);
+    transform: translateZ(0) scale(calc(1 + (var(--voice-level) * 0.01)));
+  }
+
+  .call-participant-speaking::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    z-index: -1;
+    border-radius: 24px;
+    pointer-events: none;
+    border: 1px solid rgb(88 199 131 / calc(18% + (var(--voice-level) * 22%)));
+    box-shadow: 0 0 calc(14px + (var(--voice-level) * 22px)) rgb(88 199 131 / 22%);
+    animation: call-speaking-ring-breathe 780ms ease-in-out infinite;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .active-discussion-card::after,
-    .active-discussion-status-dot {
+    .active-discussion-status-dot,
+    .call-participant-speaking::after {
       animation: none;
     }
   }
 
 
+  .call-summary-enter {
+    animation: call-summary-enter 260ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
   .ktr-project-list-motion {
     animation: ktr-project-list-change 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
     will-change: opacity, transform;
@@ -633,64 +687,7 @@
   }
 
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  
-  .ktr-project-list-motion {
-    animation: ktr-project-list-change 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    will-change: opacity, transform;
-  }
-  .ktr-dropdown-popover {
-    transform-origin: var(--trigger-anchor-point, bottom right);
-    will-change: opacity, transform;
-  }
-
-  .ktr-dropdown-popover[data-entering],
-  .ktr-dropdown-popover[data-entering="true"] {
-    animation: ktr-dropdown-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .ktr-dropdown-popover[data-exiting],
-  .ktr-dropdown-popover[data-exiting="true"] {
-    animation: ktr-dropdown-out 150ms ease-in;
-  }
-
-  .ktr-modal-backdrop[data-entering],
-  .ktr-modal-backdrop[data-entering="true"] {
-    animation: ktr-modal-backdrop-in 200ms ease-out;
-  }
-
-  .ktr-modal-backdrop[data-exiting],
-  .ktr-modal-backdrop[data-exiting="true"] {
-    animation: ktr-modal-backdrop-out 150ms ease-in;
-  }
-
-  .ktr-modal-container {
-    will-change: opacity, transform;
-  }
-
-  .ktr-modal-container[data-entering],
-  .ktr-modal-container[data-entering="true"] {
-    animation: ktr-modal-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .ktr-modal-container[data-exiting],
-  .ktr-modal-container[data-exiting="true"] {
-    animation: ktr-modal-out 160ms ease-in;
-  }
-
-  .ktr-toast[data-frontmost="true"] {
-    animation: ktr-toast-in 190ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    will-change: opacity, transform;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ktr-dropdown-popover,
-    .ktr-modal-backdrop,
-    .ktr-modal-container,
-    .ktr-toast {
-      animation: none !important;
-    }
-  }
-  .ktr-bottom-sheet-overlay {
+    .ktr-bottom-sheet-overlay {
       background: rgb(43 48 51 / 18%);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -733,3 +730,4 @@
     animation: ktr-bottom-sheet-out 160ms ease-in;
   }
 }
+

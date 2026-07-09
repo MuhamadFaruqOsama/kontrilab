@@ -10,11 +10,11 @@ import FilterSelect from "@/components/teacher/FilterSelect";
 import SearchInput from "@/components/teacher/SearchInput";
 
 const mockStudents = [
-  { id: 1, name: "Bima Aditya Pratama", class: "XII RPL 1", project: "Website Profil Sekolah", group: "Kelompok 1", progress: "2 upload", peerAss: "Selesai", status: "Tercatat Baik" },
-  { id: 2, name: "Raka Maulana Yusuf", class: "XII RPL 1", project: "Website Profil Sekolah", group: "Kelompok 1", progress: "1 upload", peerAss: "Selesai", status: "Tercatat Baik" },
-  { id: 3, name: "Nadia Safira Lestari", class: "XII RPL 1", project: "Website Profil Sekolah", group: "Kelompok 1", progress: "0 upload", peerAss: "Selesai", status: "Cukup Terlihat" },
-  { id: 4, name: "Alya Putri Ramadhani", class: "XI Desain Web", project: "Landing Page UMKM", group: "Kelompok 2", progress: "3 upload", peerAss: "Belum", status: "Perlu Ditinjau" },
-  { id: 5, name: "Dimas Fajar Nugroho", class: "XI Desain Web", project: "Landing Page UMKM", group: "Kelompok 2", progress: "0 upload", peerAss: "Selesai", status: "Belum Cukup Data" },
+  { id: 1, name: "Bima Aditya Pratama", class: "XII RPL 1", project: "Website Profil Sekolah", group: "Kelompok 1", progress: "2 unggahan", peerAss: "Selesai", status: "Tercatat Baik" },
+  { id: 2, name: "Raka Maulana Yusuf", class: "XII RPL 1", project: "Website Profil Sekolah", group: "Kelompok 1", progress: "1 unggahan", peerAss: "Selesai", status: "Tercatat Baik" },
+  { id: 3, name: "Nadia Safira Lestari", class: "XII RPL 1", project: "Website Profil Sekolah", group: "Kelompok 1", progress: "0 unggahan", peerAss: "Selesai", status: "Cukup Terlihat" },
+  { id: 4, name: "Alya Putri Ramadhani", class: "XI Desain Web", project: "Landing Page UMKM", group: "Kelompok 2", progress: "3 unggahan", peerAss: "Belum", status: "Perlu Ditinjau" },
+  { id: 5, name: "Dimas Fajar Nugroho", class: "XI Desain Web", project: "Landing Page UMKM", group: "Kelompok 2", progress: "0 unggahan", peerAss: "Selesai", status: "Belum Cukup Data" },
 ];
 
 export default function StudentsPage() {
@@ -81,7 +81,7 @@ export default function StudentsPage() {
                 <th className="px-6 py-4 font-medium">Kelas</th>
                 <th className="px-6 py-4 font-medium">Proyek Aktif</th>
                 <th className="px-6 py-4 font-medium">Kelompok</th>
-                <th className="px-6 py-4 text-center font-medium">Progress</th>
+                <th className="px-6 py-4 text-center font-medium">Progres</th>
                 <th className="px-6 py-4 text-center font-medium">Peer Ass.</th>
                 <th className="px-6 py-4 text-center font-medium">Status Kontribusi</th>
                 <th className="px-6 py-4 text-right font-medium">Aksi</th>

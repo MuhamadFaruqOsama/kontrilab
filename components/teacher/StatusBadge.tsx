@@ -27,11 +27,11 @@ export default function StatusBadge({ status, className }: StatusBadgeProps) {
     color = "default";
   } else if (status === "Sedang Berjalan" || status === "Berjalan") {
     color = "primary";
-  } else if (status === "Menunggu Review") {
+  } else if (status === "Menunggu Tinjauan") {
     color = "warning";
   } else if (status === "Revisi" || status === "Sedang Diperbaiki") {
     color = "warning";
-  } else if (status === "Submit Ulang") {
+  } else if (status === "Dikirim Ulang") {
     color = "danger";
   } else if (status === "Selesai") {
     color = "success";

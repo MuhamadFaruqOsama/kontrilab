@@ -9,7 +9,8 @@ import {
   FilterIcon, 
   ArrowRight01Icon,
   Folder01Icon,
-  MoreVerticalCircle01Icon
+  MoreVerticalCircle01Icon,
+  PlusSignIcon
 } from "@hugeicons/core-free-icons";
 import FilterSelect from "@/components/teacher/FilterSelect";
 import SearchInput from "@/components/teacher/SearchInput";
@@ -17,7 +18,7 @@ import SearchInput from "@/components/teacher/SearchInput";
 const mockProjects = [
   { id: 1, name: "Website Profil Sekolah", class: "XII RPL 1", groups: 5, students: 20, status: "Sedang Berjalan", progress: 75, deadline: "2026-07-20" },
   { id: 2, name: "Landing Page UMKM", class: "XI Desain Web", groups: 4, students: 16, status: "Selesai", progress: 100, deadline: "2026-07-15" },
-  { id: 3, name: "Aplikasi Kas Sederhana", class: "XII RPL 2", groups: 6, students: 24, status: "Menunggu Review", progress: 95, deadline: "2026-07-18" },
+  { id: 3, name: "Aplikasi Kas Sederhana", class: "XII RPL 2", groups: 6, students: 24, status: "Menunggu Tinjauan", progress: 95, deadline: "2026-07-18" },
 ];
 
 export default function ProjectsPage() {
@@ -53,11 +54,15 @@ export default function ProjectsPage() {
             options={[
               { value: "all-status", label: "Semua Status" },
               { value: "Sedang Berjalan", label: "Sedang Berjalan" },
-              { value: "Menunggu Review", label: "Menunggu Review" },
+              { value: "Menunggu Tinjauan", label: "Menunggu Tinjauan" },
             ]}
           />
           <Button variant="outline" className="border-default-200 shadow-none px-3 min-w-10 h-10">
             <HugeiconsIcon icon={FilterIcon} size={18} />
+          </Button>
+          <Button variant="primary" className="h-10 gap-2 px-4 font-medium text-white shadow-none">
+            <HugeiconsIcon icon={PlusSignIcon} size={16} />
+            Tambah Project
           </Button>
         </div>
       </div>
@@ -85,7 +90,7 @@ export default function ProjectsPage() {
 
               <div className="mt-5 space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-default-500">Progress</span>
+                  <span className="text-default-500">Progres</span>
                   <span className="font-medium text-foreground">{project.progress}%</span>
                 </div>
                 <div className="w-full bg-default-200 rounded-full h-2 overflow-hidden">

@@ -26,7 +26,7 @@ type QuickAction =
 const quickActions: QuickAction[] = [
   {
     title: "Gabung Proyek",
-    description: "Masukkan kode join dari guru.",
+    description: "Masukkan kode bergabung dari guru.",
     icon: "/icons/quick-actions/gabung-proyek.svg",
     sheet: true,
   },
@@ -67,7 +67,7 @@ function ActionCard({ action }: { action: QuickAction }) {
 
 export default function QuickActions() {
   return (
-    <section className="mb-0">
+    <section className="">
       <h2 className="mb-3 text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Aksi Cepat</h2>
       <div className="space-y-2">
         {quickActions.map((action) => {
@@ -90,7 +90,7 @@ export default function QuickActions() {
                 <BottomSheetHeader>
                   <BottomSheetTitle>Gabung Proyek</BottomSheetTitle>
                   <BottomSheetDescription>
-                    Masukkan kode join dari guru untuk bergabung ke proyek kelompokmu.
+                    Masukkan kode bergabung dari guru untuk bergabung ke proyek kelompokmu.
                   </BottomSheetDescription>
                 </BottomSheetHeader>
                 <label className="mt-5 block text-sm font-medium leading-ktr-snug text-ktr-text-primary" htmlFor="join-code">
@@ -107,7 +107,7 @@ export default function QuickActions() {
                       Batal
                     </Button>
                   </BottomSheetClose>
-                  <Button asChild className="w-full" onClick={() => toast.success("Kode diterima", { description: "Pilih atau buat kelompok untuk melanjutkan.", indicator: <HugeiconsIcon icon={CheckmarkCircle02Icon} size={18} strokeWidth={1.8} color="currentColor" aria-hidden="true" /> })}>
+                  <Button asChild className="w-full" onClick={() => toast.success("Kode diterima", { description: "Pilih atau buat kelompok untuk mulai bekerja bersama.", indicator: <HugeiconsIcon icon={CheckmarkCircle02Icon} size={18} strokeWidth={1.8} color="currentColor" aria-hidden="true" /> })}>
                     <Link href="/student/projects/group/start">Gabung Proyek</Link>
                   </Button>
                 </BottomSheetFooter>

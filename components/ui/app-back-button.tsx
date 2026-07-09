@@ -22,6 +22,11 @@ export function AppBackButton({ href, label = "Kembali", className, onClick }: A
       return;
     }
 
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+
     if (href) {
       router.push(href);
       return;

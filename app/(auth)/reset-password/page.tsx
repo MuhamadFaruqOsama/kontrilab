@@ -10,6 +10,7 @@ import { publicAppConfig } from "@/lib/env";
 import { supabase } from "@/lib/supabase/client";
 import { resetPasswordSchema } from "@/lib/validation/auth";
 import { getFirstZodError } from "@/lib/validation/zod";
+import { getFriendlyAuthError } from "@/lib/copy/auth";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -28,7 +29,7 @@ export default function ResetPasswordPage() {
     if (!parsed.success) {
       const message = getFirstZodError(parsed.error);
       setError(message);
-      toast.warning("Password belum valid", { description: message });
+      toast.warning("Kata sandi belum valid", { description: message });
       return;
     }
 
@@ -37,35 +38,35 @@ export default function ResetPasswordPage() {
     setIsSubmitting(false);
 
     if (updateError) {
-      const message = updateError.message || "Password belum bisa diperbarui. Buka ulang link reset dari email.";
+      const message = getFriendlyAuthError(updateError.message || "Kata sandi belum bisa diperbarui. Buka ulang link reset dari email.");
       setError(message);
-      toast.danger("Password belum diperbarui", { description: message });
+      toast.danger("Kata sandi belum diperbarui", { description: message });
       return;
     }
 
-    setMessage("Password berhasil diperbarui. Silakan masuk dengan password baru.");
-    toast.success("Password berhasil diperbarui", { description: "Silakan masuk dengan password barumu." });
+    setMessage("Kata sandi berhasil diperbarui. Silakan masuk dengan kata sandi baru.");
+    toast.success("Kata sandi diperbarui", { description: "Silakan masuk dengan kata sandi barumu." });
   }
 
   return (
     <div className="flex min-h-full flex-col">
       <div>
         <div className="space-y-3">
-          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Buat Password Baru</h1>
+          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Buat Kata Sandi Baru</h1>
           <p className="max-w-[360px] text-[14px] leading-ktr-relaxed text-ktr-text-secondary">
-            Masukkan password baru untuk akun {publicAppConfig.name}. Link reset hanya berlaku dari email yang kamu terima.
+            Masukkan kata sandi baru untuk akun {publicAppConfig.name}. Link reset hanya berlaku dari email yang kamu terima.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-9 space-y-5">
-          <AppFormField label="Password Baru" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Buat password baru" />
-          <AppFormField label="Konfirmasi Password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Ulangi password baru" />
+          <AppFormField label="Kata Sandi Baru" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Buat kata sandi baru" />
+          <AppFormField label="Konfirmasi Kata Sandi" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Ulangi kata sandi baru" />
 
           {error ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-project-need-attention">{error}</p> : null}
           {message ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-primary-dark">{message}</p> : null}
 
           <Button type="submit" size="lg" disabled={isSubmitting} className="h-12 w-full rounded-[10px] bg-ktr-primary text-white hover:bg-ktr-primary-hover">
-            {isSubmitting ? "Memproses..." : "Simpan Password"}
+            {isSubmitting ? "Memproses..." : "Simpan Kata Sandi"}
           </Button>
         </form>
       </div>

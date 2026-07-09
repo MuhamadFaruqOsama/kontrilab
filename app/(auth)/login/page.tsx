@@ -9,6 +9,7 @@ import { toast } from "@/components/ui/toast";
 import { AppFormField } from "@/components/ui/app-form-field";
 import { publicAppConfig } from "@/lib/env";
 import { supabase } from "@/lib/supabase/client";
+import { getFriendlyAuthError } from "@/lib/copy/auth";
 import { loginSchema } from "@/lib/validation/auth";
 import { getFirstZodError } from "@/lib/validation/zod";
 
@@ -37,23 +38,25 @@ export default function LoginPage() {
     setIsSubmitting(false);
 
     if (signInError) {
-      const message = signInError.message || "Gagal masuk. Periksa kembali email dan password.";
+      const message = getFriendlyAuthError(signInError.message);
       setError(message);
-      toast.danger("Login belum berhasil", { description: message });
+      toast.danger("Belum bisa masuk", { description: message });
       return;
     }
 
-    toast.success("Berhasil masuk", { description: "Selamat datang kembali di KontriLab." });
-    router.push("/student");
+    document.cookie = "kontrilab-auth=1; path=/; max-age=604800; samesite=lax";
+    toast.success("Masuk berhasil", { description: "Selamat datang kembali. Yuk lanjutkan progres kelompokmu." });
+    const redirectTo = new URLSearchParams(window.location.search).get("redirectTo");
+    router.push(redirectTo || "/student");
   }
 
   return (
     <div className="flex min-h-full flex-col">
       <div>
         <div className="space-y-3">
-          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Selamat Datang Kembali!</h1>
+          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Selamat Datang Kembali</h1>
           <p className="max-w-[360px] text-[14px] leading-ktr-relaxed text-ktr-text-secondary">
-            Masuk untuk melanjutkan proyek, diskusi, dan progress kelompokmu di {publicAppConfig.name}.
+            Masuk untuk melanjutkan proyek, diskusi, dan catatan progres kelompokmu di {publicAppConfig.name}.
           </p>
         </div>
 
@@ -70,16 +73,16 @@ export default function LoginPage() {
 
           <div className="space-y-3">
             <AppFormField
-              label="Password"
+              label="Kata Sandi"
               type="password"
               autoComplete="current-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="Masukkan password"
+              placeholder="Masukkan kata sandi"
             />
             <div className="text-right">
               <Link href="/forgot-password" className="text-[14px] font-medium text-ktr-primary hover:text-ktr-primary-hover">
-                Lupa password?
+                Lupa kata sandi?
               </Link>
             </div>
           </div>

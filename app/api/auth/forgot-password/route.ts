@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     }
 
     const { email } = parsed.data;
-    const redirectTo = `${getAppUrl(new URL(request.url).origin)}/reset-password`;
+    const redirectTo = `${getAppUrl(new URL(request.url).origin)}/reset-kata sandi`;
 
     const { data, error } = await supabaseAdmin.auth.admin.generateLink({
       type: "recovery",
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Instruksi reset password belum bisa dikirim.";
+    const message = error instanceof Error ? error.message : "Instruksi reset kata sandi belum bisa dikirim.";
     return NextResponse.json({ message }, { status: 500 });
   }
 }

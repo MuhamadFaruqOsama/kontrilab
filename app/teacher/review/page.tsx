@@ -13,16 +13,16 @@ import FilterSelect from "@/components/teacher/FilterSelect";
 import SearchInput from "@/components/teacher/SearchInput";
 
 const mockSubmissions = [
-  { id: 1, project: "Website Profil Sekolah", group: "Kelompok 1", submitDate: "2026-07-18", finalResult: "school-profile.zip", status: "Menunggu Review" },
-  { id: 2, project: "Landing Page UMKM", group: "Kelompok 2", submitDate: "2026-07-14", finalResult: "https://umkm-landing.vercel.app", status: "Menunggu Review" },
+  { id: 1, project: "Website Profil Sekolah", group: "Kelompok 1", submitDate: "2026-07-18", finalResult: "school-profile.zip", status: "Menunggu Tinjauan" },
+  { id: 2, project: "Landing Page UMKM", group: "Kelompok 2", submitDate: "2026-07-14", finalResult: "https://umkm-landing.vercel.app", status: "Menunggu Tinjauan" },
   { id: 3, project: "Aplikasi Kas Sederhana", group: "Kelompok 4", submitDate: "2026-07-12", finalResult: "app-kas-v2.apk", status: "Revisi" },
 ];
 
-export default function ReviewPage() {
+export default function TinjauanPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-heading text-foreground tracking-tight">Review Proyek</h1>
+        <h1 className="text-3xl font-bold font-heading text-foreground tracking-tight">Tinjau Proyek</h1>
       </div>
 
       {/* Filters (No border frame) */}
@@ -49,8 +49,8 @@ export default function ReviewPage() {
             ariaLabel="Filter Status"
             defaultValue="all-status"
             options={[
-              { value: "all-status", label: "Semua Status Review" },
-              { value: "Menunggu Review", label: "Menunggu Review" },
+              { value: "all-status", label: "Semua Status Tinjauan" },
+              { value: "Menunggu Tinjauan", label: "Menunggu Tinjauan" },
               { value: "Revisi", label: "Revisi" },
               { value: "Selesai", label: "Selesai" },
             ]}
@@ -69,9 +69,9 @@ export default function ReviewPage() {
               <tr>
                 <th className="px-6 py-4 font-medium">Proyek</th>
                 <th className="px-6 py-4 font-medium">Kelompok</th>
-                <th className="px-6 py-4 font-medium">Tanggal Submit</th>
+                <th className="px-6 py-4 font-medium">Tanggal Kirim</th>
                 <th className="px-6 py-4 font-medium">Hasil Akhir</th>
-                <th className="px-6 py-4 text-center font-medium">Status Review</th>
+                <th className="px-6 py-4 text-center font-medium">Status Tinjauan</th>
                 <th className="px-6 py-4 text-right font-medium">Aksi</th>
               </tr>
             </thead>
@@ -92,9 +92,9 @@ export default function ReviewPage() {
                     <StatusBadge status={sub.status} />
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <Link href={`/teacher/review/${sub.id}`} className="inline-flex h-9 items-center justify-center rounded-md bg-primary/10 px-4 text-xs font-medium text-primary hover:bg-primary/20 transition-colors">
+                    <Link href={`/teacher/tinjauan/${sub.id}`} className="inline-flex h-9 items-center justify-center rounded-md bg-primary/10 px-4 text-xs font-medium text-primary hover:bg-primary/20 transition-colors">
                       <HugeiconsIcon icon={EyeIcon} size={14} className="mr-2" />
-                      Review Proyek
+                      Tinjau Proyek
                     </Link>
                   </td>
                 </tr>

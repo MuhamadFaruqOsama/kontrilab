@@ -1,6 +1,6 @@
-﻿export default function StudentHeader() {
+export default function StudentHeader() {
   return (
-    <header className="mb-9 flex items-start justify-between gap-5">
+    <header className="flex items-start justify-between gap-5">
       <h1 className="max-w-[282px] text-[24px] font-semibold leading-[1.18] text-ktr-text-primary">
         <span className="block font-normal text-ktr-text-secondary">Selamat datang kembali,</span>
         Akagami!

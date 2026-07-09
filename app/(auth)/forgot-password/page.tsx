@@ -9,6 +9,7 @@ import { AppFormField } from "@/components/ui/app-form-field";
 import { publicAppConfig } from "@/lib/env";
 import { forgotPasswordSchema } from "@/lib/validation/auth";
 import { getFirstZodError } from "@/lib/validation/zod";
+import { getFriendlyAuthError } from "@/lib/copy/auth";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -42,23 +43,23 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(false);
 
     if (!response.ok) {
-      const message = result.message || "Reset password belum bisa dikirim.";
+      const message = getFriendlyAuthError(result.message || "Link reset belum bisa dikirim.");
       setError(message);
       toast.danger("Link reset belum terkirim", { description: message });
       return;
     }
 
-    setMessage("Instruksi reset password sudah dikirim ke emailmu.");
-    toast.success("Link reset terkirim", { description: "Cek emailmu untuk membuat password baru." });
+    setMessage("Instruksi reset kata sandi sudah dikirim ke emailmu.");
+    toast.success("Link reset terkirim", { description: "Cek emailmu untuk membuat kata sandi baru." });
   }
 
   return (
     <div className="flex min-h-full flex-col">
       <div>
         <div className="space-y-3">
-          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Reset Password</h1>
+          <h1 className="text-[24px] font-semibold leading-ktr-tight text-ktr-text-primary">Reset Kata Sandi</h1>
           <p className="max-w-[360px] text-[14px] leading-ktr-relaxed text-ktr-text-secondary">
-            Masukkan email akun {publicAppConfig.name}, lalu kami kirim link untuk membuat password baru.
+            Masukkan email akun {publicAppConfig.name}. Kami akan mengirim link untuk membuat kata sandi baru.
           </p>
         </div>
 
@@ -75,7 +76,7 @@ export default function ForgotPasswordPage() {
       </div>
 
       <div className="mt-auto pt-10 text-center text-[14px] text-ktr-text-primary">
-        Ingat password?{" "}
+        Ingat kata sandi?{" "}
         <Link href="/login" className="font-medium text-ktr-primary hover:text-ktr-primary-hover">
           Masuk
         </Link>
