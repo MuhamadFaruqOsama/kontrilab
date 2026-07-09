@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { forwardRef, InputHTMLAttributes, ReactNode, useId, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { EyeIcon, EyeOffIcon } from "@hugeicons/core-free-icons";
+import { EyeClosedIcon, ViewIcon } from "@hugeicons/core-free-icons";
 
 import { cn } from "@/lib/utils";
 
@@ -49,7 +49,7 @@ export const AppFormField = forwardRef<HTMLInputElement, AppFormFieldProps>(func
             onClick={() => setShowPassword((value) => !value)}
             className="ml-2 inline-flex size-8 items-center justify-center rounded-full text-ktr-text-primary hover:bg-ktr-surface-soft"
           >
-            <HugeiconsIcon icon={showPassword ? EyeOffIcon : EyeIcon} size={18} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
+            <HugeiconsIcon icon={showPassword ? ViewIcon : EyeClosedIcon} size={18} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
           </button>
         ) : (
           rightSlot

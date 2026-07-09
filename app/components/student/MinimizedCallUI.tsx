@@ -1,40 +1,39 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { HeadphonesIcon } from "@hugeicons/core-free-icons";
+import { Mic01Icon, MicOff01Icon } from "@hugeicons/core-free-icons";
+import { useState } from "react";
 
 export const STUDENT_HAS_ACTIVE_DISCUSSION = true;
 
 export default function MinimizedCallUI() {
-  // In a real app, you would determine if there's an active call from global state.
-  // For this mockup, we'll assume there's an active discussion.
+  const [muted, setMuted] = useState(false);
   const isActive = STUDENT_HAS_ACTIVE_DISCUSSION;
 
   if (!isActive) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-[80px] z-30 mx-auto w-full max-w-[430px] px-4 pb-2">
-      <Link
-        href="/student/discussions/current"
-        className="flex items-center justify-between rounded-[16px] bg-ktr-primary px-4 py-3 text-ktr-text-white shadow-lg transition-transform hover:scale-[1.02]"
-      >
-        <div className="flex items-center gap-3">
-          <div className="relative flex size-10 items-center justify-center rounded-full bg-white/20">
-            <div className="absolute inset-0 animate-pulse rounded-full bg-white/30" />
-            <HugeiconsIcon icon={HeadphonesIcon} size={20} className="relative text-white" />
+      <div className="flex items-center gap-3 rounded-[16px] bg-ktr-primary px-4 py-3 text-ktr-text-white shadow-[0_18px_38px_rgba(87,193,134,0.34)] transition-transform hover:scale-[1.01]">
+        <Link href="/student/discussions/current#call" className="flex min-w-0 flex-1 items-center gap-3">
+          <Image src="/icons/panggilan-card.svg" alt="" width={38} height={38} aria-hidden="true" className="size-[38px] shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[14px] font-semibold leading-[20px] text-white">Landing Page UMKM</p>
+            <p className="truncate text-[12px] font-medium leading-4 text-white/75">Kelompok 1</p>
           </div>
-          <div className="flex flex-col">
-            <span className="text-[12px] font-medium text-white/80">Diskusi Berjalan</span>
-            <span className="line-clamp-1 text-[14px] font-semibold leading-tight text-white">
-              Landing Page UMKM
-            </span>
-          </div>
-        </div>
-        <div className="flex size-8 items-center justify-center rounded-full bg-white/20">
-          <span className="text-xs font-bold text-white">1:04</span>
-        </div>
-      </Link>
+          <span className="shrink-0 text-[16px] font-semibold leading-6 tabular-nums text-white">1:04</span>
+        </Link>
+        <button
+          type="button"
+          aria-label={muted ? "Nyalakan mikrofon" : "Matikan mikrofon"}
+          className="flex size-9 shrink-0 items-center justify-center rounded-full text-white transition-colors hover:bg-white/12 active:bg-white/18"
+          onClick={() => setMuted((value) => !value)}
+        >
+          <HugeiconsIcon icon={muted ? MicOff01Icon : Mic01Icon} size={21} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
+        </button>
+      </div>
     </div>
   );
 }

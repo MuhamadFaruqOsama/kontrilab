@@ -596,22 +596,9 @@
     transform: translateZ(0) scale(calc(1 + (var(--voice-level) * 0.01)));
   }
 
-  .call-participant-speaking::after {
-    content: "";
-    position: absolute;
-    inset: -4px;
-    z-index: -1;
-    border-radius: 24px;
-    pointer-events: none;
-    border: 1px solid rgb(88 199 131 / calc(18% + (var(--voice-level) * 22%)));
-    box-shadow: 0 0 calc(14px + (var(--voice-level) * 22px)) rgb(88 199 131 / 22%);
-    animation: call-speaking-ring-breathe 780ms ease-in-out infinite;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .active-discussion-card::after,
-    .active-discussion-status-dot,
-    .call-participant-speaking::after {
+    .active-discussion-status-dot {
       animation: none;
     }
   }

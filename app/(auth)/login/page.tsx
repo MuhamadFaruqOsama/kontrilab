@@ -29,7 +29,6 @@ export default function LoginPage() {
     if (!parsed.success) {
       const message = getFirstZodError(parsed.error);
       setError(message);
-      toast.warning("Data login belum lengkap", { description: message });
       return;
     }
 
@@ -40,7 +39,6 @@ export default function LoginPage() {
     if (signInError) {
       const message = getFriendlyAuthError(signInError.message);
       setError(message);
-      toast.danger("Belum bisa masuk", { description: message });
       return;
     }
 

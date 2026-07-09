@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import { EmailConfirmationView } from "../email-confirmation/EmailConfirmationView";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/toast";
 import { AppFormField } from "@/components/ui/app-form-field";
 import { publicAppConfig } from "@/lib/env";
 import { registerSchema } from "@/lib/validation/auth";
@@ -35,7 +34,6 @@ export default function RegisterPage() {
     if (!parsed.success) {
       const message = getFirstZodError(parsed.error);
       setError(message);
-      toast.warning("Data pendaftaran belum lengkap", { description: message });
       return;
     }
 
@@ -55,11 +53,8 @@ export default function RegisterPage() {
     if (!response.ok) {
       const message = getFriendlyAuthError(result.message);
       setError(message);
-      toast.danger("Akun belum berhasil dibuat", { description: message });
       return;
     }
-
-    toast.success("Pendaftaran berhasil", { description: "Link verifikasi sudah dikirim ke emailmu." });
     setPendingEmail(payload.email);
   }
 

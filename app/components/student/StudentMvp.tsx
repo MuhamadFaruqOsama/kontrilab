@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
@@ -12,6 +13,7 @@ import {
   BubbleChatIcon,
   Briefcase01Icon,
   Calendar03Icon,
+  CheckmarkCircle02Icon,
   Call02Icon,
   CallEnd01Icon,
   Clock01Icon,
@@ -919,6 +921,7 @@ type DiscussionItem = {
   messages: string;
   meta: string;
   primary?: boolean;
+  requiresPeerAssessment?: boolean;
 };
 
 type ProgresItem = {
@@ -937,7 +940,7 @@ const groupMembers: GroupMember[] = [
 
 const groupDiscussions: DiscussionItem[] = [
   { title: "Pembahasan Konsep Landing Page", status: "Sedang Berjalan", statusClass: "text-ktr-project-in-progress", messages: "4 pesan", meta: "Terakhir 10 menit lalu", primary: true },
-  { title: "Tinjauan Konten Produk", status: "Menunggu Umpan Balik Anggota", statusClass: "text-ktr-project-revision", messages: "2 pesan", meta: "3 dari 4 anggota sudah memberi umpan balik" },
+  { title: "Tinjauan Konten Produk", status: "Menunggu Umpan Balik Anggota", statusClass: "text-ktr-project-revision", messages: "2 pesan", meta: "3 dari 4 anggota sudah memberi umpan balik", requiresPeerAssessment: true },
   { title: "Revisi Tampilan Kontak", status: "Selesai", statusClass: "text-ktr-project-finished", messages: "2 pesan", meta: "Semua anggota sudah memberi umpan balik" },
 ];
 
@@ -1102,41 +1105,36 @@ function MemberRow({ member, showDivider = true }: { member: GroupMember; showDi
   );
 }
 
-function DiscussionCard({ item, showDivider = true }: { item: DiscussionItem; showDivider?: boolean }) {
-  if (item.primary) {
-    return (
-      <>
-        <Link href="/student/discussions/current" className={cn("block rounded-[14px] p-2 transition-colors hover:bg-ktr-primary-soft/50", item.status === "Sedang Berjalan" ? "active-discussion-card" : "")}>
-          <div className="flex min-w-0 items-start justify-between gap-3">
-            <h3 className="min-w-0 text-[14px] font-normal leading-[22px] text-ktr-text-primary">{item.title}</h3>
-            <span className={cn("shrink-0 pt-0.5 text-[12px] font-medium leading-[18px]", item.statusClass)}>{item.status}</span>
-          </div>
-          <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] leading-[18px] text-ktr-text-tertiary">
-            <span className="flex items-center gap-1.5"><Icon icon={BubbleChatIcon} />{item.messages}</span>
-            <span className="text-ktr-text-disabled">&bull;</span>
-            <span>{item.meta}</span>
-          </div>
-        </Link>
-        {showDivider ? <div className="h-[0.6px] w-full bg-ktr-border-light" aria-hidden="true" /> : null}
-      </>
-    );
-  }
+function DiscussionCard({ item }: { item: DiscussionItem }) {
+  const href = item.primary ? "/student/discussions/current" : "/student/discussions/summary";
 
   return (
-    <>
-      <div>
-        <div className="flex min-w-0 items-start justify-between gap-3">
+    <Link
+      href={href}
+      className={cn(
+        "block rounded-[16px] border bg-ktr-surface-card p-3 transition-[border-color,background-color,transform] active:scale-[0.99]",
+        item.requiresPeerAssessment ? "border-ktr-project-revision/45 bg-ktr-project-revision-bg/20" : "border-ktr-border-light hover:border-ktr-primary/35 hover:bg-ktr-primary-soft/30",
+      )}
+    >
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-2">
+          {item.requiresPeerAssessment ? (
+            <span className="relative mt-2 flex size-2 shrink-0" aria-label="Umpan balik anggota wajib diisi">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-ktr-project-revision opacity-60" />
+              <span className="relative inline-flex size-2 rounded-full bg-ktr-project-revision" />
+            </span>
+          ) : null}
           <h3 className="min-w-0 text-[14px] font-normal leading-[22px] text-ktr-text-primary">{item.title}</h3>
-          <span className={cn("shrink-0 pt-0.5 text-right text-[12px] font-medium leading-[18px]", item.statusClass)}>{item.status}</span>
         </div>
-        <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] leading-[18px] text-ktr-text-tertiary">
-          <span className="flex items-center gap-1.5"><Icon icon={BubbleChatIcon} />{item.messages}</span>
-          <span className="text-ktr-text-disabled">&bull;</span>
-          <span>{item.meta}</span>
-        </div>
+        <span className={cn("shrink-0 pt-0.5 text-right text-[12px] font-medium leading-[18px]", item.statusClass)}>{item.status}</span>
       </div>
-      {showDivider ? <div className="h-[0.6px] w-full bg-ktr-border-light" aria-hidden="true" /> : null}
-    </>
+      <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] leading-[18px] text-ktr-text-tertiary">
+        <span className="flex items-center gap-1.5"><Icon icon={BubbleChatIcon} />{item.messages}</span>
+        <span className="text-ktr-text-disabled">&bull;</span>
+        <span>{item.meta}</span>
+      </div>
+      {item.requiresPeerAssessment ? <p className="mt-2 text-[12px] font-medium leading-[18px] text-ktr-project-revision">Wajib isi umpan balik anggota sebelum sesi dianggap selesai.</p> : null}
+    </Link>
   );
 }
 
@@ -1221,11 +1219,9 @@ export function GroupDetailPage({ role = "member" }: { role?: DiscussionRole } =
         </section>
 
         <SectionTitle>Diskusi Kelompok</SectionTitle>
-        <section className="rounded-[20px] border border-ktr-border-light bg-ktr-surface-card p-3">
-          <div className="space-y-3">
-            {groupDiscussions.map((item, index, list) => <DiscussionCard key={item.title} item={item} showDivider={index < list.length - 1} />)}
-          </div>
-        </section>
+        <div className="space-y-3">
+          {groupDiscussions.map((item) => <DiscussionCard key={item.title} item={item} />)}
+        </div>
       </div>
 
       {isLeader ? (
@@ -1652,7 +1648,7 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
           <button
             type="button"
             onClick={onBack}
-            className="flex size-10 shrink-0 items-center justify-center rounded-[12px] border border-white/10 bg-[#1a2026] text-white transition-colors hover:bg-white/10"
+            className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-[#1a2026] text-white transition-colors hover:bg-white/10"
             aria-label="Kembali ke diskusi"
           >
             <HugeiconsIcon icon={ArrowLeft02Icon} size={20} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
@@ -1746,44 +1742,60 @@ function ActiveCallBadge({ elapsed, onJoin }: { elapsed: number; onJoin: () => v
 
 
 function CallSummaryPage({ duration, onDone }: { duration: number; onDone: () => void }) {
-  const participantCount = callParticipantsList.length;
-  const minutes = Math.max(1, Math.ceil(duration / 60));
+  const participantCount = 6;
+  const [mounted, setMounted] = React.useState(false);
 
-  return (
-    <main className="flex h-dvh w-full flex-col bg-background text-ktr-text-primary">
-      <div className="mx-auto flex h-full w-full max-w-[430px] flex-col px-4 py-6">
-        <AppBackButton href="/student/group" className="mb-6 px-0" />
-        <div className="call-summary-enter flex flex-1 flex-col justify-center">
-          <div className="rounded-[20px] border border-ktr-border-light bg-ktr-surface-card p-5 text-center shadow-[0_18px_44px_rgba(43,48,51,0.08)]">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-[16px] bg-ktr-primary-soft text-ktr-primary">
-              <HugeiconsIcon icon={CallEnd01Icon} size={28} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
-            </div>
-            <h1 className="mt-4 text-[20px] font-semibold leading-[28px] text-ktr-text-primary">Panggilan Berakhir</h1>
-            <p className="mt-1 text-[14px] leading-[22px] text-ktr-text-secondary">Ringkasan singkat panggilan kelompok.</p>
-            <div className="mt-5 grid grid-cols-2 gap-3 text-left">
-              <div className="rounded-[14px] bg-ktr-primary-bg-form p-3">
-                <p className="text-[12px] font-medium leading-4 text-ktr-text-secondary">Durasi</p>
-                <p className="mt-1 text-[18px] font-semibold leading-[26px] text-ktr-text-primary">{formatCallTime(duration)}</p>
-              </div>
-              <div className="rounded-[14px] bg-ktr-primary-bg-form p-3">
-                <p className="text-[12px] font-medium leading-4 text-ktr-text-secondary">Peserta</p>
-                <p className="mt-1 text-[18px] font-semibold leading-[26px] text-ktr-text-primary">{participantCount} orang</p>
-              </div>
-              <div className="rounded-[14px] bg-ktr-surface-soft p-3">
-                <p className="text-[12px] font-medium leading-4 text-ktr-text-secondary">Estimasi</p>
-                <p className="mt-1 text-[18px] font-semibold leading-[26px] text-ktr-text-primary">{minutes} menit</p>
-              </div>
-              <div className="rounded-[14px] bg-ktr-surface-soft p-3">
-                <p className="text-[12px] font-medium leading-4 text-ktr-text-secondary">Host akhir</p>
-                <p className="mt-1 text-[18px] font-semibold leading-[26px] text-ktr-text-primary">Alya P.</p>
-              </div>
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const summaryContent = (
+    <main className="fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden rounded-none bg-[#1a2026] text-white">
+      <div className="call-summary-enter relative h-full w-full overflow-hidden rounded-none bg-[#1a2026] text-center">
+        <Image
+          src="/icons/ringkasan-panggilan.svg"
+          alt=""
+          width={250}
+          height={250}
+          aria-hidden="true"
+          className="absolute left-[90px] top-[102px] size-[250px] object-contain"
+        />
+
+        <section className="absolute left-[101px] top-[384px] flex w-[228px] flex-col items-center gap-6">
+          <div className="flex w-full flex-col items-center gap-3.5">
+            <p className="w-full text-center text-[36px] font-semibold leading-[40px] tabular-nums text-white">{formatCallTime(duration)}</p>
+            <div className="-mx-12 w-[324px] space-y-1 text-center">
+              <h1 className="text-[24px] font-semibold leading-8 text-white">Panggilan Berakhir</h1>
+              <p className="whitespace-nowrap text-[14px] font-normal leading-[22px] text-[#e8e8e8]">Lanjutkan pekerjaan Anda di proyek.</p>
             </div>
           </div>
-          <Button className="mt-4 h-11 w-full rounded-[12px]" onClick={onDone}>Kembali ke Diskusi</Button>
-        </div>
+
+          <div className="inline-flex h-9 w-[154px] items-center rounded-[10px] bg-[#252d34] px-2 py-1.5">
+            <div className="flex w-[72px] shrink-0 items-center pl-0">
+              {callParticipantsList.slice(0, 4).map((participant) => (
+                <MemberAvatar key={participant.initials} member={participant} size="-ml-2 first:ml-0 size-6 border border-[#252d34]" />
+              ))}
+            </div>
+            <span className="ml-1.5 shrink-0 text-left text-[14px] font-normal leading-[22px] text-white">{participantCount} peserta</span>
+          </div>
+        </section>
+
+        <button
+          type="button"
+          onClick={onDone}
+          className="absolute left-1/2 top-[588px] inline-flex h-[42px] -translate-x-1/2 items-center justify-center whitespace-nowrap rounded-[12px] bg-white px-6 py-2.5 text-[16px] font-semibold leading-[22px] text-ktr-primary transition-colors hover:bg-white/92"
+        >
+          Kembali ke Diskusi
+        </button>
       </div>
     </main>
   );
+
+  if (mounted && typeof document !== "undefined") {
+    return createPortal(summaryContent, document.body);
+  }
+
+  return summaryContent;
 }
 export function DiscussionChatPage({
   hasActiveCall = true,
@@ -1798,6 +1810,7 @@ export function DiscussionChatPage({
   const [inputValue, setInputValue] = React.useState("");
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialChatMessages);
   const [endConfirmOpen, setEndConfirmOpen] = React.useState(false);
+  const [startCallConfirmOpen, setStartCallConfirmOpen] = React.useState(false);
   const router = useRouter();
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -1808,8 +1821,19 @@ export function DiscussionChatPage({
   }, [callActive]);
 
   React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash === "#call" && callActive) setInCall(true);
+  }, [callActive]);
+
+  React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  function startCall() {
+    setCallSummaryDuration(null);
+    setCallActive(true);
+    setInCall(true);
+  }
 
   function sendMessage() {
     const trimmed = inputValue.trim();
@@ -1896,10 +1920,7 @@ export function DiscussionChatPage({
                 type="button"
                 aria-label="Mulai Panggilan"
                 className="flex size-11 items-center justify-center rounded-[10px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
-                onClick={() => {
-                  setCallActive(true);
-                  setInCall(true);
-                }}
+                onClick={() => setStartCallConfirmOpen(true)}
               >
                 <Icon icon={Call02Icon} />
               </button>
@@ -1946,7 +1967,7 @@ export function DiscussionChatPage({
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4">
-          <div className="flex flex-col pb-4 pt-1">
+          <div className="flex flex-col pb-4 pt-[14px]">
             {messages.map((msg, index) => {
               const previousMessage = messages[index - 1];
               const isGroupedMessage = Boolean(
@@ -1997,8 +2018,8 @@ export function DiscussionChatPage({
         </div>
 
         {/* Input bar */}
-        <div className="shrink-0 bg-background px-3.5 py-3">
-          <div className="flex flex-col gap-3 rounded-[14px] bg-white p-2.5 shadow-[0_-2px_12px_rgba(0,0,0,0.05)] border border-black/5">
+        <div className="shrink-0 bg-background px-3.5 py-2">
+          <div className="flex flex-col gap-2 rounded-[14px] bg-white px-3 py-2 shadow-[0_8px_24px_rgba(43,48,51,0.08)]">
             <input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -2008,10 +2029,10 @@ export function DiscussionChatPage({
                   sendMessage();
                 }
               }}
-              className="w-full bg-transparent px-1 text-[14px] leading-[22px] text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary"
+              className="w-full bg-transparent text-[14px] leading-[22px] text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary"
               placeholder="Tuliskan pesan..."
             />
-            <div className="flex items-center justify-between pl-1 pr-0.5">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 text-ktr-text-primary">
                 <button type="button" aria-label="Galeri" className="text-[#879196] hover:text-ktr-primary transition-colors" onClick={() => toast.info("Galeri", { description: "Pilih foto dari galeri (segera hadir)" })}>
                   <HugeiconsIcon icon={Album02Icon} size={22} strokeWidth={1.8} color="currentColor" />
@@ -2040,6 +2061,15 @@ export function DiscussionChatPage({
           </div>
         </div>
       </div>
+      <ConfirmModal
+        open={startCallConfirmOpen}
+        onOpenChange={setStartCallConfirmOpen}
+        title="Mulai panggilan?"
+        description="Anggota kelompok akan melihat sesi panggilan aktif dan bisa langsung bergabung."
+        confirmText="Mulai Panggilan"
+        cancelText="Batal"
+        onConfirm={startCall}
+      />
       <ConfirmModal
         open={endConfirmOpen}
         onOpenChange={setEndConfirmOpen}
@@ -2169,6 +2199,7 @@ export function PeerAssessmentPage({ currentUserInitials = "AP", allMembersCompl
   const [activity, setActivity] = React.useState("");
   const [contribution, setContribution] = React.useState("");
   const [teamwork, setTeamwork] = React.useState("");
+  const [completedMembers, setCompletedMembers] = React.useState<string[]>([]);
   const assessableMembers = assessmentMembers.filter((item) => item.initials !== currentUserInitials);
 
   function submit() {
@@ -2177,8 +2208,20 @@ export function PeerAssessmentPage({ currentUserInitials = "AP", allMembersCompl
       return;
     }
 
-    toast.success("Umpan balik berhasil dikirim.");
-    router.push(allMembersCompleted ? "/student/discussions/finished" : "/student/discussions/waiting");
+    const nextCompleted = Array.from(new Set([...completedMembers, member]));
+    setCompletedMembers(nextCompleted);
+    setMember("");
+    setActivity("");
+    setContribution("");
+    setTeamwork("");
+
+    if (allMembersCompleted || nextCompleted.length >= assessableMembers.length) {
+      toast.success("Semua umpan balik terkirim", { description: "Sesi ini sudah lengkap untuk semua anggota." });
+      router.push(allMembersCompleted ? "/student/discussions/finished" : "/student/discussions/waiting");
+      return;
+    }
+
+    toast.success("Umpan balik tersimpan", { description: `Lanjut isi ${assessableMembers.length - nextCompleted.length} anggota lagi.` });
   }
 
   return (
@@ -2195,13 +2238,23 @@ export function PeerAssessmentPage({ currentUserInitials = "AP", allMembersCompl
           <div className="space-y-2">
             {assessableMembers.map((item) => {
               const selected = member === item.name;
+              const completed = completedMembers.includes(item.name);
               return (
-                <button key={item.name} type="button" className={cn("flex h-[58px] w-full items-center gap-3 rounded-[12px] border px-3 text-left transition-colors", selected ? "border-ktr-primary bg-ktr-success-bg" : "border-ktr-border-light bg-ktr-surface-card")} onClick={() => setMember(item.name)}>
+                <button
+                  key={item.name}
+                  type="button"
+                  className={cn(
+                    "flex h-[58px] w-full items-center gap-3 rounded-[12px] border px-3 text-left transition-colors",
+                    selected ? "border-ktr-primary bg-ktr-success-bg" : completed ? "border-ktr-primary/30 bg-ktr-primary-bg-form" : "border-ktr-border-light bg-ktr-surface-card",
+                  )}
+                  onClick={() => !completed && setMember(item.name)}
+                >
                   <MemberAvatar member={item} size="size-9" />
-                  <span className="min-w-0">
+                  <span className="min-w-0 flex-1">
                     <span className="block text-[14px] font-normal leading-[22px] text-ktr-text-primary">{item.name}</span>
-                    <span className="block text-[12px] leading-[18px] text-ktr-text-secondary">{item.role}</span>
+                    <span className="block text-[12px] leading-[18px] text-ktr-text-secondary">{completed ? "Sudah diberi umpan balik" : item.role}</span>
                   </span>
+                  {completed ? <Icon icon={CheckmarkCircle02Icon} className="size-5 shrink-0 text-ktr-primary" /> : null}
                 </button>
               );
             })}
@@ -2275,22 +2328,26 @@ export function SessionSummaryPage({ role = "member", projectReadyToSubmit = fal
       </Card>
 
       <SectionTitle>Umpan Balik Anggota</SectionTitle>
-      <Card className="mb-6 bg-ktr-primary-bg-form">
-        <p className="text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Semua anggota sudah mengisi umpan balik untuk sesi ini.</p>
-        <p className="mt-1 text-[13px] leading-5 text-ktr-text-secondary">Isi umpan balik anggota tidak ditampilkan ke anggota lain.</p>
+      <Card className="mb-6 p-3">
+        <div className="space-y-3">
+          {assessmentMembers.map((member, index) => (
+            <div key={member.initials} className="space-y-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <MemberAvatar member={member} size="size-9" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[14px] font-normal leading-[22px] text-ktr-text-primary">{member.name}</p>
+                  <p className="text-[12px] leading-[18px] text-ktr-text-secondary">Umpan balik sudah dikirim</p>
+                </div>
+                <span className="flex size-8 shrink-0 items-center justify-center text-ktr-primary" aria-label="Sudah diberi umpan balik">
+                  <Icon icon={CheckmarkCircle02Icon} className="size-5" />
+                </span>
+              </div>
+              {index < assessmentMembers.length - 1 ? <div className="h-[0.6px] w-full bg-ktr-border-light" aria-hidden="true" /> : null}
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 rounded-[12px] bg-ktr-secondary-bg-info-card p-3 text-[12px] leading-[18px] text-ktr-text-secondary">Isi umpan balik anggota tidak ditampilkan ke anggota lain.</p>
       </Card>
-
-      <SectionTitle>Langkah Berikutnya</SectionTitle>
-      <div className="space-y-2">
-        {role === "leader" ? (
-          <>
-            <CreateDiscussionSheet trigger={<button type="button" className="block w-full"><Card className="flex items-center justify-between gap-3 p-3 text-left"><span><span className="block text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Buat Diskusi Baru</span><span className="block text-[13px] leading-5 text-ktr-text-secondary">Mulai sesi baru jika masih ada hal yang perlu dibahas.</span></span><Icon icon={ArrowRight02Icon} className="text-ktr-primary" /></Card></button>} />
-            {projectReadyToSubmit ? <Link href="/student/projects/landing-page-umkm/submit" className="block"><Card className="flex items-center justify-between gap-3 p-3"><span><span className="block text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Kirim Proyek</span><span className="block text-[13px] leading-5 text-ktr-text-secondary">Kirim hasil akhir proyek untuk ditinjau guru.</span></span><Icon icon={ArrowRight02Icon} className="text-ktr-primary" /></Card></Link> : null}
-          </>
-        ) : (
-          <Card className="bg-ktr-secondary-bg-info-card p-3"><p className="text-[14px] font-normal leading-[22px] text-ktr-text-secondary">Tunggu ketua kelompok memulai diskusi baru atau mengirim hasil akhir proyek.</p></Card>
-        )}
-      </div>
     </ScreenShell>
   );
 }
@@ -2422,8 +2479,38 @@ export function ProjectRevisionPage() {
   );
 }
 export function ActivitiesPage() {
-  const items = [["Bima mengirim progres desain hero section", "Website Profil Sekolah - 5 menit lalu", Upload04Icon], ["Alya memulai diskusi baru", "Pembahasan Konsep Landing Page - 18 menit lalu", BubbleChatIcon], ["Raka mengunggah bukti kerja", "Website Profil Sekolah - 1 jam lalu", FileCheckIcon], ["Nadia memberi umpan balik anggota", "Kelompok 4 - Kemarin", MessageDone02Icon]] as const;
-  return <ScreenShell title="Aktivitas" subtitle="Lihat perkembangan diskusi dan progres kelompokmu." showBottomNav><Segments items={["Semua", "Diskusi", "Progres", "Umpan Balik"]} /><div className="mt-4 space-y-3">{items.map(([title, meta, icon]) => <Card key={title} className="flex items-start gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-ktr-primary-soft text-ktr-primary"><Icon icon={icon} /></span><div className="min-w-0"><p className="text-[14px] font-semibold leading-[22px] text-ktr-text-primary">{title}</p><p className="text-[13px] leading-5 text-ktr-text-secondary">{meta}</p></div></Card>)}</div></ScreenShell>;
+  const items = [
+    { title: "Bima mengirim progres desain hero section", meta: "Website Profil Sekolah - 5 menit lalu", important: false },
+    { title: "Alya memulai diskusi baru", meta: "Pembahasan Konsep Landing Page - 18 menit lalu", important: true },
+    { title: "Raka mengunggah bukti kerja", meta: "Website Profil Sekolah - 1 jam lalu", important: false },
+    { title: "Nadia memberi umpan balik anggota", meta: "Kelompok 4 - Kemarin", important: true },
+  ] as const;
+
+  return (
+    <ScreenShell title="Aktivitas" showBottomNav>
+      <Segments items={["Semua", "Diskusi", "Progres", "Umpan Balik"]} />
+      <section className="mt-5 rounded-[16px] bg-ktr-surface-card px-3">
+        <div className="divide-y divide-ktr-border-light">
+          {items.map((item) => (
+            <div key={item.title} className="flex items-start gap-3 py-3.5">
+              <span className="relative mt-2 size-2 shrink-0 rounded-full bg-transparent">
+                {item.important ? (
+                  <>
+                    <span className="absolute inset-0 animate-ping rounded-full bg-ktr-primary/45" />
+                    <span className="relative block size-2 rounded-full bg-ktr-primary" />
+                  </>
+                ) : null}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-medium leading-[22px] text-ktr-text-primary">{item.title}</p>
+                <p className="mt-0.5 text-[13px] leading-5 text-ktr-text-secondary">{item.meta}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </ScreenShell>
+  );
 }
 
 export function ContributionSummaryPage() {
