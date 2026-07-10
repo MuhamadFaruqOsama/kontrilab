@@ -28,8 +28,9 @@ const variantClass = {
 type AppToast = React.ComponentProps<typeof Toast>["toast"];
 
 function ToastItem({ queuedToast }: { queuedToast: AppToast }) {
-  const content = queuedToast.content ?? {};
-  const variant = (content.variant ?? "default") as keyof typeof variantIcon;
+  const content = (queuedToast.content ?? {}) as { variant?: keyof typeof variantIcon; indicator?: React.ReactNode | null; title?: React.ReactNode; description?: React.ReactNode };
+  const variant = content.variant ?? "default";
+  const toastVariant = variant === "info" ? "accent" : variant;
   const Icon = variantIcon[variant];
 
   React.useEffect(() => {
@@ -41,7 +42,7 @@ function ToastItem({ queuedToast }: { queuedToast: AppToast }) {
   return (
     <Toast
       toast={queuedToast}
-      variant={variant}
+      variant={toastVariant}
       className="ktr-toast pointer-events-auto absolute inset-x-0 flex items-center gap-3 rounded-[18px] border border-ktr-border-light bg-ktr-surface-card p-3 text-ktr-text-primary shadow-[0_16px_42px_rgba(43,48,51,0.12)] outline-none"
     >
       {content.indicator === null ? null : (

@@ -7,12 +7,14 @@ import { createPortal } from "react-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
+  ArrowDown02Icon,
   Album02Icon,
   ArrowLeft02Icon,
   ArrowRight02Icon,
   BubbleChatIcon,
   Briefcase01Icon,
   Calendar03Icon,
+  Cancel01Icon,
   CheckmarkCircle02Icon,
   Call02Icon,
   CallEnd01Icon,
@@ -34,6 +36,7 @@ import {
   TaskDone02Icon,
   Search01Icon,
   StarIcon,
+  CloudUploadIcon,
   Upload04Icon,
   UserGroupIcon,
   VolumeHighIcon,
@@ -179,6 +182,15 @@ function Card({ children, className }: { children: React.ReactNode; className?: 
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="mb-3 text-[16px] font-semibold leading-[22px] text-ktr-text-primary">{children}</h2>;
+}
+
+function PulseDot({ className, colorClass = "bg-ktr-project-revision", pingClassName = "opacity-55", ...props }: React.HTMLAttributes<HTMLSpanElement> & { colorClass?: string; pingClassName?: string }) {
+  return (
+    <span className={cn("relative inline-flex size-2.5 shrink-0 items-center justify-center align-middle", className)} {...props}>
+      <span className={cn("absolute left-1/2 top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full", colorClass, pingClassName)} />
+      <span className={cn("relative size-1.5 rounded-full", colorClass)} />
+    </span>
+  );
 }
 
 function statusIcon() {
@@ -921,6 +933,7 @@ type DiscussionItem = {
   messages: string;
   meta: string;
   primary?: boolean;
+  unreadCount?: number;
   requiresPeerAssessment?: boolean;
 };
 
@@ -939,8 +952,8 @@ const groupMembers: GroupMember[] = [
 ];
 
 const groupDiscussions: DiscussionItem[] = [
-  { title: "Pembahasan Konsep Landing Page", status: "Sedang Berjalan", statusClass: "text-ktr-project-in-progress", messages: "4 pesan", meta: "Terakhir 10 menit lalu", primary: true },
-  { title: "Tinjauan Konten Produk", status: "Menunggu Umpan Balik Anggota", statusClass: "text-ktr-project-revision", messages: "2 pesan", meta: "3 dari 4 anggota sudah memberi umpan balik", requiresPeerAssessment: true },
+  { title: "Pembahasan Konsep Landing Page", status: "Sedang Berjalan", statusClass: "text-ktr-project-in-progress", messages: "4 pesan", meta: "Terakhir 10 menit lalu", primary: true, unreadCount: 1 },
+  { title: "Tinjauan Konten Produk", status: "Menunggu Umpan Balik Anggota", statusClass: "text-ktr-project-revision", messages: "2 pesan", meta: "Menunggu 1 anggota", requiresPeerAssessment: true },
   { title: "Revisi Tampilan Kontak", status: "Selesai", statusClass: "text-ktr-project-finished", messages: "2 pesan", meta: "Semua anggota sudah memberi umpan balik" },
 ];
 
@@ -1111,27 +1124,31 @@ function DiscussionCard({ item }: { item: DiscussionItem }) {
   return (
     <Link
       href={href}
-      className={cn(
-        "block rounded-[16px] border bg-ktr-surface-card p-3 transition-[border-color,background-color,transform] active:scale-[0.99]",
-        item.requiresPeerAssessment ? "border-ktr-project-revision/45 bg-ktr-project-revision-bg/20" : "border-ktr-border-light hover:border-ktr-primary/35 hover:bg-ktr-primary-soft/30",
-      )}
+      className="block rounded-[16px] border border-ktr-border-light bg-ktr-surface-card p-3 transition-[border-color,background-color,transform] hover:border-ktr-primary/35 hover:bg-ktr-primary-soft/30 active:scale-[0.99]"
     >
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-2">
           {item.requiresPeerAssessment ? (
-            <span className="relative mt-2 flex size-2 shrink-0" aria-label="Umpan balik anggota wajib diisi">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-ktr-project-revision opacity-60" />
-              <span className="relative inline-flex size-2 rounded-full bg-ktr-project-revision" />
-            </span>
+            <PulseDot className="mt-[7px]" aria-label="Umpan balik anggota wajib diisi" />
           ) : null}
           <h3 className="min-w-0 text-[14px] font-normal leading-[22px] text-ktr-text-primary">{item.title}</h3>
         </div>
         <span className={cn("shrink-0 pt-0.5 text-right text-[12px] font-medium leading-[18px]", item.statusClass)}>{item.status}</span>
       </div>
       <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] leading-[18px] text-ktr-text-tertiary">
-        <span className="flex items-center gap-1.5"><Icon icon={BubbleChatIcon} />{item.messages}</span>
-        <span className="text-ktr-text-disabled">&bull;</span>
-        <span>{item.meta}</span>
+        {item.requiresPeerAssessment ? (
+          <>
+            <span>3/4 umpan balik terkirim</span>
+            <span className="size-1 rounded-full bg-ktr-text-tertiary/70" aria-hidden="true" />
+            <span>{item.meta}</span>
+          </>
+        ) : (
+          <>
+            <span className="flex items-center gap-1.5"><Icon icon={BubbleChatIcon} />{item.messages}</span>
+            <span className="size-1 rounded-full bg-ktr-text-tertiary/70" aria-hidden="true" />
+            <span>{item.meta}</span>
+          </>
+        )}
       </div>
       {item.requiresPeerAssessment ? <p className="mt-2 text-[12px] font-medium leading-[18px] text-ktr-project-revision">Wajib isi umpan balik anggota sebelum sesi dianggap selesai.</p> : null}
     </Link>
@@ -1146,7 +1163,6 @@ function ActiveDiscussionSection({ item }: { item: DiscussionItem }) {
         <div className="flex min-w-0 items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate text-[15px] font-semibold leading-[24px] text-ktr-text-primary">{item.title}</p>
-            <p className="mt-1 text-[13px] leading-5 text-ktr-text-secondary">{item.messages} &bull; {item.meta}</p>
           </div>
           <span className={cn("shrink-0 pt-0.5 text-[12px] font-medium leading-[18px]", item.statusClass)}>{item.status}</span>
         </div>
@@ -1156,8 +1172,9 @@ function ActiveDiscussionSection({ item }: { item: DiscussionItem }) {
               <MemberAvatar key={member.initials} member={member} size="-ml-2 size-7 border-2 border-white" />
             ))}
           </div>
-          <span className="inline-flex h-9 shrink-0 items-center justify-center rounded-[12px] bg-ktr-primary px-3 text-[13px] font-semibold leading-5 text-ktr-text-white">
-            Masuk Diskusi
+          <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-[12px] text-[13px] font-medium leading-5 text-ktr-text-primary">
+            {item.unreadCount ? <span>{item.unreadCount} belum dibaca</span> : null}
+            <Icon icon={ArrowRight02Icon} className="size-4" />
           </span>
         </div>
       </Link>
@@ -1207,14 +1224,20 @@ export function GroupDetailPage({ role = "member" }: { role?: DiscussionRole } =
           </div>
         </section>
 
-        <SectionTitle>Progres Kelompok</SectionTitle>
+        <div className="mb-3 flex min-w-0 items-center justify-between gap-3">
+          <h2 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Progres Kelompok</h2>
+          <Link href="/student/progress/new" className="inline-flex h-8 shrink-0 items-center gap-1.5 text-[14px] font-medium leading-[22px] text-ktr-primary" onClick={() => toast.info("Siapkan progresmu", { description: "Tambahkan catatan dan bukti pekerjaan terbaru." })}>
+            <Icon icon={Add01Icon} className="size-5" />
+            Tambah Progres
+          </Link>
+        </div>
         <section className="mb-6 rounded-[20px] border border-ktr-border-light bg-ktr-surface-card p-3">
           <div className="space-y-3">
-            {groupProgres.map((item, index) => <ProgresRow key={item.text} item={item} showDivider={index < groupProgres.length - 1} />)}
-            <Link href="/student/progress/new" className="flex h-[46px] items-center gap-3 px-0 text-[14px] font-medium leading-[22px] text-ktr-primary" onClick={() => toast.info("Siapkan progresmu", { description: "Tambahkan catatan dan bukti pekerjaan terbaru." })}>
-              <Icon icon={Add01Icon} className="size-6" />
-              Tambah Progres
-            </Link>
+            {groupProgres.slice(0, 5).map((item) => <ProgresRow key={item.text} item={item} />)}
+            <button type="button" className="flex h-[46px] w-full items-center justify-center gap-2 px-0 text-[14px] font-medium leading-[22px] text-ktr-text-secondary transition-colors hover:text-ktr-primary">
+              Lihat lebih banyak
+              <Icon icon={ArrowDown02Icon} className="size-4" />
+            </button>
           </div>
         </section>
 
@@ -1244,7 +1267,7 @@ export function NewDiscussionPage({ role = "member" }: { role?: DiscussionRole }
     return <RoleRestrictedState title="Buat Diskusi Baru" description="Hanya ketua kelompok yang dapat membuat sesi diskusi baru." backHref="/student/group" />;
   }
 
-  return <ScreenShell title="Buat Diskusi Baru" subtitle="Mulai ruang diskusi untuk membahas ide, progres, kendala, atau revisi kelompokmu."><Card className="space-y-4"><Field label="Judul Diskusi" placeholder="Contoh: Pembahasan Konsep Landing Page" /><div><p className="mb-2 text-[12px] font-medium leading-4 text-ktr-text-primary">Topik Diskusi</p><Segments items={["Ide Proyek", "Progres", "Kendala", "Revisi", "Lainnya"]} /></div><Field label="Catatan Awal" placeholder="Tulis hal pertama yang ingin dibahas bersama kelompok." as="textarea" /><PrimaryButton href="/student/discussions/current" className="w-full" onClick={() => toast.success("Diskusi baru dibuat", { description: "Ruang diskusi sudah siap digunakan kelompok." })}>Buat Diskusi</PrimaryButton></Card></ScreenShell>;
+  return <ScreenShell title="Buat Diskusi Baru" subtitle="Mulai ruang diskusi untuk membahas ide, progres, kendala, atau revisi kelompokmu."><Card className="space-y-4"><Field label="Judul Diskusi" placeholder="Contoh: Pembahasan Konsep Landing Page" /><div><p className="mb-3 text-[16px] font-medium leading-[22px] text-ktr-text-primary">Topik Diskusi</p><Segments items={["Ide Proyek", "Progres", "Kendala", "Revisi", "Lainnya"]} /></div><Field label="Catatan Awal" placeholder="Tulis hal pertama yang ingin dibahas bersama kelompok." as="textarea" /><PrimaryButton href="/student/discussions/current" className="w-full" onClick={() => toast.success("Diskusi baru dibuat", { description: "Ruang diskusi sudah siap digunakan kelompok." })}>Buat Diskusi</PrimaryButton></Card></ScreenShell>;
 }
 
 type DiscussionRole = "leader" | "member";
@@ -1720,10 +1743,7 @@ function ActiveCallBadge({ elapsed, onJoin }: { elapsed: number; onJoin: () => v
       className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-ktr-border-light bg-white px-3 py-2 shadow-none"
     >
       {/* Pulse dot */}
-      <span className="relative flex size-2.5 shrink-0 items-center justify-center">
-        <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#F5A623] opacity-60" />
-        <span className="relative inline-flex size-1.5 rounded-full bg-[#F5A623]" />
-      </span>
+      <PulseDot colorClass="bg-[#F5A623]" pingClassName="opacity-55" />
       {/* Stacked avatars */}
       <div className="flex shrink-0 items-center pl-1">
         {callParticipantsList.slice(0, 4).map((p) => (
@@ -2164,8 +2184,121 @@ export function DiscussionDetailPage({ role = "member", discussionStatus = "ongo
     </main>
   );
 }
+function formatAttachmentSize(size: number) {
+  if (size >= 1024 * 1024) return (size / (1024 * 1024)).toFixed(1) + " MB";
+  if (size >= 1024) return Math.max(1, Math.round(size / 1024)) + " KB";
+  return size + " B";
+}
+
 export function ProgressInputPage() {
-  return <ScreenShell title="Kirim Progres" subtitle="Ceritakan progres yang kamu kerjakan setelah diskusi. Progres ini akan membantu kontribusimu terlihat lebih jelas."><Card className="space-y-4"><Field label="Progres yang Dikerjakan" placeholder="Contoh: Saya membuat draft layout hero section dan menyesuaikan warna utama." as="textarea" /><div className="relative overflow-hidden rounded-[20px] border border-dashed border-ktr-border-input bg-ktr-primary-bg-form p-4 text-center"><Icon icon={FileCheckIcon} className="mx-auto text-ktr-primary" /><p className="mt-2 text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Tambahkan Bukti Progres</p><p className="text-[13px] leading-5 text-ktr-text-secondary">Unggah foto, file, atau link pendukung jika ada.</p></div><Field label="Link Bukti Progres" placeholder="Tempel link Figma, Drive, atau dokumen" /><div><p className="mb-2 text-[12px] font-medium leading-4 text-ktr-text-primary">Status Progres</p><Segments items={["Sedang Dikerjakan", "Selesai", "Terkendala"]} /></div><Button className="h-11 w-full rounded-[10px]" onClick={() => toast.success("Progres berhasil dikirim.", { description: "Progresmu sudah tercatat untuk ditinjau kelompok." })}>Kirim Progres</Button></Card></ScreenShell>;
+  const [progress, setProgress] = React.useState("");
+  const [evidenceLink, setEvidenceLink] = React.useState("");
+  const [attachment, setAttachment] = React.useState<{ name: string; size: string } | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const canSubmit = progress.trim().length > 0 && (Boolean(attachment) || evidenceLink.trim().length > 0);
+
+  function handleAttachmentChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setAttachment({ name: file.name, size: formatAttachmentSize(file.size) });
+    event.target.value = "";
+  }
+
+  function submitProgress() {
+    if (!canSubmit) return;
+    toast.success("Progres berhasil dikirim.", { description: "Progresmu sudah tercatat untuk ditinjau kelompok." });
+  }
+
+  return (
+    <ScreenShell title="Kirim Progres">
+      <div className="space-y-5">
+        <label className="block space-y-3">
+          <span className="block text-[16px] font-medium leading-[22px] text-ktr-text-primary">Progres yang Dikerjakan</span>
+          <textarea
+            value={progress}
+            onChange={(event) => setProgress(event.target.value)}
+            className="min-h-28 w-full min-w-0 resize-none rounded-[12px] border border-ktr-border-light bg-white px-3.5 py-3 text-[14px] leading-[22px] text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ktr-primary/12"
+            placeholder="Contoh: Saya menyelesaikan draft tampilan awal dan menambahkan konten utama."
+          />
+        </label>
+
+        <div>
+          <p className="mb-3 text-[16px] font-medium leading-[22px] text-ktr-text-primary">Bukti Progres</p>
+          {attachment ? (
+            <div className="flex items-center justify-between gap-3 rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3 py-2.5">
+              <span className="flex min-w-0 items-center gap-2.5">
+                <Image src="/icons/file-icon.svg" alt="" width={32} height={32} aria-hidden="true" className="size-8 shrink-0" />
+                <span className="min-w-0">
+                  <span className="block truncate text-[13px] font-medium leading-5 text-ktr-text-primary">{attachment.name}</span>
+                  <span className="block text-[11px] leading-4 text-ktr-text-tertiary">{attachment.size}</span>
+                </span>
+              </span>
+              <button type="button" className="flex size-8 shrink-0 items-center justify-center rounded-[8px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft" onClick={() => setAttachment(null)} aria-label="Hapus lampiran">
+                <Icon icon={Cancel01Icon} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="flex min-h-[96px] w-full flex-col items-center justify-center rounded-[16px] border border-dashed border-ktr-border-input bg-ktr-primary-bg-form px-4 py-4 text-center transition-colors hover:border-ktr-primary/50 hover:bg-ktr-primary-soft/40"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Icon icon={CloudUploadIcon} className="text-ktr-primary" />
+              <span className="mt-2 text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Tambahkan Lampiran</span>
+              <span className="text-[13px] leading-5 text-ktr-text-secondary">Unggah file atau gambar pendukung.</span>
+            </button>
+          )}
+          <input ref={fileInputRef} type="file" className="hidden" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" onChange={handleAttachmentChange} />
+        </div>
+
+        <label className="block space-y-3">
+          <span className="block text-[16px] font-medium leading-[22px] text-ktr-text-primary">Link Bukti Progres</span>
+          <input
+            value={evidenceLink}
+            onChange={(event) => setEvidenceLink(event.target.value)}
+            className="flex h-11 w-full min-w-0 rounded-[12px] border border-ktr-border-light bg-white px-3.5 text-[14px] leading-none text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ktr-primary/12"
+            placeholder="Tempel link bukti progress"
+          />
+        </label>
+
+        <div>
+          <p className="mb-3 text-[16px] font-medium leading-[22px] text-ktr-text-primary">Status Progres</p>
+          <Segments items={["Sedang Dikerjakan", "Selesai", "Terkendala"]} />
+        </div>
+
+        <div className="pt-5">
+          <Button className="h-11 w-full rounded-[12px] text-[14px] font-semibold disabled:opacity-45" disabled={!canSubmit} onClick={submitProgress}>Kirim Progres</Button>
+        </div>
+      </div>
+    </ScreenShell>
+  );
+}
+
+const peerAssessmentStorageKey = "kontrilab-peer-assessment-completed";
+const peerAssessmentSelectedKey = "kontrilab-peer-assessment-selected";
+
+function readPeerAssessmentCompleted() {
+  if (typeof window === "undefined") return [] as string[];
+
+  try {
+    const rawValue = window.localStorage.getItem(peerAssessmentStorageKey);
+    const parsedValue = rawValue ? JSON.parse(rawValue) : [];
+    return Array.isArray(parsedValue) ? parsedValue.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [] as string[];
+  }
+}
+
+function writePeerAssessmentCompleted(names: string[]) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(peerAssessmentStorageKey, JSON.stringify(names));
+  window.dispatchEvent(new Event("peer-assessment-updated"));
+}
+
+function setPendingPeerAssessmentMember(name: string) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(peerAssessmentSelectedKey, name);
 }
 
 const assessmentMembers = groupMembers.map((member) => ({
@@ -2175,16 +2308,39 @@ const assessmentMembers = groupMembers.map((member) => ({
   avatarClass: member.avatarClass,
 }));
 
-function AssessmentOptionGroup({ title, items, value, onChange }: { title: string; items: string[]; value: string; onChange: (value: string) => void }) {
+const assessmentQuestions = [
+  { key: "participation", title: "Keaktifan Diskusi", subtitle: "Seberapa aktif anggota ini ikut berdiskusi?" },
+  { key: "progress", title: "Kontribusi Progres", subtitle: "Seberapa jelas kontribusi progres yang diberikan?" },
+  { key: "teamwork", title: "Kerja Sama", subtitle: "Seberapa baik anggota ini bekerja sama dengan tim?" },
+  { key: "responsibility", title: "Tanggung Jawab", subtitle: "Seberapa konsisten anggota ini menyelesaikan bagiannya?" },
+] as const;
+
+type AssessmentQuestionKey = (typeof assessmentQuestions)[number]["key"];
+type AssessmentRatings = Partial<Record<AssessmentQuestionKey, number>>;
+
+function AssessmentScaleQuestion({ title, subtitle, value, onChange }: { title: string; subtitle: string; value?: number; onChange: (value: number) => void }) {
   return (
     <div>
-      <p className="mb-2 text-[14px] font-semibold leading-[22px] text-ktr-text-primary">{title}</p>
-      <div className="flex min-w-0 flex-wrap gap-2">
-        {items.map((item) => {
-          const selected = value === item;
+      <div className="mb-3">
+        <p className="text-[14px] font-semibold leading-[22px] text-ktr-text-primary">{title}</p>
+        <p className="mt-0.5 text-[12px] leading-[18px] text-ktr-text-secondary">{subtitle}</p>
+      </div>
+      <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label={title}>
+        {[1, 2, 3, 4].map((score) => {
+          const selected = value === score;
           return (
-            <button key={item} type="button" className={cn("rounded-[10px] border px-3 py-2 text-[12px] font-medium leading-[18px] transition-colors", selected ? "border-ktr-primary bg-ktr-primary-soft text-ktr-primary" : "border-ktr-border-light bg-ktr-surface-card text-ktr-text-secondary")} onClick={() => onChange(item)}>
-              {item}
+            <button
+              key={score}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              className={cn(
+                "flex h-10 items-center justify-center rounded-[12px] border text-[14px] font-semibold leading-[22px] transition-colors",
+                selected ? "border-ktr-primary bg-ktr-primary-soft text-ktr-primary" : "border-ktr-border-light bg-ktr-surface-card text-ktr-text-secondary",
+              )}
+              onClick={() => onChange(score)}
+            >
+              {score}
             </button>
           );
         })}
@@ -2196,79 +2352,89 @@ function AssessmentOptionGroup({ title, items, value, onChange }: { title: strin
 export function PeerAssessmentPage({ currentUserInitials = "AP", allMembersCompleted = false }: { currentUserInitials?: string; allMembersCompleted?: boolean } = {}) {
   const router = useRouter();
   const [member, setMember] = React.useState("");
-  const [activity, setActivity] = React.useState("");
-  const [contribution, setContribution] = React.useState("");
-  const [teamwork, setTeamwork] = React.useState("");
+  const [ratings, setRatings] = React.useState<AssessmentRatings>({});
+  const [description, setDescription] = React.useState("");
   const [completedMembers, setCompletedMembers] = React.useState<string[]>([]);
   const assessableMembers = assessmentMembers.filter((item) => item.initials !== currentUserInitials);
+  const selectedMember = assessableMembers.find((item) => item.name === member);
+  const isComplete = Boolean(member) && assessmentQuestions.every((question) => ratings[question.key]) && description.trim().length > 0;
+
+  React.useEffect(() => {
+    const storedCompleted = readPeerAssessmentCompleted();
+    const targetMembers = assessmentMembers.filter((item) => item.initials !== currentUserInitials);
+    const pendingMember = window.localStorage.getItem(peerAssessmentSelectedKey) ?? "";
+    const pendingIsValid = targetMembers.some((item) => item.name === pendingMember) && !storedCompleted.includes(pendingMember);
+    const firstIncompleteMember = targetMembers.find((item) => !storedCompleted.includes(item.name))?.name ?? "";
+    const nextMember = pendingIsValid ? pendingMember : firstIncompleteMember;
+
+    setCompletedMembers(storedCompleted);
+    setMember(nextMember);
+    setRatings({});
+    setDescription("");
+    window.localStorage.removeItem(peerAssessmentSelectedKey);
+  }, [currentUserInitials]);
+
+  function updateRating(key: AssessmentQuestionKey, value: number) {
+    setRatings((current) => ({ ...current, [key]: value }));
+  }
 
   function submit() {
-    if (!member || !activity || !contribution || !teamwork) {
-      toast.warning("Lengkapi pilihan umpan balik terlebih dahulu.");
+    if (!isComplete) {
+      toast.warning("Lengkapi semua penilaian terlebih dahulu.");
       return;
     }
 
     const nextCompleted = Array.from(new Set([...completedMembers, member]));
     setCompletedMembers(nextCompleted);
-    setMember("");
-    setActivity("");
-    setContribution("");
-    setTeamwork("");
+    writePeerAssessmentCompleted(nextCompleted);
+    setRatings({});
+    setDescription("");
 
-    if (allMembersCompleted || nextCompleted.length >= assessableMembers.length) {
-      toast.success("Semua umpan balik terkirim", { description: "Sesi ini sudah lengkap untuk semua anggota." });
-      router.push(allMembersCompleted ? "/student/discussions/finished" : "/student/discussions/waiting");
-      return;
-    }
-
-    toast.success("Umpan balik tersimpan", { description: `Lanjut isi ${assessableMembers.length - nextCompleted.length} anggota lagi.` });
+    toast.success("Umpan balik tersimpan", { description: (selectedMember?.name ?? "Anggota") + " sudah ditandai selesai." });
+    router.push(allMembersCompleted ? "/student/discussions/waiting" : "/student/discussions/summary");
   }
 
   return (
-    <ScreenShell title="Umpan Balik Sesi" subtitle="Berikan umpan balik berdasarkan diskusi dan progres pada sesi ini. Isi dengan jujur dan tetap menghargai temanmu." backHref="/student/discussions/waiting">
-      <Card className="mb-4 space-y-1 bg-ktr-primary-bg-form">
+    <ScreenShell title="Umpan Balik Sesi" backHref="/student/discussions/summary">
+      <Card className="mb-5 space-y-1 bg-ktr-primary-bg-form">
         <h2 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Pembahasan Konsep Landing Page</h2>
         <p className="text-[13px] leading-5 text-ktr-text-secondary">Kelompok 4</p>
         <p className="text-[13px] leading-5 text-ktr-text-secondary">Selesai didiskusikan hari ini, 10.15</p>
       </Card>
 
-      <Card className="space-y-5">
-        <div>
-          <p className="mb-3 text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Pilih Anggota</p>
-          <div className="space-y-2">
-            {assessableMembers.map((item) => {
-              const selected = member === item.name;
-              const completed = completedMembers.includes(item.name);
-              return (
-                <button
-                  key={item.name}
-                  type="button"
-                  className={cn(
-                    "flex h-[58px] w-full items-center gap-3 rounded-[12px] border px-3 text-left transition-colors",
-                    selected ? "border-ktr-primary bg-ktr-success-bg" : completed ? "border-ktr-primary/30 bg-ktr-primary-bg-form" : "border-ktr-border-light bg-ktr-surface-card",
-                  )}
-                  onClick={() => !completed && setMember(item.name)}
-                >
-                  <MemberAvatar member={item} size="size-9" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[14px] font-normal leading-[22px] text-ktr-text-primary">{item.name}</span>
-                    <span className="block text-[12px] leading-[18px] text-ktr-text-secondary">{completed ? "Sudah diberi umpan balik" : item.role}</span>
-                  </span>
-                  {completed ? <Icon icon={CheckmarkCircle02Icon} className="size-5 shrink-0 text-ktr-primary" /> : null}
-                </button>
-              );
-            })}
+      {selectedMember ? (
+        <div className="space-y-7">
+          <div className="flex min-w-0 items-center gap-3">
+            <MemberAvatar member={selectedMember} size="size-9" />
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Penilaian untuk {selectedMember.name}</p>
+              <p className="text-[12px] leading-[18px] text-ktr-text-secondary">Pilih skala 1 sampai 4 untuk tiap pertanyaan.</p>
+            </div>
           </div>
+
+          <div className="space-y-5">
+            {assessmentQuestions.map((question) => (
+              <AssessmentScaleQuestion key={question.key} title={question.title} subtitle={question.subtitle} value={ratings[question.key]} onChange={(value) => updateRating(question.key, value)} />
+            ))}
+            <label className="block min-w-0">
+              <span className="text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Deskripsi</span>
+              <span className="mt-0.5 block text-[12px] leading-[18px] text-ktr-text-secondary">Jelaskan singkat kontribusi atau catatan untuk anggota ini.</span>
+              <textarea
+                className="mt-3 min-h-24 w-full min-w-0 resize-none rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 py-3 text-[14px] leading-[22px] outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20"
+                placeholder="Tulis penjelasan singkat..."
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+              />
+            </label>
+          </div>
+
+          <Button className="h-11 w-full rounded-[12px] text-[14px] font-medium disabled:opacity-45" disabled={!isComplete} onClick={submit}>Kirim Umpan Balik</Button>
         </div>
-
-        <AssessmentOptionGroup title="Keaktifan Diskusi" items={["Belum Terlihat", "Cukup Terlihat", "Sangat Terlihat"]} value={activity} onChange={setActivity} />
-        <AssessmentOptionGroup title="Kontribusi Progres" items={["Belum Terlihat", "Cukup Terlihat", "Sangat Terlihat"]} value={contribution} onChange={setContribution} />
-        <AssessmentOptionGroup title="Kerja Sama" items={["Perlu Dibantu", "Cukup Baik", "Sangat Baik"]} value={teamwork} onChange={setTeamwork} />
-
-        <Field label="Catatan Tambahan" placeholder="Tulis masukan singkat dengan sopan." as="textarea" />
-        <p className="rounded-[12px] bg-ktr-secondary-bg-info-card p-3 text-[13px] leading-5 text-ktr-text-secondary">Umpan balik ini digunakan sebagai data pendukung. Guru tetap meninjau keputusan akhir.</p>
-        <Button className="h-11 w-full rounded-[12px] text-[14px] font-medium" onClick={submit}>Kirim Umpan Balik</Button>
-      </Card>
+      ) : (
+        <Card className="bg-ktr-secondary-bg-info-card p-3">
+          <p className="text-[14px] font-normal leading-[22px] text-ktr-text-secondary">Semua anggota sudah diberi umpan balik.</p>
+        </Card>
+      )}
     </ScreenShell>
   );
 }
@@ -2282,15 +2448,32 @@ function SummaryStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function SessionSummaryPage({ role = "member", projectReadyToSubmit = false }: { role?: DiscussionRole; projectReadyToSubmit?: boolean } = {}) {
+export function SessionSummaryPage({ role = "member", projectReadyToSubmit = false, currentUserInitials = "AP" }: { role?: DiscussionRole; projectReadyToSubmit?: boolean; currentUserInitials?: string } = {}) {
   const progresItems = [
     ["Bima A.", "Desain hero section", "1 lampiran", "09.24", "bg-[linear-gradient(135deg,#233046,#5b8fb9)]"],
     ["Raka M.", "Draft konten produk", "1 link", "09.36", "bg-[linear-gradient(135deg,#f5a623,#5b8fb9)]"],
     ["Nadia S.", "Layout halaman kontak", "1 lampiran", "09.45", "bg-[linear-gradient(135deg,#57c186,#2f536f)]"],
   ];
+  const peerTargets = assessmentMembers.filter((member) => member.initials !== currentUserInitials);
+  const [completedPeerNames, setCompletedPeerNames] = React.useState<string[]>([]);
+  const hasPendingPeerAssessment = peerTargets.some((member) => !completedPeerNames.includes(member.name));
+
+  React.useEffect(() => {
+    function syncCompleted() {
+      setCompletedPeerNames(readPeerAssessmentCompleted());
+    }
+
+    syncCompleted();
+    window.addEventListener("peer-assessment-updated", syncCompleted);
+    window.addEventListener("storage", syncCompleted);
+    return () => {
+      window.removeEventListener("peer-assessment-updated", syncCompleted);
+      window.removeEventListener("storage", syncCompleted);
+    };
+  }, []);
 
   return (
-    <ScreenShell title="Ringkasan Sesi" subtitle="Lihat rangkuman diskusi, progres, dan lampiran yang tercatat pada sesi ini." backHref="/student/discussions/finished">
+    <ScreenShell title="Ringkasan Sesi" backHref="/student/discussions/finished">
       <Card className="mb-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -2306,45 +2489,67 @@ export function SessionSummaryPage({ role = "member", projectReadyToSubmit = fal
         <SummaryStat value="12" label="pesan diskusi" />
         <SummaryStat value="3" label="progres terkirim" />
         <SummaryStat value="4" label="lampiran ditambahkan" />
-        <SummaryStat value="6" label="umpan balik anggota selesai" />
+        <SummaryStat value={`${completedPeerNames.length}/${peerTargets.length}`} label="umpan balik anggota selesai" />
       </div>
 
       <SectionTitle>Progres Sesi Ini</SectionTitle>
       <Card className="mb-6 p-3">
         <div className="space-y-3">
-          {progresItems.map(([name, title, file, time, avatar]) => (
+          {progresItems.map(([name, title, file, time, avatar], index) => (
             <div key={title} className="space-y-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <MemberAvatar member={{ initials: name.slice(0, 1), avatarClass: avatar }} size="size-8" />
-                <div className="min-w-0">
-                  <p className="truncate text-[14px] font-normal leading-[22px] text-ktr-text-primary">{title}</p>
-                  <p className="text-[12px] leading-[18px] text-ktr-text-secondary">{name} &bull; {file} &bull; {time}</p>
+              <div>
+                <p className="truncate text-[14px] font-normal leading-[22px] text-ktr-text-primary">{title}</p>
+                <div className="mt-2 flex min-w-0 items-center gap-2 text-[12px] leading-[18px] text-ktr-text-tertiary">
+                  <MemberAvatar member={{ initials: name.slice(0, 1), avatarClass: avatar }} size="size-6" />
+                  <span className="shrink-0 font-normal text-ktr-text-primary">{name}</span>
+                  <span className="size-1 rounded-full bg-ktr-text-tertiary/70" aria-hidden="true" />
+                  <span className="shrink-0">{file}</span>
+                  <span className="size-1 rounded-full bg-ktr-text-tertiary/70" aria-hidden="true" />
+                  <span className="min-w-0 truncate">{time}</span>
                 </div>
               </div>
-              <div className="h-[0.6px] w-full bg-ktr-border-light" aria-hidden="true" />
+              {index < progresItems.length - 1 ? <div className="h-[0.6px] w-full bg-ktr-border-light" aria-hidden="true" /> : null}
             </div>
           ))}
         </div>
       </Card>
 
-      <SectionTitle>Umpan Balik Anggota</SectionTitle>
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Umpan Balik Anggota</h2>
+        {hasPendingPeerAssessment ? (
+          <PulseDot aria-label="Ada umpan balik anggota yang wajib diisi" />
+        ) : null}
+      </div>
       <Card className="mb-6 p-3">
         <div className="space-y-3">
-          {assessmentMembers.map((member, index) => (
-            <div key={member.initials} className="space-y-3">
-              <div className="flex min-w-0 items-center gap-3">
+          {peerTargets.map((member, index) => {
+            const completed = completedPeerNames.includes(member.name);
+            const rowContent = (
+              <>
                 <MemberAvatar member={member} size="size-9" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[14px] font-normal leading-[22px] text-ktr-text-primary">{member.name}</p>
-                  <p className="text-[12px] leading-[18px] text-ktr-text-secondary">Umpan balik sudah dikirim</p>
+                  <p className="text-[12px] leading-[18px] text-ktr-text-secondary">{completed ? "Umpan balik sudah dikirim" : "Belum mengisi umpan balik"}</p>
                 </div>
-                <span className="flex size-8 shrink-0 items-center justify-center text-ktr-primary" aria-label="Sudah diberi umpan balik">
-                  <Icon icon={CheckmarkCircle02Icon} className="size-5" />
+                <span className={cn("flex size-8 shrink-0 items-center justify-center", completed ? "text-ktr-primary" : "text-ktr-text-tertiary")} aria-label={completed ? "Sudah diberi umpan balik" : "Isi umpan balik"}>
+                  <Icon icon={completed ? CheckmarkCircle02Icon : ArrowRight02Icon} className="size-5" />
                 </span>
+              </>
+            );
+
+            return (
+              <div key={member.initials} className="space-y-3">
+                {completed ? (
+                  <div className="flex min-w-0 items-center gap-3">{rowContent}</div>
+                ) : (
+                  <Link href="/student/peer-assessment" className="flex min-w-0 items-center gap-3 rounded-[12px] transition-colors hover:bg-ktr-primary-soft/40" onClick={() => setPendingPeerAssessmentMember(member.name)}>
+                    {rowContent}
+                  </Link>
+                )}
+                {index < peerTargets.length - 1 ? <div className="h-[0.6px] w-full bg-ktr-border-light" aria-hidden="true" /> : null}
               </div>
-              {index < assessmentMembers.length - 1 ? <div className="h-[0.6px] w-full bg-ktr-border-light" aria-hidden="true" /> : null}
-            </div>
-          ))}
+            );
+          })}
         </div>
         <p className="mt-3 rounded-[12px] bg-ktr-secondary-bg-info-card p-3 text-[12px] leading-[18px] text-ktr-text-secondary">Isi umpan balik anggota tidak ditampilkan ke anggota lain.</p>
       </Card>
@@ -2493,13 +2698,8 @@ export function ActivitiesPage() {
         <div className="divide-y divide-ktr-border-light">
           {items.map((item) => (
             <div key={item.title} className="flex items-start gap-3 py-3.5">
-              <span className="relative mt-2 size-2 shrink-0 rounded-full bg-transparent">
-                {item.important ? (
-                  <>
-                    <span className="absolute inset-0 animate-ping rounded-full bg-ktr-primary/45" />
-                    <span className="relative block size-2 rounded-full bg-ktr-primary" />
-                  </>
-                ) : null}
+              <span className="mt-[7px] shrink-0">
+                {item.important ? <PulseDot colorClass="bg-ktr-primary" pingClassName="opacity-45" /> : null}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-medium leading-[22px] text-ktr-text-primary">{item.title}</p>
