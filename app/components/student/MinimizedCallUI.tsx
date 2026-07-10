@@ -20,15 +20,15 @@ export default function MinimizedCallUI() {
         <Link href="/student/discussions/current#call" className="flex min-w-0 flex-1 items-center gap-3">
           <Image src="/icons/panggilan-card.svg" alt="" width={38} height={38} aria-hidden="true" className="size-[38px] shrink-0" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[14px] font-semibold leading-[20px] text-white">Landing Page UMKM</p>
-            <p className="truncate text-[12px] font-medium leading-4 text-white/75">Kelompok 1</p>
+            <p className="truncate text-[14px] font-semibold leading-[20px] text-ktr-text-white">Landing Page UMKM</p>
+            <p className="truncate text-[12px] font-medium leading-4 text-ktr-text-white/75">Kelompok 1</p>
           </div>
-          <span className="shrink-0 text-[16px] font-semibold leading-6 tabular-nums text-white">1:04</span>
+          <span className="shrink-0 text-[16px] font-semibold leading-6 tabular-nums text-ktr-text-white">1:04</span>
         </Link>
         <button
           type="button"
           aria-label={muted ? "Nyalakan mikrofon" : "Matikan mikrofon"}
-          className="flex size-9 shrink-0 items-center justify-center rounded-full text-white transition-colors hover:bg-white/12 active:bg-white/18"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full text-ktr-text-white transition-colors hover:bg-ktr-text-white/12 active:bg-ktr-text-white/18"
           onClick={() => setMuted((value) => !value)}
         >
           <HugeiconsIcon icon={muted ? MicOff01Icon : Mic01Icon} size={21} strokeWidth={1.8} color="currentColor" aria-hidden="true" />

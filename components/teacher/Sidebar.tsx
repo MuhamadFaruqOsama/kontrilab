@@ -18,11 +18,11 @@ export default function Sidebar() {
   return (
     <div className="flex h-full flex-col bg-card">
       <div className="flex h-16 items-center px-6">
-        <span className="text-xl font-bold font-heading text-foreground tracking-tight">KontriLab</span>
+        <span className="text-xl font-bold font-heading text-ktr-text-primary tracking-tight">KontriLab</span>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
-        <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Projects</p>
+        <p className="px-3 text-xs font-semibold text-ktr-text-secondary uppercase tracking-wider mb-2">Projects</p>
         {navigation.map((item) => {
           const isActive = item.href === "/teacher" ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const iconRef = item.icon;
@@ -33,7 +33,7 @@ export default function Sidebar() {
               href={item.href}
               className={cn(
                 "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150",
-                isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                isActive ? "bg-ktr-primary text-ktr-text-white" : "text-ktr-text-secondary hover:bg-ktr-surface-soft hover:text-ktr-text-primary"
               )}
             >
               <HugeiconsIcon icon={iconRef} size={18} className="mr-3 flex-shrink-0 transition-colors duration-150" aria-hidden="true" />
@@ -44,7 +44,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-4">
-        <Link href="#" className="group flex items-center rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors duration-150">
+        <Link href="#" className="group flex items-center rounded-lg px-3 py-2 text-sm font-medium text-ktr-text-secondary hover:bg-ktr-surface-soft hover:text-ktr-text-primary transition-colors duration-150">
           <HugeiconsIcon icon={Settings01Icon} size={18} className="mr-3 flex-shrink-0" />
           Settings
         </Link>

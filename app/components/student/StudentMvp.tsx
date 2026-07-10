@@ -159,7 +159,7 @@ function ScreenShell({
   backHref?: string;
 }) {
   return (
-    <main className={cn("relative min-h-dvh w-full bg-background pt-6 text-foreground", showBottomNav ? "pb-[220px]" : "pb-8")}>
+    <main className={cn("relative min-h-dvh w-full bg-background pt-6 text-ktr-text-primary", showBottomNav ? "pb-[220px]" : "pb-8")}>
       <div className="mx-auto min-w-0 w-full max-w-[430px] px-4">
         {!showBottomNav ? <AppBackButton href={backHref} className="mb-6" /> : null}
         <header className="mb-6 flex min-w-0 items-start justify-between gap-3">
@@ -309,12 +309,12 @@ function ProjectMemberStack({ count }: { count: number }) {
       {avatarStyles.slice(0, visibleCount).map((className, index) => (
         <span
           key={className}
-          className={cn("-ml-1.5 size-8 rounded-full border-2 border-white", className)}
+          className={cn("-ml-1.5 size-8 rounded-full border-2 border-ktr-surface-card", className)}
           aria-label={`Anggota ${index + 1}`}
         />
       ))}
       {overflowCount > 0 ? (
-        <span className="-ml-1.5 flex size-8 items-center justify-center rounded-full border-2 border-white bg-ktr-primary-light text-[12px] font-semibold leading-4 text-ktr-text-primary">
+        <span className="-ml-1.5 flex size-8 items-center justify-center rounded-full border-2 border-ktr-surface-card bg-ktr-primary-light text-[12px] font-semibold leading-4 text-ktr-text-primary">
           +{overflowCount}
         </span>
       ) : null}
@@ -444,7 +444,7 @@ export function ProjectsPage() {
   }
 
   return (
-    <main className="relative min-h-dvh w-full bg-ktr-surface-bg-app pb-[220px] pt-6 text-foreground">
+    <main className="relative min-h-dvh w-full bg-ktr-surface-bg-app pb-[220px] pt-6 text-ktr-text-primary">
       <section className="px-4 pb-5 pt-0">
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-[24px] font-semibold leading-[32px] text-ktr-text-primary">Proyek Saya</h1>
@@ -688,7 +688,7 @@ function JoinGroupPtinjauan({ state }: { state: "idle" | "loading" | "found" | "
       <div className="mt-3 flex min-w-0 items-center gap-2">
         <div className="flex items-center pl-1">
           {avatarStyles.slice(0, 4).map((className) => (
-            <span key={className} className={cn("-ml-1.5 size-6 rounded-full border-2 border-white", className)} />
+            <span key={className} className={cn("-ml-1.5 size-6 rounded-full border-2 border-ktr-surface-card", className)} />
           ))}
         </div>
         <span className="min-w-0 truncate text-[12px] font-normal leading-[18px] text-ktr-primary">4 anggota sudah bergabung</span>
@@ -1066,7 +1066,7 @@ function ProjectHeaderBlock() {
 }
 
 function MemberAvatar({ member, size = "size-[44px]" }: { member: Pick<GroupMember, "initials" | "avatarClass">; size?: string }) {
-  return <span className={cn("flex shrink-0 items-center justify-center rounded-full text-[11px] font-semibold leading-none text-white", size, member.avatarClass)}>{member.initials}</span>;
+  return <span className={cn("flex shrink-0 items-center justify-center rounded-full text-[11px] font-semibold leading-none text-ktr-text-white", size, member.avatarClass)}>{member.initials}</span>;
 }
 
 function MemberRow({ member, showDivider = true }: { member: GroupMember; showDivider?: boolean }) {
@@ -1169,7 +1169,7 @@ function ActiveDiscussionSection({ item }: { item: DiscussionItem }) {
         <div className="mt-4 flex items-center justify-between gap-3">
           <div className="flex items-center pl-2">
             {groupMembers.slice(0, 4).map((member) => (
-              <MemberAvatar key={member.initials} member={member} size="-ml-2 size-7 border-2 border-white" />
+              <MemberAvatar key={member.initials} member={member} size="-ml-2 size-7 border-2 border-ktr-surface-card" />
             ))}
           </div>
           <span className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-[12px] text-[13px] font-medium leading-5 text-ktr-text-primary">
@@ -1357,7 +1357,7 @@ function SessionMessageCard({ status }: { status: DiscussionStatus }) {
         <p className="text-[14px] font-normal leading-[22px] text-ktr-text-primary">4 pesan belum dibaca</p>
         <SessionStatusText status={status} />
       </div>
-      <div className="mt-[14px] rounded-bl-[12px] rounded-br-[12px] rounded-tr-[12px] rounded-tl-[4px] bg-ktr-primary p-[14px] text-white">
+      <div className="mt-[14px] rounded-bl-[12px] rounded-br-[12px] rounded-tr-[12px] rounded-tl-[4px] bg-ktr-primary p-[14px] text-ktr-text-white">
         <div className="flex items-center gap-2">
           <MemberAvatar member={{ initials: "AP", avatarClass: "bg-[linear-gradient(135deg,#57c186,#2f536f)]" }} size="size-8" />
           <p className="text-[16px] font-semibold leading-[24px]">Alya P.</p>
@@ -1553,7 +1553,7 @@ function formatCallTime(s: number) {
 
 // ─── Call UI (Zoom-style) ─────────────────────────────────────────────────
 function CallMicStatus({ muted, className, variant = "light" }: { muted: boolean; className?: string; variant?: "light" | "dark" }) {
-  const statusClass = muted ? (variant === "dark" ? "text-white/45" : "text-ktr-text-tertiary") : "text-ktr-primary";
+  const statusClass = muted ? (variant === "dark" ? "text-ktr-text-white/45" : "text-ktr-text-tertiary") : "text-ktr-primary";
 
   return (
     <span
@@ -1601,14 +1601,14 @@ function CallParticipantTile({ participant, muted, voiceLevel }: { participant: 
   return (
     <div
       className={cn(
-        "relative flex min-h-0 flex-col items-center justify-center gap-3 rounded-[20px] bg-[#252d34] p-4 transition-[border-color,box-shadow,transform] duration-200",
+        "relative flex min-h-0 flex-col items-center justify-center gap-3 rounded-[20px] bg-ktr-call-card p-4 transition-[border-color,box-shadow,transform] duration-200",
         isSpeaking ? "call-participant-speaking" : "border border-transparent"
       )}
       style={isSpeaking ? ({ "--voice-level": voiceLevel.toFixed(2) } as React.CSSProperties) : undefined}
     >
       <CallMicStatus muted={participantMuted} variant="dark" className="absolute right-3 top-3" />
       <MemberAvatar member={participant} size="size-16" />
-      <p className="text-center text-[14px] font-medium leading-[22px] text-white">{participant.name}</p>
+      <p className="text-center text-[14px] font-medium leading-[22px] text-ktr-text-white">{participant.name}</p>
     </div>
   );
 }
@@ -1617,15 +1617,15 @@ function CallOverflowTile({ count, onClick }: { count: number; onClick: () => vo
   const overflowParticipants = callParticipantsList.slice(5, 8);
 
   return (
-    <button type="button" className="flex min-h-0 flex-col items-center justify-center gap-3 rounded-[20px] bg-[#252d34] p-4 text-white transition-colors hover:bg-[#2b343c]" onClick={onClick}>
+    <button type="button" className="flex min-h-0 flex-col items-center justify-center gap-3 rounded-[20px] bg-ktr-call-card p-4 text-ktr-text-white transition-colors hover:bg-ktr-call-card-hover" onClick={onClick}>
       <div className="flex items-center justify-center pl-4">
         {overflowParticipants.map((participant) => (
-          <MemberAvatar key={participant.initials} member={participant} size="-ml-4 size-12 border-2 border-[#252d34]" />
+          <MemberAvatar key={participant.initials} member={participant} size="-ml-4 size-12 border-2 border-ktr-call-card" />
         ))}
       </div>
       <div className="text-center">
         <p className="text-[16px] font-semibold leading-[24px]">+{count}</p>
-        <p className="mt-0.5 text-[11px] leading-4 text-white/50">peserta lainnya</p>
+        <p className="mt-0.5 text-[11px] leading-4 text-ktr-text-white/50">peserta lainnya</p>
       </div>
     </button>
   );
@@ -1638,13 +1638,13 @@ function CallControlButton({ label, children, onClick, active = false, danger = 
         type="button"
         onClick={onClick}
         className={cn(
-          "flex size-14 items-center justify-center rounded-full transition-colors",
-          danger ? "bg-red-500 active:bg-red-600" : active ? "bg-white/25" : "bg-white/[0.12]"
+          "flex size-14 items-center justify-center rounded-full text-ktr-text-white transition-colors",
+          danger ? "bg-ktr-project-need-attention active:bg-ktr-project-need-attention" : active ? "bg-ktr-text-white/25" : "bg-ktr-text-white/[0.12]"
         )}
       >
         {children}
       </button>
-      <span className="text-[11px] leading-4 text-white/50">{label}</span>
+      <span className="text-[11px] leading-4 text-ktr-text-white/50">{label}</span>
     </div>
   );
 }
@@ -1663,7 +1663,7 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
   return (
     <>
       <div
-        className="fixed inset-0 z-50 mx-auto flex w-full max-w-[430px] flex-col bg-[#1a2026]"
+        className="fixed inset-0 z-50 mx-auto flex w-full max-w-[430px] flex-col bg-ktr-call-surface"
         style={{ left: "50%", right: "auto", transform: "translateX(-50%)" }}
       >
         {/* Header */}
@@ -1671,16 +1671,16 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
           <button
             type="button"
             onClick={onBack}
-            className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-[#1a2026] text-white transition-colors hover:bg-white/10"
+            className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-ktr-call-surface text-ktr-text-white transition-colors hover:bg-ktr-text-white/10"
             aria-label="Kembali ke diskusi"
           >
             <HugeiconsIcon icon={ArrowLeft02Icon} size={20} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
           </button>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[17px] font-semibold leading-[26px] text-white">Kelompok 1</p>
-            <p className="mt-0.5 truncate text-[12px] leading-4 text-white/50">Landing Page UMKM</p>
+            <p className="truncate text-[17px] font-semibold leading-[26px] text-ktr-text-white">Kelompok 1</p>
+            <p className="mt-0.5 truncate text-[12px] leading-4 text-ktr-text-white/50">Landing Page UMKM</p>
           </div>
-          <p className="shrink-0 pt-1 text-[14px] font-medium tabular-nums text-white/60">{formatCallTime(elapsed)}</p>
+          <p className="shrink-0 pt-1 text-[14px] font-medium tabular-nums text-ktr-text-white/60">{formatCallTime(elapsed)}</p>
         </div>
 
         {/* Participant grid */}
@@ -1692,20 +1692,20 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
         {/* Controls */}
         <div className="grid shrink-0 grid-cols-4 gap-3 px-6 pb-16 pt-8">
           <CallControlButton label="Peserta" onClick={() => setParticipantsOpen(true)}>
-            <HugeiconsIcon icon={UserGroupIcon} size={22} strokeWidth={1.8} color="white" aria-hidden="true" />
+            <HugeiconsIcon icon={UserGroupIcon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
           </CallControlButton>
           <CallControlButton label={muted ? "Bisu" : "Mikrofon"} active={muted} onClick={() => setMuted((m) => !m)}>
-            <HugeiconsIcon icon={muted ? MicOff01Icon : Mic01Icon} size={22} strokeWidth={1.8} color="white" aria-hidden="true" />
+            <HugeiconsIcon icon={muted ? MicOff01Icon : Mic01Icon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
           </CallControlButton>
           <CallControlButton label="Speaker" active={speakerOn} onClick={() => setSpeakerOn((s) => !s)}>
-            <HugeiconsIcon icon={VolumeHighIcon} size={22} strokeWidth={1.8} color="white" aria-hidden="true" />
+            <HugeiconsIcon icon={VolumeHighIcon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
           </CallControlButton>
           <div className="relative flex min-w-0 justify-center">
             {isCurrentUserHost && exitMenuOpen ? (
-              <div className="ktr-dropdown-popover absolute bottom-[76px] right-0 z-10 w-[214px] rounded-[16px] border border-white/10 bg-[#252d34] p-1 shadow-[0_18px_42px_rgba(0,0,0,0.35)]">
+              <div className="ktr-dropdown-popover absolute bottom-[76px] right-0 z-10 w-[214px] rounded-[16px] border border-ktr-text-white/10 bg-ktr-call-card p-1 shadow-[0_18px_42px_rgba(43,48,51,0.35)]">
                 <button
                   type="button"
-                  className="block w-full rounded-[12px] px-3 py-2 text-left text-[14px] font-medium leading-[22px] text-white transition-colors hover:bg-white/10"
+                  className="block w-full rounded-[12px] px-3 py-2 text-left text-[14px] font-medium leading-[22px] text-ktr-text-white transition-colors hover:bg-ktr-text-white/10"
                   onClick={() => {
                     setExitMenuOpen(false);
                     onLeave();
@@ -1715,7 +1715,7 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
                 </button>
                 <button
                   type="button"
-                  className="block w-full rounded-[12px] px-3 py-2 text-left text-[14px] font-medium leading-[22px] text-red-300 transition-colors hover:bg-red-500/10"
+                  className="block w-full rounded-[12px] px-3 py-2 text-left text-[14px] font-medium leading-[22px] text-ktr-project-need-attention transition-colors hover:bg-ktr-project-need-attention-bg"
                   onClick={() => {
                     setExitMenuOpen(false);
                     onEndCall();
@@ -1726,7 +1726,7 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
               </div>
             ) : null}
             <CallControlButton label={isCurrentUserHost ? "Tutup" : "Keluar"} danger onClick={isCurrentUserHost ? () => setExitMenuOpen((open) => !open) : onLeave}>
-              <HugeiconsIcon icon={CallEnd01Icon} size={22} strokeWidth={1.8} color="white" aria-hidden="true" />
+              <HugeiconsIcon icon={CallEnd01Icon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
             </CallControlButton>
           </div>
         </div>
@@ -1740,16 +1740,16 @@ function ActiveCallBadge({ elapsed, onJoin }: { elapsed: number; onJoin: () => v
     <button
       type="button"
       onClick={onJoin}
-      className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-ktr-border-light bg-white px-3 py-2 shadow-none"
+      className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-ktr-border-light bg-ktr-surface-card px-3 py-2 shadow-none"
     >
       {/* Pulse dot */}
-      <PulseDot colorClass="bg-[#F5A623]" pingClassName="opacity-55" />
+      <PulseDot colorClass="bg-ktr-warning" pingClassName="opacity-55" />
       {/* Stacked avatars */}
       <div className="flex shrink-0 items-center pl-1">
         {callParticipantsList.slice(0, 4).map((p) => (
           <span
             key={p.initials}
-            className={cn("-ml-2 flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-white text-[9px] font-semibold text-white", p.avatarClass)}
+            className={cn("-ml-2 flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-ktr-surface-card text-[9px] font-semibold text-ktr-text-white", p.avatarClass)}
           >
             {p.initials}
           </span>
@@ -1770,8 +1770,8 @@ function CallSummaryPage({ duration, onDone }: { duration: number; onDone: () =>
   }, []);
 
   const summaryContent = (
-    <main className="fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden rounded-none bg-[#1a2026] text-white">
-      <div className="call-summary-enter relative h-full w-full overflow-hidden rounded-none bg-[#1a2026] text-center">
+    <main className="fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden rounded-none bg-ktr-call-surface text-ktr-text-white">
+      <div className="call-summary-enter relative h-full w-full overflow-hidden rounded-none bg-ktr-call-surface text-center">
         <Image
           src="/icons/ringkasan-panggilan.svg"
           alt=""
@@ -1783,27 +1783,27 @@ function CallSummaryPage({ duration, onDone }: { duration: number; onDone: () =>
 
         <section className="absolute left-[101px] top-[384px] flex w-[228px] flex-col items-center gap-6">
           <div className="flex w-full flex-col items-center gap-3.5">
-            <p className="w-full text-center text-[36px] font-semibold leading-[40px] tabular-nums text-white">{formatCallTime(duration)}</p>
+            <p className="w-full text-center text-[36px] font-semibold leading-[40px] tabular-nums text-ktr-text-white">{formatCallTime(duration)}</p>
             <div className="-mx-12 w-[324px] space-y-1 text-center">
-              <h1 className="text-[24px] font-semibold leading-8 text-white">Panggilan Berakhir</h1>
-              <p className="whitespace-nowrap text-[14px] font-normal leading-[22px] text-[#e8e8e8]">Lanjutkan pekerjaan Anda di proyek.</p>
+              <h1 className="text-[24px] font-semibold leading-8 text-ktr-text-white">Panggilan Berakhir</h1>
+              <p className="whitespace-nowrap text-[14px] font-normal leading-[22px] text-ktr-call-text-muted">Lanjutkan pekerjaan Anda di proyek.</p>
             </div>
           </div>
 
-          <div className="inline-flex h-9 w-[154px] items-center rounded-[10px] bg-[#252d34] px-2 py-1.5">
+          <div className="inline-flex h-9 w-[154px] items-center rounded-[10px] bg-ktr-call-card px-2 py-1.5">
             <div className="flex w-[72px] shrink-0 items-center pl-0">
               {callParticipantsList.slice(0, 4).map((participant) => (
-                <MemberAvatar key={participant.initials} member={participant} size="-ml-2 first:ml-0 size-6 border border-[#252d34]" />
+                <MemberAvatar key={participant.initials} member={participant} size="-ml-2 first:ml-0 size-6 border border-ktr-call-card" />
               ))}
             </div>
-            <span className="ml-1.5 shrink-0 text-left text-[14px] font-normal leading-[22px] text-white">{participantCount} peserta</span>
+            <span className="ml-1.5 shrink-0 text-left text-[14px] font-normal leading-[22px] text-ktr-text-white">{participantCount} peserta</span>
           </div>
         </section>
 
         <button
           type="button"
           onClick={onDone}
-          className="absolute left-1/2 top-[588px] inline-flex h-[42px] -translate-x-1/2 items-center justify-center whitespace-nowrap rounded-[12px] bg-white px-6 py-2.5 text-[16px] font-semibold leading-[22px] text-ktr-primary transition-colors hover:bg-white/92"
+          className="absolute left-1/2 top-[588px] inline-flex h-[42px] -translate-x-1/2 items-center justify-center whitespace-nowrap rounded-[12px] bg-ktr-surface-card px-6 py-2.5 text-[16px] font-semibold leading-[22px] text-ktr-primary transition-colors hover:bg-ktr-text-white/92"
         >
           Kembali ke Diskusi
         </button>
@@ -1938,8 +1938,12 @@ export function DiscussionChatPage({
               />
               <button
                 type="button"
-                aria-label="Mulai Panggilan"
-                className="flex size-11 items-center justify-center rounded-[10px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
+                aria-label={callActive ? "Panggilan sedang berlangsung" : "Mulai Panggilan"}
+                disabled={callActive}
+                className={cn(
+                  "flex size-11 items-center justify-center rounded-[10px] transition-colors",
+                  callActive ? "cursor-not-allowed text-ktr-text-tertiary" : "text-ktr-text-primary hover:bg-ktr-surface-soft"
+                )}
                 onClick={() => setStartCallConfirmOpen(true)}
               >
                 <Icon icon={Call02Icon} />
@@ -2013,8 +2017,8 @@ export function DiscussionChatPage({
                 return (
                   <div key={msg.id} className={cn("flex justify-end", messageSpacing)}>
                     <div className="inline-block max-w-[min(78%,292px)] rounded-l-[16px] rounded-br-[16px] rounded-tr-[0px] bg-ktr-primary px-3.5 py-2">
-                      <p className="text-[14px] font-medium leading-[22px] text-white">{msg.content}</p>
-                      <p className="mt-1 text-right text-[12px] text-[#eeeeee]">{msg.time}</p>
+                      <p className="text-[14px] font-medium leading-[22px] text-ktr-text-white">{msg.content}</p>
+                      <p className="mt-1 text-right text-[12px] text-ktr-border-light">{msg.time}</p>
                     </div>
                   </div>
                 );
@@ -2025,9 +2029,9 @@ export function DiscussionChatPage({
                   {isGroupedMessage ? <span className="size-8 shrink-0" aria-hidden="true" /> : <MemberAvatar member={msg} size="size-8 mt-[22px] shrink-0" />}
                   <div className="flex min-w-0 flex-col items-start">
                     {!isGroupedMessage ? <span className="mb-1 block text-[14px] text-ktr-text-secondary">{msg.author}</span> : null}
-                    <div className="inline-block max-w-[min(78%,292px)] rounded-r-[16px] rounded-bl-[16px] rounded-tl-[0px] bg-[#f9f9f9] px-3.5 py-2">
+                    <div className="inline-block max-w-[min(78%,292px)] rounded-r-[16px] rounded-bl-[16px] rounded-tl-[0px] bg-ktr-surface-soft px-3.5 py-2">
                       <p className="text-[14px] font-medium leading-[22px] text-ktr-text-primary">{msg.content}</p>
-                      <p className="mt-1 text-right text-[12px] text-[#879196]">{msg.time}</p>
+                      <p className="mt-1 text-right text-[12px] text-ktr-text-tertiary">{msg.time}</p>
                     </div>
                   </div>
                 </div>
@@ -2039,7 +2043,7 @@ export function DiscussionChatPage({
 
         {/* Input bar */}
         <div className="shrink-0 bg-background px-3.5 py-2">
-          <div className="flex flex-col gap-2 rounded-[14px] bg-white px-3 py-2 shadow-[0_8px_24px_rgba(43,48,51,0.08)]">
+          <div className="flex flex-col gap-2 rounded-[14px] bg-ktr-surface-card px-3 pb-2 pt-3 shadow-[0_8px_24px_rgba(43,48,51,0.08)]">
             <input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -2054,10 +2058,10 @@ export function DiscussionChatPage({
             />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 text-ktr-text-primary">
-                <button type="button" aria-label="Galeri" className="text-[#879196] hover:text-ktr-primary transition-colors" onClick={() => toast.info("Galeri", { description: "Pilih foto dari galeri (segera hadir)" })}>
+                <button type="button" aria-label="Galeri" className="text-ktr-text-tertiary hover:text-ktr-primary transition-colors" onClick={() => toast.info("Galeri", { description: "Pilih foto dari galeri (segera hadir)" })}>
                   <HugeiconsIcon icon={Album02Icon} size={22} strokeWidth={1.8} color="currentColor" />
                 </button>
-                <button type="button" aria-label="Dokumen" className="text-[#879196] hover:text-ktr-primary transition-colors" onClick={() => toast.info("Dokumen", { description: "Fitur unggah dokumen (segera hadir)" })}>
+                <button type="button" aria-label="Dokumen" className="text-ktr-text-tertiary hover:text-ktr-primary transition-colors" onClick={() => toast.info("Dokumen", { description: "Fitur unggah dokumen (segera hadir)" })}>
                   <HugeiconsIcon icon={File02Icon} size={22} strokeWidth={1.8} color="currentColor" />
                 </button>
               </div>
@@ -2218,7 +2222,7 @@ export function ProgressInputPage() {
           <textarea
             value={progress}
             onChange={(event) => setProgress(event.target.value)}
-            className="min-h-28 w-full min-w-0 resize-none rounded-[12px] border border-ktr-border-light bg-white px-3.5 py-3 text-[14px] leading-[22px] text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ktr-primary/12"
+            className="min-h-28 w-full min-w-0 resize-none rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3.5 py-3 text-[14px] leading-[22px] text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ktr-primary/12"
             placeholder="Contoh: Saya menyelesaikan draft tampilan awal dan menambahkan konten utama."
           />
         </label>
@@ -2257,7 +2261,7 @@ export function ProgressInputPage() {
           <input
             value={evidenceLink}
             onChange={(event) => setEvidenceLink(event.target.value)}
-            className="flex h-11 w-full min-w-0 rounded-[12px] border border-ktr-border-light bg-white px-3.5 text-[14px] leading-none text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ktr-primary/12"
+            className="flex h-11 w-full min-w-0 rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3.5 text-[14px] leading-none text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ktr-primary/12"
             placeholder="Tempel link bukti progress"
           />
         </label>

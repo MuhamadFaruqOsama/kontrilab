@@ -7,8 +7,8 @@ import { publicAppConfig } from "@/lib/env";
 
 export default function OnboardingPage() {
   return (
-    <main className="min-h-dvh bg-ktr-surface-bg-app text-foreground sm:bg-ktr-neutral-1000 sm:py-6">
-      <section className="relative ktr-app-shell mx-auto min-h-dvh w-full max-w-[430px] overflow-hidden bg-ktr-surface-bg-app rounded-[12px]">
+    <main className="min-h-dvh bg-ktr-surface-bg-app text-ktr-text-primary sm:bg-ktr-neutral-1000 sm:py-6">
+      <section className="relative ktr-app-shell mx-auto min-h-dvh w-full max-w-[430px] overflow-hidden bg-ktr-surface-bg-app">
         <Image
           src="/images/onboarding-hero.svg"
           alt={`Ilustrasi siswa siap memulai proyek ${publicAppConfig.name}`}
@@ -33,7 +33,7 @@ export default function OnboardingPage() {
 
             <Link
               href="/register"
-              className="flex h-[48px] w-full items-center justify-center gap-3 rounded-[12px] bg-ktr-primary px-4 text-base font-medium text-white hover:bg-ktr-primary-hover"
+              className="flex h-[48px] w-full items-center justify-center gap-3 rounded-[12px] bg-ktr-primary px-4 text-base font-medium text-ktr-text-white hover:bg-ktr-primary-hover"
             >
               Mulai Sekarang
               <HugeiconsIcon icon={ArrowRight02Icon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />

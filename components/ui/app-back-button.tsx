@@ -22,17 +22,17 @@ export function AppBackButton({ href, label = "Kembali", className, onClick }: A
       return;
     }
 
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-      return;
-    }
-
     if (href) {
       router.push(href);
       return;
     }
 
-    router.back();
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+
+    router.push("/");
   }
 
   return (
@@ -41,7 +41,7 @@ export function AppBackButton({ href, label = "Kembali", className, onClick }: A
       aria-label={label}
       onClick={handleClick}
       className={cn(
-        "inline-flex size-11 items-center justify-center rounded-[10px] border-0 bg-white text-ktr-text-primary shadow-none transition-colors",
+        "inline-flex size-11 items-center justify-center rounded-[10px] border-0 bg-ktr-surface-card text-ktr-text-primary shadow-none transition-colors",
         "hover:bg-ktr-surface-soft focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ktr-primary/15",
         className,
       )}

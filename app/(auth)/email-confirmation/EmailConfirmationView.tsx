@@ -29,7 +29,7 @@ export function EmailConfirmationView({ email, onBack }: { email: string; onBack
 
         <Link
           href="/login"
-          className="mt-7 flex h-12 w-[202px] items-center justify-center rounded-[10px] bg-ktr-primary px-4 text-base font-medium text-white hover:bg-ktr-primary-hover"
+          className="mt-7 flex h-12 w-[202px] items-center justify-center rounded-[10px] bg-ktr-primary px-4 text-base font-medium text-ktr-text-white hover:bg-ktr-primary-hover"
           aria-label={`Masuk setelah konfirmasi email untuk ${email}`}
           onClick={() => toast.info("Lanjut masuk", { description: "Masuk setelah akun selesai diverifikasi." })}
         >

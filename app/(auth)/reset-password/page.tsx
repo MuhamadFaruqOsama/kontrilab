@@ -65,7 +65,7 @@ export default function ResetPasswordPage() {
           {error ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-project-need-attention">{error}</p> : null}
           {message ? <p className="text-[13px] font-medium leading-ktr-relaxed text-ktr-primary-dark">{message}</p> : null}
 
-          <Button type="submit" size="lg" disabled={isSubmitting} className="h-12 w-full rounded-[10px] bg-ktr-primary text-white hover:bg-ktr-primary-hover">
+          <Button type="submit" size="lg" disabled={isSubmitting} className="h-12 w-full rounded-[10px] bg-ktr-primary text-ktr-text-white hover:bg-ktr-primary-hover">
             {isSubmitting ? "Memproses..." : "Simpan Kata Sandi"}
           </Button>
         </form>

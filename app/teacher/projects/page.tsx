@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Button } from "@heroui/react/button";
@@ -26,7 +26,7 @@ export default function ProjectsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold font-heading text-foreground tracking-tight">Proyek</h1>
+        <h1 className="text-3xl font-bold font-heading text-ktr-text-primary tracking-tight">Proyek</h1>
       </div>
 
       {/* Filters (No border frame) */}
@@ -57,10 +57,10 @@ export default function ProjectsPage() {
               { value: "Menunggu Tinjauan", label: "Menunggu Tinjauan" },
             ]}
           />
-          <Button variant="outline" className="border-default-200 shadow-none px-3 min-w-10 h-10">
+          <Button variant="outline" className="border-ktr-border-light shadow-none px-3 min-w-10 h-10">
             <HugeiconsIcon icon={FilterIcon} size={18} />
           </Button>
-          <Button variant="primary" className="h-10 gap-2 px-4 font-medium text-white shadow-none">
+          <Button variant="primary" className="h-10 gap-2 px-4 font-medium text-ktr-text-white shadow-none">
             <HugeiconsIcon icon={PlusSignIcon} size={16} />
             Tambah Project
           </Button>
@@ -71,34 +71,34 @@ export default function ProjectsPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {mockProjects.map((project) => (
           <Link key={project.id} href={`/teacher/projects/${project.id}`} className="block">
-            <Card className="shadow-none border border-default-200 hover:border-primary transition-colors h-full">
+            <Card className="shadow-none border border-ktr-border-light hover:border-ktr-primary transition-colors h-full">
             <Card.Content className="p-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-primary-100 p-2.5">
-                    <HugeiconsIcon icon={Folder01Icon} size={24} className="text-primary" />
+                  <div className="rounded-lg bg-ktr-primary-light p-2.5">
+                    <HugeiconsIcon icon={Folder01Icon} size={24} className="text-ktr-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground text-base leading-tight line-clamp-1">{project.name}</h3>
-                    <p className="text-xs text-default-500 mt-1">{project.class} â€¢ {project.groups} Kelompok</p>
+                    <h3 className="font-semibold text-ktr-text-primary text-base leading-tight line-clamp-1">{project.name}</h3>
+                    <p className="text-xs text-ktr-text-tertiary mt-1">{project.class} • {project.groups} Kelompok</p>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" className="text-default-500 px-2 min-w-8 h-8">
+                <Button variant="ghost" size="sm" className="text-ktr-text-tertiary px-2 min-w-8 h-8">
                   <HugeiconsIcon icon={MoreVerticalCircle01Icon} size={18} />
                 </Button>
               </div>
 
               <div className="mt-5 space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-default-500">Progres</span>
-                  <span className="font-medium text-foreground">{project.progress}%</span>
+                  <span className="text-ktr-text-tertiary">Progres</span>
+                  <span className="font-medium text-ktr-text-primary">{project.progress}%</span>
                 </div>
-                <div className="w-full bg-default-200 rounded-full h-2 overflow-hidden">
-                  <div className="bg-primary h-full rounded-full" style={{ width: `${project.progress}%` }}></div>
+                <div className="w-full bg-ktr-border-light rounded-full h-2 overflow-hidden">
+                  <div className="bg-ktr-primary h-full rounded-full" style={{ width: `${project.progress}%` }}></div>
                 </div>
               </div>
 
-              <div className="mt-5 flex items-center justify-between border-t border-default-200 pt-4">
+              <div className="mt-5 flex items-center justify-between border-t border-ktr-border-light pt-4">
                 <Chip size="sm" variant="secondary" color={
                   project.status === 'Selesai' ? 'success' : 
                   project.status === 'Sedang Berjalan' ? 'accent' : 'warning'

@@ -47,7 +47,7 @@ function AppDropdown({ trigger, label, items, placement = "bottom end", triggerC
                 item.selected
                   ? "bg-ktr-primary text-ktr-text-white"
                   : item.tone === "danger"
-                    ? "text-red-500 hover:bg-red-50 focus:bg-red-50"
+                    ? "text-ktr-project-need-attention hover:bg-ktr-project-need-attention-bg focus:bg-ktr-project-need-attention-bg"
                     : "text-ktr-text-primary hover:bg-ktr-primary-soft focus:bg-ktr-primary-soft"
               )}
             >

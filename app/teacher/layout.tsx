@@ -9,17 +9,17 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
   const isPureProjectDetail = /^\/teacher\/projects\/[^/]+$/.test(pathname);
 
   if (isPureProjectDetail) {
-    return <main className="min-h-dvh bg-default-50 font-sans">{children}</main>;
+    return <main className="min-h-dvh bg-ktr-surface-soft font-sans">{children}</main>;
   }
 
   return (
-    <div className="flex h-screen w-full bg-default-50 overflow-hidden font-sans">
-      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r border-default-200 bg-background">
+    <div className="flex h-screen w-full bg-ktr-surface-soft overflow-hidden font-sans">
+      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r border-ktr-border-light bg-background">
         <Sidebar />
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 flex items-center border-b border-default-200 bg-background px-6 shrink-0">
+        <header className="h-16 flex items-center border-b border-ktr-border-light bg-background px-6 shrink-0">
           <Topbar />
         </header>
 

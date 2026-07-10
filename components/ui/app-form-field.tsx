@@ -27,7 +27,7 @@ export const AppFormField = forwardRef<HTMLInputElement, AppFormFieldProps>(func
       <span className="block text-[14px] font-medium leading-ktr-snug text-ktr-text-primary">{label}</span>
       <span
         className={cn(
-          "flex h-11 items-center rounded-[12px] border bg-white px-3.5 text-ktr-text-primary",
+          "flex h-11 items-center rounded-[12px] border bg-ktr-surface-card px-3.5 text-ktr-text-primary",
           "border-ktr-border-light focus-within:border-ktr-border-focus focus-within:ring-3 focus-within:ring-ktr-primary/12",
           error && "border-ktr-project-need-attention focus-within:border-ktr-project-need-attention focus-within:ring-ktr-project-need-attention/15",
         )}

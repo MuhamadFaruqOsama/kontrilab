@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Button } from "@heroui/react/button";
@@ -25,27 +25,27 @@ export default function ContributionsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-heading text-foreground tracking-tight">Distribusi Kontribusi</h1>
+          <h1 className="text-3xl font-bold font-heading text-ktr-text-primary tracking-tight">Distribusi Kontribusi</h1>
         </div>
       </div>
 
       {/* Contribution Status Summary */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-success-200 bg-success-50 p-4">
-          <p className="text-sm font-medium text-success-800">Tercatat Baik</p>
-          <p className="text-3xl font-bold font-heading mt-2 text-success-700">45</p>
+        <div className="rounded-xl border border-ktr-success bg-ktr-success-bg p-4">
+          <p className="text-sm font-medium text-ktr-success">Tercatat Baik</p>
+          <p className="text-3xl font-bold font-heading mt-2 text-ktr-success">45</p>
         </div>
-        <div className="rounded-xl border border-primary-200 bg-primary-50 p-4">
-          <p className="text-sm font-medium text-primary-800">Cukup Terlihat</p>
-          <p className="text-3xl font-bold font-heading mt-2 text-primary-700">24</p>
+        <div className="rounded-xl border border-ktr-primary/35 bg-ktr-primary-soft p-4">
+          <p className="text-sm font-medium text-ktr-primary-dark">Cukup Terlihat</p>
+          <p className="text-3xl font-bold font-heading mt-2 text-ktr-primary-hover">24</p>
         </div>
-        <div className="rounded-xl border border-warning-200 bg-warning-50 p-4">
-          <p className="text-sm font-medium text-warning-800">Perlu Ditinjau</p>
-          <p className="text-3xl font-bold font-heading mt-2 text-warning-700">12</p>
+        <div className="rounded-xl border border-ktr-warning bg-ktr-warning-bg p-4">
+          <p className="text-sm font-medium text-ktr-warning">Perlu Ditinjau</p>
+          <p className="text-3xl font-bold font-heading mt-2 text-ktr-warning">12</p>
         </div>
-        <div className="rounded-xl border border-default-200 bg-default-50 p-4">
-          <p className="text-sm font-medium text-default-800">Belum Cukup Data</p>
-          <p className="text-3xl font-bold font-heading mt-2 text-default-700">3</p>
+        <div className="rounded-xl border border-ktr-border-light bg-ktr-surface-soft p-4">
+          <p className="text-sm font-medium text-ktr-text-primary">Belum Cukup Data</p>
+          <p className="text-3xl font-bold font-heading mt-2 text-ktr-text-primary">3</p>
         </div>
       </div>
 
@@ -86,17 +86,17 @@ export default function ContributionsPage() {
               { value: "Perlu Ditinjau", label: "Perlu Ditinjau" },
             ]}
           />
-          <Button variant="outline" className="border-default-200 shadow-none px-3 min-w-10 h-10">
+          <Button variant="outline" className="border-ktr-border-light shadow-none px-3 min-w-10 h-10">
             <HugeiconsIcon icon={FilterIcon} size={18} />
           </Button>
         </div>
       </div>
 
       {/* Table */}
-      <Card className="shadow-none border border-default-200 overflow-hidden">
+      <Card className="shadow-none border border-ktr-border-light overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-default-50 text-default-500 font-medium border-b border-default-200">
+            <thead className="bg-ktr-surface-soft text-ktr-text-tertiary font-medium border-b border-ktr-border-light">
               <tr>
                 <th className="px-6 py-4 font-medium">Nama Siswa</th>
                 <th className="px-6 py-4 font-medium">Proyek</th>
@@ -109,25 +109,25 @@ export default function ContributionsPage() {
                 <th className="px-6 py-4 text-right font-medium">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-default-100">
+            <tbody className="divide-y divide-ktr-border-light">
               {mockContributions.map((c) => (
-                <tr key={c.id} className="hover:bg-default-50/50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-foreground">{c.name}</td>
-                  <td className="px-6 py-4 text-default-500">{c.project}</td>
-                  <td className="px-6 py-4 text-default-500">{c.group}</td>
-                  <td className="px-6 py-4 text-center text-default-500">{c.discussion}</td>
-                  <td className="px-6 py-4 text-center text-default-500">{c.progress}</td>
-                  <td className="px-6 py-4 text-center text-default-500">{c.attachments}</td>
-                  <td className="px-6 py-4 text-center text-default-500">{c.peerAss}</td>
+                <tr key={c.id} className="hover:bg-ktr-surface-soft/50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-ktr-text-primary">{c.name}</td>
+                  <td className="px-6 py-4 text-ktr-text-tertiary">{c.project}</td>
+                  <td className="px-6 py-4 text-ktr-text-tertiary">{c.group}</td>
+                  <td className="px-6 py-4 text-center text-ktr-text-tertiary">{c.discussion}</td>
+                  <td className="px-6 py-4 text-center text-ktr-text-tertiary">{c.progress}</td>
+                  <td className="px-6 py-4 text-center text-ktr-text-tertiary">{c.attachments}</td>
+                  <td className="px-6 py-4 text-center text-ktr-text-tertiary">{c.peerAss}</td>
                   <td className="px-6 py-4 text-center">
                     <StatusBadge status={c.status} />
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Link href={`/teacher/students/${c.id}`} className="p-2 inline-flex text-default-500 hover:text-primary hover:bg-primary-50 rounded-md transition-colors" title="Lihat Detail Siswa">
+                      <Link href={`/teacher/students/${c.id}`} className="p-2 inline-flex text-ktr-text-tertiary hover:text-ktr-primary hover:bg-ktr-primary-soft rounded-md transition-colors" title="Lihat Detail Siswa">
                         <HugeiconsIcon icon={EyeIcon} size={16} />
                       </Link>
-                      <Link href={`/teacher/projects/${c.projectId}/groups/${c.groupId}`} className="p-2 inline-flex text-default-500 hover:text-primary hover:bg-primary-50 rounded-md transition-colors" title="Lihat Detail Kelompok">
+                      <Link href={`/teacher/projects/${c.projectId}/groups/${c.groupId}`} className="p-2 inline-flex text-ktr-text-tertiary hover:text-ktr-primary hover:bg-ktr-primary-soft rounded-md transition-colors" title="Lihat Detail Kelompok">
                         <HugeiconsIcon icon={UserGroupIcon} size={16} />
                       </Link>
                     </div>

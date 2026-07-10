@@ -6,7 +6,7 @@ import BottomNav from "@/app/components/student/BottomNav";
 
 export default function StudentHomePage() {
   return (
-    <main className="relative min-h-dvh bg-background pb-[220px] pt-6 text-foreground">
+    <main className="relative min-h-dvh bg-background pb-[220px] pt-6 text-ktr-text-primary">
       <div className="mx-auto flex w-full max-w-[430px] flex-col gap-6 px-4">
         <StudentHeader />
         <ActiveProject />

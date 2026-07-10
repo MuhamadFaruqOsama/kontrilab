@@ -59,7 +59,7 @@ function ConfirmModal({
                 type="button"
                 className={cn(
                   "h-11 rounded-[12px] text-[14px] font-medium",
-                  tone === "danger" ? "bg-red-500 text-white hover:bg-red-500/90" : "bg-ktr-primary text-ktr-text-white hover:bg-ktr-primary-hover"
+                  tone === "danger" ? "bg-ktr-project-need-attention text-ktr-text-white hover:bg-ktr-project-need-attention" : "bg-ktr-primary text-ktr-text-white hover:bg-ktr-primary-hover"
                 )}
                 onClick={handleConfirm}
               >

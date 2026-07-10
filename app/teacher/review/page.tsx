@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Button } from "@heroui/react/button";
@@ -22,7 +22,7 @@ export default function TinjauanPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-heading text-foreground tracking-tight">Tinjau Proyek</h1>
+        <h1 className="text-3xl font-bold font-heading text-ktr-text-primary tracking-tight">Tinjau Proyek</h1>
       </div>
 
       {/* Filters (No border frame) */}
@@ -55,17 +55,17 @@ export default function TinjauanPage() {
               { value: "Selesai", label: "Selesai" },
             ]}
           />
-          <Button variant="outline" className="border-default-200 shadow-none px-3 min-w-10 h-10">
+          <Button variant="outline" className="border-ktr-border-light shadow-none px-3 min-w-10 h-10">
             <HugeiconsIcon icon={FilterIcon} size={18} />
           </Button>
         </div>
       </div>
 
       {/* Table */}
-      <Card className="shadow-none border border-default-200 overflow-hidden">
+      <Card className="shadow-none border border-ktr-border-light overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-default-50 text-default-500 font-medium border-b border-default-200">
+            <thead className="bg-ktr-surface-soft text-ktr-text-tertiary font-medium border-b border-ktr-border-light">
               <tr>
                 <th className="px-6 py-4 font-medium">Proyek</th>
                 <th className="px-6 py-4 font-medium">Kelompok</th>
@@ -75,24 +75,24 @@ export default function TinjauanPage() {
                 <th className="px-6 py-4 text-right font-medium">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-default-100">
+            <tbody className="divide-y divide-ktr-border-light">
               {mockSubmissions.map((sub) => (
-                <tr key={sub.id} className="hover:bg-default-50/50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-foreground">{sub.project}</td>
-                  <td className="px-6 py-4 text-default-500">{sub.group}</td>
-                  <td className="px-6 py-4 text-default-500">{sub.submitDate}</td>
+                <tr key={sub.id} className="hover:bg-ktr-surface-soft/50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-ktr-text-primary">{sub.project}</td>
+                  <td className="px-6 py-4 text-ktr-text-tertiary">{sub.group}</td>
+                  <td className="px-6 py-4 text-ktr-text-tertiary">{sub.submitDate}</td>
                   <td className="px-6 py-4">
                     {sub.finalResult.startsWith('http') ? (
-                      <a href={sub.finalResult} target="_blank" rel="noreferrer" className="text-primary hover:underline">{sub.finalResult}</a>
+                      <a href={sub.finalResult} target="_blank" rel="noreferrer" className="text-ktr-primary hover:underline">{sub.finalResult}</a>
                     ) : (
-                      <span className="text-foreground">{sub.finalResult}</span>
+                      <span className="text-ktr-text-primary">{sub.finalResult}</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <StatusBadge status={sub.status} />
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <Link href={`/teacher/tinjauan/${sub.id}`} className="inline-flex h-9 items-center justify-center rounded-md bg-primary/10 px-4 text-xs font-medium text-primary hover:bg-primary/20 transition-colors">
+                    <Link href={`/teacher/tinjauan/${sub.id}`} className="inline-flex h-9 items-center justify-center rounded-md bg-ktr-primary-soft px-4 text-xs font-medium text-ktr-primary hover:bg-ktr-primary-light transition-colors">
                       <HugeiconsIcon icon={EyeIcon} size={14} className="mr-2" />
                       Tinjau Proyek
                     </Link>

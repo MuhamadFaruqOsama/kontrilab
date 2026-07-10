@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Button } from "@heroui/react/button";
@@ -55,16 +55,16 @@ export default function AIInsightPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center p-1">
-          <div className="absolute inset-0 bg-primary/30 blur-lg rounded-full animate-pulse"></div>
-          <HugeiconsIcon icon={BrainIcon} size={28} className="text-primary relative animate-bounce" style={{ animationDuration: '3s' }} />
+          <div className="absolute inset-0 bg-ktr-primary-light blur-lg rounded-full animate-pulse"></div>
+          <HugeiconsIcon icon={BrainIcon} size={28} className="text-ktr-primary relative animate-bounce" style={{ animationDuration: '3s' }} />
         </div>
-        <h1 className="text-3xl font-bold font-heading text-foreground tracking-tight">AI Insight Center</h1>
+        <h1 className="text-3xl font-bold font-heading text-ktr-text-primary tracking-tight">AI Insight Center</h1>
       </div>
 
       {/* Disclaimer Banner */}
-      <Card className="shadow-none border border-primary-200 bg-primary-50/50">
+      <Card className="shadow-none border border-ktr-primary/35 bg-ktr-primary-soft/50">
         <Card.Content className="p-4">
-          <p className="text-sm font-medium text-primary-800 text-center italic">
+          <p className="text-sm font-medium text-ktr-primary-dark text-center italic">
             "Ringkasan AI bersifat pendukung. Guru tetap menentukan penilaian akhir berdasarkan konteks penuh pembelajaran."
           </p>
         </Card.Content>
@@ -75,13 +75,13 @@ export default function AIInsightPage() {
         {mockInsights.map((insight) => {
           const isPositive = insight.type === "positif";
           return (
-            <Card key={insight.id} className="shadow-none border border-default-200 flex flex-col">
+            <Card key={insight.id} className="shadow-none border border-ktr-border-light flex flex-col">
               {/* Card Header Tag */}
-              <div className={`px-5 py-3 border-b border-default-200 flex items-center gap-3 ${isPositive ? "bg-success-50/70" : "bg-warning-50/70"}`}>
+              <div className={`px-5 py-3 border-b border-ktr-border-light flex items-center gap-3 ${isPositive ? "bg-ktr-success-bg/70" : "bg-ktr-warning-bg/70"}`}>
                 <HugeiconsIcon 
                   icon={isPositive ? UserCheck01Icon : Alert01Icon} 
                   size={18} 
-                  className={isPositive ? "text-success-600" : "text-warning-600"} 
+                  className={isPositive ? "text-ktr-success" : "text-ktr-warning"} 
                 />
                 <Chip 
                   color={isPositive ? "success" : "warning"} 
@@ -96,34 +96,34 @@ export default function AIInsightPage() {
               <Card.Content className="p-5 flex flex-col gap-4 flex-1">
                 {/* Title & Target */}
                 <div>
-                  <h3 className="font-semibold text-foreground text-base leading-snug">{insight.title}</h3>
-                  <p className="text-xs text-default-500 mt-1">
-                    <span className="font-medium text-foreground">{insight.target}</span> Â· {insight.project}
+                  <h3 className="font-semibold text-ktr-text-primary text-base leading-snug">{insight.title}</h3>
+                  <p className="text-xs text-ktr-text-tertiary mt-1">
+                    <span className="font-medium text-ktr-text-primary">{insight.target}</span> Â· {insight.project}
                   </p>
                 </div>
 
                 {/* Summary */}
-                <p className="text-sm text-default-600 leading-relaxed">{insight.summary}</p>
+                <p className="text-sm text-ktr-text-secondary leading-relaxed">{insight.summary}</p>
 
                 {/* Evidence */}
-                <div className="rounded-xl border border-default-200 bg-default-50 p-3">
+                <div className="rounded-xl border border-ktr-border-light bg-ktr-surface-soft p-3">
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <HugeiconsIcon icon={Bookmark01Icon} size={14} className="text-default-500" />
-                    <p className="text-xs font-semibold text-default-500 capitalize tracking-wide">Referensi Bukti</p>
+                    <HugeiconsIcon icon={Bookmark01Icon} size={14} className="text-ktr-text-tertiary" />
+                    <p className="text-xs font-semibold text-ktr-text-tertiary capitalize tracking-wide">Referensi Bukti</p>
                   </div>
-                  <p className="text-xs text-default-500 italic leading-relaxed">{insight.evidence}</p>
+                  <p className="text-xs text-ktr-text-tertiary italic leading-relaxed">{insight.evidence}</p>
                 </div>
 
                 {/* Suggestion */}
                 <div className="flex items-start gap-2">
-                  <HugeiconsIcon icon={InformationCircleIcon} size={16} className="text-primary shrink-0 mt-0.5" />
-                  <p className="text-sm text-default-600 leading-relaxed">{insight.suggestion}</p>
+                  <HugeiconsIcon icon={InformationCircleIcon} size={16} className="text-ktr-primary shrink-0 mt-0.5" />
+                  <p className="text-sm text-ktr-text-secondary leading-relaxed">{insight.suggestion}</p>
                 </div>
 
                 {/* CTA */}
                 <Link
                   href={insight.link}
-                  className="mt-auto inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-default-100 px-4 text-sm font-medium text-foreground hover:bg-default-200 transition-colors"
+                  className="mt-auto inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-ktr-surface-soft px-4 text-sm font-medium text-ktr-text-primary hover:bg-ktr-border-light transition-colors"
                 >
                   Lihat Detail Konteks <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
                 </Link>

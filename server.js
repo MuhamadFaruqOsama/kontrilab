@@ -8,7 +8,13 @@ const dev =
 const hostname = process.env.HOST || 'localhost';
 const port = Number(process.env.PORT || 3000);
 
-const app = next({ dev, hostname, port });
+const app = next({
+  dev,
+  hostname,
+  port,
+  webpack: dev,
+  turbopack: false,
+});
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
