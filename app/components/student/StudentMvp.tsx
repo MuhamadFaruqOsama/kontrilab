@@ -420,9 +420,36 @@ export function ProjectsPage() {
   const [query, setQuery] = React.useState("");
   const [filter, setFilter] = React.useState<"Semua" | Status>("Semua");
   const [showBackToSearch, setShowBackToSearch] = React.useState(false);
+  const [apiProjects, setApiProjects] = React.useState<Project[]>(projects);
   const searchPanelRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const res = await fetch("/api/student/projects");
+        if (res.ok) {
+          const data = await res.json();
+          // Map DB project to UI Project format
+          const mapped = data.map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            className: p.className,
+            group: "Belum berkelompok",
+            members: "0 anggota",
+            deadline: p.deadline ? new Date(p.deadline).toLocaleDateString('id-ID') : "TBA",
+            status: p.status === "IN_PROGRESS" ? "Sedang Berjalan" : p.status === "NOT_STARTED" ? "Belum Dimulai" : p.status === "FINISHED" ? "Selesai" : "Revisi"
+          }));
+          setApiProjects(mapped);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchProjects();
+  }, []);
+
   const normalizedQuery = query.trim().toLowerCase();
-  const visibleProjects = projects.filter((project) => {
+  const visibleProjects = apiProjects.filter((project) => {
     const matchesQuery = normalizedQuery.length === 0 || `${project.title} ${project.className} ${project.group}`.toLowerCase().includes(normalizedQuery);
     const matchesFilter = filter === "Semua" || project.status === filter;
     return matchesQuery && matchesFilter;

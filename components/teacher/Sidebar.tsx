@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { DashboardSquare01Icon, Folder01Icon, UserGroupIcon, Settings01Icon } from "@hugeicons/core-free-icons";
+import { DashboardSquare01Icon, Folder01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 
 const navigation = [
   { name: "Dashboard", href: "/teacher", icon: DashboardSquare01Icon },
@@ -16,13 +16,12 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full flex-col bg-card">
-      <div className="flex h-16 items-center px-6">
-        <span className="text-xl font-bold font-heading text-ktr-text-primary tracking-tight">KontriLab</span>
+    <div className="flex h-full flex-col bg-white">
+      <div className="flex h-20 items-center justify-center px-4 xl:justify-start xl:px-7">
+        <span className="font-heading text-[24px] font-semibold tracking-normal text-ktr-text-primary xl:block">KontriLab</span>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
-        <p className="px-3 text-xs font-semibold text-ktr-text-secondary uppercase tracking-wider mb-2">Projects</p>
+      <nav className="flex flex-1 flex-col gap-2 px-4 py-5" aria-label="Navigasi teacher">
         {navigation.map((item) => {
           const isActive = item.href === "/teacher" ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const iconRef = item.icon;
@@ -31,24 +30,20 @@ export default function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
+              title={item.name}
               className={cn(
-                "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150",
-                isActive ? "bg-ktr-primary text-ktr-text-white" : "text-ktr-text-secondary hover:bg-ktr-surface-soft hover:text-ktr-text-primary"
+                "group flex h-12 cursor-pointer items-center justify-center gap-3 rounded-[14px] px-3 text-sm font-medium transition-[background,color,transform] duration-150 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ktr-primary/20 active:scale-[0.995] xl:justify-start xl:px-4",
+                isActive
+                  ? "bg-ktr-primary text-ktr-text-white"
+                  : "text-ktr-text-secondary hover:bg-ktr-surface-soft hover:text-ktr-text-primary"
               )}
             >
-              <HugeiconsIcon icon={iconRef} size={18} className="mr-3 flex-shrink-0 transition-colors duration-150" aria-hidden="true" />
-              {item.name}
+              <HugeiconsIcon icon={iconRef} size={20} className="shrink-0" aria-hidden="true" />
+              <span className="hidden xl:inline">{item.name}</span>
             </Link>
           );
         })}
       </nav>
-
-      <div className="p-4">
-        <Link href="#" className="group flex items-center rounded-lg px-3 py-2 text-sm font-medium text-ktr-text-secondary hover:bg-ktr-surface-soft hover:text-ktr-text-primary transition-colors duration-150">
-          <HugeiconsIcon icon={Settings01Icon} size={18} className="mr-3 flex-shrink-0" />
-          Settings
-        </Link>
-      </div>
     </div>
   );
 }

@@ -2,31 +2,21 @@
 
 import Sidebar from "@/components/teacher/Sidebar";
 import Topbar from "@/components/teacher/Topbar";
-import { usePathname } from "next/navigation";
 
 export default function TeacherLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isPureProjectDetail = /^\/teacher\/projects\/[^/]+$/.test(pathname);
-
-  if (isPureProjectDetail) {
-    return <main className="min-h-dvh bg-ktr-surface-soft font-sans">{children}</main>;
-  }
-
   return (
-    <div className="flex h-screen w-full bg-ktr-surface-soft overflow-hidden font-sans">
-      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r border-ktr-border-light bg-background">
+    <div className="teacher-root flex h-screen w-full overflow-hidden bg-white font-sans text-ktr-text-primary">
+      <aside className="hidden w-[92px] shrink-0 flex-col border-r border-ktr-border-light bg-white md:flex xl:w-[248px]">
         <Sidebar />
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 flex items-center border-b border-ktr-border-light bg-background px-6 shrink-0">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
+        <header className="flex h-20 shrink-0 items-center border-b border-ktr-border-light bg-white px-6 md:px-8">
           <Topbar />
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="mx-auto max-w-7xl">
-            {children}
-          </div>
+        <main className="flex-1 overflow-y-auto bg-white px-6 py-6 md:px-10 md:py-7">
+          <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>
     </div>

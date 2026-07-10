@@ -1,204 +1,280 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Button } from "@heroui/react/button";
 import { Card } from "@heroui/react/card";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { 
-  ArrowLeft01Icon, 
-  CheckmarkCircle01Icon, 
-  RefreshIcon, 
-  File01Icon, 
-  LinkSquare02Icon,
-  BrainIcon,
-  MessageMultiple01Icon,
-  Attachment01Icon,
-  CheckmarkSquare02Icon
+import {
+  ArrowLeft01Icon,
+  CheckmarkCircle02Icon,
+  ExternalLink01Icon,
+  FloppyDiskIcon,
+  Message02Icon,
 } from "@hugeicons/core-free-icons";
+import FilterSelect from "@/components/teacher/FilterSelect";
 import StatusBadge from "@/components/teacher/StatusBadge";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { toast } from "@/components/ui/toast";
+import { finalSubmissions, uploadProgress } from "@/components/teacher/mock-data";
 
-const mockSubmission = {
-  id: 1,
-  project: "Website Profil Sekolah",
-  group: "Kelompok 1",
-  submitDate: "2026-07-18",
-  status: "Menunggu Tinjauan",
-  finalResult: {
-    type: "file",
-    name: "school-profile-final.zip",
-    size: "4.2 MB",
-    url: "#"
-  },
-  members: ["Bima A.", "Raka M.", "Nadia S."],
-  contributionStatus: "Tercatat Baik"
-};
+const uploadStatusOptions = ["Valid", "Perlu Klarifikasi", "Kurang Relevan"].map((label) => ({
+  value: label.toLowerCase().replaceAll(" ", "-"),
+  label,
+}));
+const finalStatusOptions = ["Disetujui", "Perlu Revisi", "Belum Lengkap"].map((label) => ({
+  value: label.toLowerCase().replaceAll(" ", "-"),
+  label,
+}));
 
-export default function TinjauanDetailPage() {
-  const params = useParams();
+export default function ReviewDetailPage() {
+  const params = useParams<{ submissionId: string }>();
+  const upload = uploadProgress.find((item) => item.id === params.submissionId) ?? uploadProgress[0];
+  const submission = finalSubmissions.find((item) => item.id === params.submissionId);
+  const isFinal = Boolean(submission);
+
+  const [feedback, setFeedback] = React.useState("");
+  const [reviewStatus, setReviewStatus] = React.useState(
+    isFinal ? "disetujui" : upload.status === "Valid" ? "valid" : "belum-direview"
+  );
+  const [sendOpen, setSendOpen] = React.useState(false);
+  const [savingDraft, setSavingDraft] = React.useState(false);
+  const [sent, setSent] = React.useState(false);
+
+  async function saveDraft() {
+    setSavingDraft(true);
+    await new Promise((r) => setTimeout(r, 600));
+    setSavingDraft(false);
+    toast.success("Draft disimpan", {
+      description: "Feedback akan tersimpan hingga kamu siap mengirimkannya.",
+    });
+  }
+
+  function sendFeedback() {
+    setSent(true);
+    toast.success("Feedback berhasil dikirim", {
+      description: `${isFinal ? submission?.group : upload.student} akan menerima notifikasi feedback.`,
+    });
+  }
+
+  if (sent) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
+        <span className="flex size-20 items-center justify-center rounded-full bg-ktr-success-bg text-ktr-success">
+          <HugeiconsIcon icon={CheckmarkCircle02Icon} size={40} />
+        </span>
+        <div>
+          <h2 className="font-heading text-2xl font-semibold text-ktr-text-primary">
+            Feedback Terkirim!
+          </h2>
+          <p className="mt-2 text-sm font-medium text-ktr-text-secondary">
+            {isFinal ? submission?.group : upload.student} akan mendapatkan notifikasi segera.
+          </p>
+        </div>
+        <Link
+          href="/teacher/review"
+          className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-[14px] border border-ktr-border-light px-5 text-sm font-semibold text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
+        >
+          Kembali ke daftar review
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Link href="/teacher/tinjauan" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-ktr-border-light bg-transparent text-sm font-medium hover:bg-ktr-surface-soft shrink-0">
+    <>
+      <div className="space-y-6">
+        <div className="flex items-start gap-4">
+          <Link
+            href="/teacher/review"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] border border-ktr-border-light bg-white transition-colors hover:bg-ktr-surface-soft"
+            aria-label="Kembali ke daftar review"
+          >
             <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
           </Link>
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold font-heading text-ktr-text-primary tracking-tight">
-                Tinjauan: {mockSubmission.group}
-              </h1>
-              <StatusBadge status={mockSubmission.status} />
+            <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">
+              {isFinal ? "Review Submit Final" : "Review Upload Progress"}
+            </h1>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <StatusBadge status={isFinal && submission ? submission.status : upload.status} />
+              <span className="rounded-full border border-ktr-border-light bg-white px-3 py-1 text-xs font-semibold text-ktr-text-secondary">
+                {isFinal && submission ? submission.group : upload.student}
+              </span>
+              {!isFinal && (
+                <span className="rounded-full border border-ktr-border-light bg-white px-3 py-1 text-xs font-semibold text-ktr-text-secondary">
+                  {upload.group}
+                </span>
+              )}
             </div>
-            <p className="text-ktr-text-tertiary mt-1 text-sm">
-              {mockSubmission.project} • Dikirim: {mockSubmission.submitDate}
-            </p>
           </div>
         </div>
-        
-        {/* Action Buttons */}
-        <div className="flex gap-2 shrink-0">
-          <Button 
-            variant="ghost"
-            className="font-medium shadow-none text-ktr-warning border-ktr-warning border"
-          >
-            <HugeiconsIcon icon={RefreshIcon} size={16} /> Minta Revisi
-          </Button>
-          <Button 
-            variant="primary"
-            className="font-medium shadow-none bg-ktr-success text-ktr-text-white"
-          >
-            <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} /> Terima Proyek
-          </Button>
+
+        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+          {/* Evidence panel */}
+          <div className="space-y-5">
+            <Card className="rounded-[18px] border border-ktr-border-light bg-white">
+              <Card.Header className="border-b border-ktr-border-light px-6 py-4">
+                <h2 className="font-heading text-lg font-semibold text-ktr-text-primary">
+                  {isFinal ? "Hasil Akhir Kelompok" : "Bukti Kerja Siswa"}
+                </h2>
+              </Card.Header>
+              <Card.Content className="space-y-5 p-6 text-sm">
+                {isFinal && submission ? (
+                  <>
+                    <DetailRow label="Kelompok" value={submission.group} />
+                    <DetailRow label="Anggota" value={submission.members} />
+                    <DetailRow label="Waktu Submit" value={submission.submittedAt} />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-ktr-text-tertiary">
+                        File / Link Hasil Akhir
+                      </p>
+                      <a
+                        href={`https://${submission.file}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-[12px] border border-ktr-border-light bg-ktr-surface-soft px-4 py-2 text-sm font-semibold text-ktr-primary transition-colors hover:border-ktr-primary/30"
+                      >
+                        {submission.file}
+                        <HugeiconsIcon icon={ExternalLink01Icon} size={14} />
+                      </a>
+                    </div>
+                    <div className="rounded-[14px] border border-ktr-border-light bg-ktr-surface-soft p-4 text-sm text-ktr-text-secondary">
+                      <p className="font-semibold text-ktr-text-primary">Riwayat Revisi</p>
+                      <p className="mt-1">Submit awal sudah diterima dan menunggu keputusan guru.</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <DetailRow label="Siswa" value={upload.student} />
+                    <DetailRow label="Kelompok" value={upload.group} />
+                    <DetailRow label="Jenis Bukti" value={upload.evidenceType} />
+                    <DetailRow label="Waktu Upload" value={upload.time} />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-ktr-text-tertiary">
+                        Isi Upload Progress
+                      </p>
+                      <p className="mt-2 leading-6 text-ktr-text-secondary">{upload.summary}</p>
+                    </div>
+                    <div className="rounded-[14px] border border-ktr-border-light bg-ktr-surface-soft p-4">
+                      <p className="text-xs font-semibold text-ktr-text-tertiary">Preview Bukti</p>
+                      <p className="mt-2 text-sm text-ktr-text-secondary">
+                        {upload.evidenceType} · {upload.relevance}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </Card.Content>
+            </Card>
+
+            {/* Rubric card */}
+            <Card className="rounded-[18px] border border-ktr-border-light bg-white">
+              <Card.Header className="border-b border-ktr-border-light px-6 py-4">
+                <h2 className="font-heading text-base font-semibold text-ktr-text-primary">
+                  Rubrik Penilaian
+                </h2>
+              </Card.Header>
+              <Card.Content className="p-5">
+                <ul className="space-y-2 text-sm text-ktr-text-secondary">
+                  {[
+                    "Kontribusi individu yang terlihat jelas",
+                    "Kejelasan dan kelengkapan bukti kerja",
+                    "Relevansi pekerjaan dengan topik proyek",
+                    "Konsistensi dan frekuensi aktivitas",
+                    "Respons terhadap feedback sebelumnya",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <HugeiconsIcon
+                        icon={CheckmarkCircle02Icon}
+                        size={15}
+                        className="mt-0.5 shrink-0 text-ktr-primary"
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </Card.Content>
+            </Card>
+          </div>
+
+          {/* Review panel */}
+          <div className="space-y-5">
+            <Card className="rounded-[18px] border border-ktr-border-light bg-white">
+              <Card.Header className="border-b border-ktr-border-light px-6 py-4">
+                <h2 className="font-heading text-lg font-semibold text-ktr-text-primary">
+                  Panel Review
+                </h2>
+              </Card.Header>
+              <Card.Content className="space-y-5 p-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-ktr-text-primary">
+                    Status Review
+                  </label>
+                  <FilterSelect
+                    className="w-full"
+                    ariaLabel="Status review"
+                    defaultValue={reviewStatus}
+                    options={isFinal ? finalStatusOptions : uploadStatusOptions}
+                    onChange={setReviewStatus}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-ktr-text-primary">
+                    Feedback untuk {isFinal ? "Kelompok" : "Siswa"}
+                  </label>
+                  <textarea
+                    rows={6}
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    className="w-full resize-none rounded-[14px] border border-ktr-border-light bg-white p-3 text-sm leading-6 text-ktr-text-primary placeholder:text-ktr-text-tertiary focus:border-ktr-primary focus:outline-none focus:ring-2 focus:ring-ktr-primary/20"
+                    placeholder={`Tulis feedback untuk ${isFinal ? "kelompok" : "siswa"} ini. Semakin spesifik, semakin membantu.`}
+                  />
+                  <p className="text-xs text-ktr-text-tertiary">{feedback.length} karakter</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <button
+                    type="button"
+                    disabled={savingDraft}
+                    onClick={saveDraft}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-[14px] border border-ktr-border-light px-5 text-sm font-semibold text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft disabled:opacity-60"
+                  >
+                    <HugeiconsIcon icon={FloppyDiskIcon} size={16} />
+                    {savingDraft ? "Menyimpan…" : "Simpan Draft"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSendOpen(true)}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-[14px] bg-ktr-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-ktr-primary-hover active:scale-[0.995]"
+                  >
+                    <HugeiconsIcon icon={Message02Icon} size={16} />
+                    Kirim Feedback
+                  </button>
+                </div>
+              </Card.Content>
+            </Card>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Result & Summary */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Final Result Card */}
-          <Card className="shadow-none border border-ktr-primary/35 bg-ktr-primary-soft/50">
-            <Card.Content className="p-6">
-              <h3 className="font-semibold text-ktr-text-primary mb-4">Hasil Akhir Proyek</h3>
-              <div className="flex items-center justify-between p-4 rounded-xl border border-ktr-border-light bg-ktr-surface-card">
-                <div className="flex items-center gap-4">
-                  <div className="rounded-lg bg-ktr-surface-soft p-3">
-                    <HugeiconsIcon icon={File01Icon} size={24} className="text-ktr-text-tertiary" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-ktr-text-primary">{mockSubmission.finalResult.name}</p>
-                    <p className="text-xs text-ktr-text-tertiary mt-0.5">{mockSubmission.finalResult.size}</p>
-                  </div>
-                </div>
-                <a 
-                  href={mockSubmission.finalResult.url}
-                  className="inline-flex h-9 items-center justify-center rounded-md bg-ktr-primary-soft px-4 text-sm font-medium text-ktr-primary hover:bg-ktr-primary-light transition-colors gap-2"
-                >
-                  Unduh / Lihat <HugeiconsIcon icon={LinkSquare02Icon} size={16} />
-                </a>
-              </div>
-            </Card.Content>
-          </Card>
+      <ConfirmModal
+        open={sendOpen}
+        onOpenChange={setSendOpen}
+        title="Kirim Feedback?"
+        description={`Feedback akan dikirim ke ${isFinal ? submission?.group ?? "kelompok" : upload.student}. Status review akan berubah menjadi "${reviewStatus.replaceAll("-", " ")}".`}
+        confirmText="Kirim Sekarang"
+        onConfirm={sendFeedback}
+      />
+    </>
+  );
+}
 
-          {/* Group Contribution Summary */}
-          <Card className="shadow-none border border-ktr-border-light">
-            <Card.Content className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="font-semibold text-ktr-text-primary">Ringkasan Kontribusi Kelompok</h3>
-                <StatusBadge status={mockSubmission.contributionStatus} />
-              </div>
-              
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="p-4 rounded-xl border border-ktr-border-light bg-ktr-surface-soft/50 text-center">
-                  <HugeiconsIcon icon={MessageMultiple01Icon} size={20} className="mx-auto mb-2 text-ktr-text-tertiary" />
-                  <p className="text-2xl font-bold font-heading">3</p>
-                  <p className="text-xs text-ktr-text-tertiary mt-1">Sesi Diskusi</p>
-                </div>
-                <div className="p-4 rounded-xl border border-ktr-border-light bg-ktr-surface-soft/50 text-center">
-                  <HugeiconsIcon icon={Attachment01Icon} size={20} className="mx-auto mb-2 text-ktr-text-tertiary" />
-                  <p className="text-2xl font-bold font-heading">4</p>
-                  <p className="text-xs text-ktr-text-tertiary mt-1">Unggahan Progres</p>
-                </div>
-                <div className="p-4 rounded-xl border border-ktr-border-light bg-ktr-surface-soft/50 text-center">
-                  <HugeiconsIcon icon={CheckmarkSquare02Icon} size={20} className="mx-auto mb-2 text-ktr-text-tertiary" />
-                  <p className="text-2xl font-bold font-heading">3/3</p>
-                  <p className="text-xs text-ktr-text-tertiary mt-1">Peer Assessment</p>
-                </div>
-              </div>
-
-              <p className="text-sm text-ktr-text-tertiary mb-3">Anggota Kelompok:</p>
-              <div className="flex flex-wrap gap-2">
-                {mockSubmission.members.map((member, i) => (
-                  <span key={i} className="inline-flex items-center rounded-lg bg-ktr-surface-soft px-3 py-1.5 text-xs font-medium text-ktr-text-primary border border-ktr-border-light">
-                    {member}
-                  </span>
-                ))}
-              </div>
-              
-              <div className="mt-5 pt-4 border-t border-ktr-border-light text-right">
-                <Link href="/teacher/projects/1/groups/1" className="text-sm font-medium text-ktr-primary hover:underline">
-                  Lihat Detail Grup Lengkap →
-                </Link>
-              </div>
-            </Card.Content>
-          </Card>
-
-        </div>
-
-        {/* Right: AI Insight & Decision Form */}
-        <div className="space-y-6">
-          
-          {/* AI Insight */}
-          <Card className="shadow-none border border-ktr-primary/35 bg-ktr-primary-soft/50">
-            <Card.Content className="p-5">
-              <div className="flex items-center gap-2 border-b border-ktr-primary/35 pb-3 mb-4">
-                <HugeiconsIcon icon={BrainIcon} size={20} className="text-ktr-primary" />
-                <h3 className="font-semibold text-ktr-primary-dark">AI Tinjauan Insight</h3>
-              </div>
-              <div className="space-y-3">
-                <p className="text-sm text-ktr-primary-hover leading-relaxed">
-                  Berdasarkan riwayat progres dan lampiran, hasil akhir proyek ini sesuai dengan brief yang diberikan. Kontribusi kelompok tercatat sangat baik dan peer assessment sudah diisi oleh semua anggota.
-                </p>
-                <div className="pt-3 border-t border-ktr-primary/35">
-                  <p className="text-[11px] italic text-ktr-primary-hover leading-tight">
-                    Ringkasan AI bersifat pendukung. Guru tetap menentukan penilaian akhir.
-                  </p>
-                </div>
-              </div>
-            </Card.Content>
-          </Card>
-
-          {/* Teacher Decision Notes */}
-          <Card className="shadow-none border border-ktr-border-light">
-            <Card.Content className="p-5">
-              <h3 className="font-semibold text-ktr-text-primary mb-4">Catatan Keputusan Guru</h3>
-              <textarea
-                placeholder="Tambahkan catatan mengapa diterima atau direvisi..."
-                rows={4}
-                className="w-full rounded-lg border border-ktr-border-light bg-ktr-surface-card p-3 text-sm text-ktr-text-primary placeholder:text-ktr-text-tertiary focus:border-ktr-primary focus:outline-none focus:ring-1 focus:ring-ktr-primary transition-colors resize-none"
-              />
-              <div className="flex gap-2 mt-4">
-                <Button 
-                  variant="ghost"
-                  className="flex-1 shadow-none font-medium text-ktr-warning border-ktr-warning border"
-                >
-                  <HugeiconsIcon icon={RefreshIcon} size={16} /> Kirim Revisi
-                </Button>
-                <Button 
-                  variant="primary"
-                  className="flex-1 shadow-none font-medium bg-ktr-success text-ktr-text-white"
-                >
-                  <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} /> Terima
-                </Button>
-              </div>
-            </Card.Content>
-          </Card>
-
-        </div>
-      </div>
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-ktr-text-tertiary">{label}</p>
+      <p className="mt-1 font-semibold text-ktr-text-primary">{value}</p>
     </div>
   );
 }

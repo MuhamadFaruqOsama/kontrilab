@@ -2,154 +2,103 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Button } from "@heroui/react/button";
-import { Card } from "@heroui/react/card";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowLeft01Icon, Copy01Icon, EyeIcon, Folder01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon, Calendar03Icon, CheckListIcon } from "@hugeicons/core-free-icons";
 import StatusBadge from "@/components/teacher/StatusBadge";
-
-const mockProject = {
-  id: 1,
-  name: "Website Profil Sekolah",
-  class: "XII RPL 1",
-  deadline: "2026-07-20",
-  joinCode: "RPL1-WEB",
-  description: "Proyek akhir semester untuk membuat website profil sekolah yang responsif dan informatif menggunakan HTML, CSS, dan JavaScript murni.",
-  status: "Sedang Berjalan",
-};
-
-const mockGroups = [
-  {
-    id: 1,
-    name: "Kelompok 1",
-    members: [
-      { name: "Bima A.", role: "Ketua", progress: "Desain hero section" },
-      { name: "Raka M.", role: "Anggota", progress: "Draft konten" },
-      { name: "Nadia S.", role: "Anggota", progress: "Layout kontak" },
-    ],
-    sessions: 3,
-    attachments: 2,
-    peerAssessment: "3/3",
-    submitStatus: "Menunggu Tinjauan",
-    contributionStatus: "Tercatat Baik",
-  },
-  {
-    id: 2,
-    name: "Kelompok 2",
-    members: [
-      { name: "Alya P.", role: "Ketua", progress: "Wireframe" },
-      { name: "Dimas F.", role: "Anggota", progress: "Asset gambar" },
-      { name: "Siti N.", role: "Anggota", progress: "Belum update" },
-    ],
-    sessions: 4,
-    attachments: 4,
-    peerAssessment: "2/3",
-    submitStatus: "Sedang Berjalan",
-    contributionStatus: "Perlu Ditinjau",
-  },
-];
+import { getProject, teacherGroups } from "@/components/teacher/mock-data";
 
 export default function ProjectDetail() {
-  const params = useParams();
-  const projectId = params.projectId;
+  const params = useParams<{ projectId: string }>();
+  const project = getProject(params.projectId);
+  const groups = teacherGroups.filter((group) => group.projectId === project.id);
 
   return (
-    <div className="min-h-dvh bg-ktr-surface-soft px-6 py-8 text-ktr-text-primary md:px-10">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-start gap-4">
-            <Link href="/teacher/projects" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-ktr-border-light bg-ktr-surface-card text-sm font-medium hover:bg-ktr-surface-soft">
-              <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
-            </Link>
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-3xl font-bold font-heading tracking-tight text-ktr-text-primary">{mockProject.name}</h1>
-                <StatusBadge status={mockProject.status} />
-              </div>
-              <p className="mt-1 text-sm text-ktr-text-tertiary">{mockProject.class} - Deadline: {mockProject.deadline}</p>
+    <div className="space-y-7">
+      <div className="flex flex-col gap-5">
+        <Link href="/teacher/projects" className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-[14px] border border-ktr-border-light bg-white px-4 py-2 text-sm font-semibold text-ktr-text-primary transition-colors hover:border-ktr-border-input hover:bg-ktr-surface-soft active:scale-[0.995]" aria-label="Kembali ke daftar proyek">
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={17} />
+          Kembali
+        </Link>
+
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <StatusBadge status={project.status} />
+              <span className="rounded-full border border-ktr-border-light bg-white px-3 py-1 text-xs font-semibold text-ktr-text-secondary">{project.className}</span>
             </div>
+            <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">{project.name}</h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-ktr-text-secondary">{project.announcement}</p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ProjectMeta icon={Calendar03Icon} label="Mulai" value={project.startDate} />
+            <ProjectMeta icon={CheckListIcon} label="Deadline Final" value={project.finalDeadline} />
           </div>
         </div>
-
-        <Card className="border border-ktr-border-light bg-ktr-surface-card shadow-none">
-          <Card.Content className="p-6">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-3xl">
-                <h2 className="font-semibold text-ktr-text-primary">Brief Proyek</h2>
-                <p className="mt-2 text-sm leading-6 text-ktr-text-tertiary">{mockProject.description}</p>
-              </div>
-              <div className="min-w-64 rounded-lg border border-ktr-border-light bg-ktr-surface-soft p-4">
-                <p className="text-xs font-medium text-ktr-text-tertiary">Kode Bergabung</p>
-                <p className="mt-1 text-lg font-bold font-sans tracking-wide text-ktr-text-primary">{mockProject.joinCode}</p>
-                <Button size="sm" variant="outline" className="mt-3 border-ktr-border-light font-medium text-ktr-text-primary shadow-none">
-                  <HugeiconsIcon icon={Copy01Icon} size={16} className="mr-1" /> Salin Kode
-                </Button>
-              </div>
-            </div>
-          </Card.Content>
-        </Card>
-
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-ktr-text-primary">Daftar Kelompok</h2>
-            <div className="flex items-center gap-2 text-sm font-medium text-ktr-text-tertiary">
-              <HugeiconsIcon icon={UserGroupIcon} size={16} />
-              {mockGroups.length} Kelompok
-            </div>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            {mockGroups.map((group) => (
-              <Card key={group.id} className="border border-ktr-border-light bg-ktr-surface-card shadow-none transition-colors hover:border-ktr-primary">
-                <Card.Content className="p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-xl bg-ktr-primary-light p-3 text-ktr-primary">
-                        <HugeiconsIcon icon={Folder01Icon} size={26} />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-semibold text-ktr-text-primary">{group.name}</h3>
-                        <p className="mt-1 text-xs text-ktr-text-tertiary">{group.sessions} diskusi - {group.attachments} lampiran - Peer {group.peerAssessment}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <StatusBadge status={group.submitStatus} />
-                      <StatusBadge status={group.contributionStatus} />
-                    </div>
-                  </div>
-
-                  <div className="mt-5 overflow-hidden rounded-lg border border-ktr-border-light">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-ktr-surface-soft text-xs font-medium text-ktr-text-tertiary">
-                        <tr>
-                          <th className="px-4 py-3 font-medium">Anggota</th>
-                          <th className="px-4 py-3 font-medium">Peran</th>
-                          <th className="px-4 py-3 font-medium">Progres Terakhir</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-ktr-border-light">
-                        {group.members.map((member) => (
-                          <tr key={member.name}>
-                            <td className="px-4 py-3 font-medium text-ktr-text-primary">{member.name}</td>
-                            <td className="px-4 py-3 text-ktr-text-tertiary">{member.role}</td>
-                            <td className="px-4 py-3 text-ktr-text-tertiary">{member.progress}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="mt-5 flex justify-end">
-                    <Link href={`/teacher/projects/${projectId}/groups/${group.id}`} className="inline-flex h-9 items-center gap-2 rounded-md bg-ktr-primary px-4 text-sm font-medium text-ktr-text-white hover:bg-ktr-primary-hover">
-                      Detail <HugeiconsIcon icon={EyeIcon} size={16} />
-                    </Link>
-                  </div>
-                </Card.Content>
-              </Card>
-            ))}
-          </div>
-        </section>
       </div>
+
+      <section>
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="font-heading text-xl font-semibold text-ktr-text-primary">Kelompok</h2>
+            <p className="mt-1 text-sm font-medium text-ktr-text-secondary">Pantau status tiap kelompok langsung dari kartu.</p>
+          </div>
+          <span className="rounded-full bg-ktr-primary-light px-3 py-1 text-sm font-semibold text-ktr-primary">{groups.length} kelompok</span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          {groups.map((group) => (
+            <Link key={group.id} href={`/teacher/projects/${project.id}/groups/${group.id}`} className="group block cursor-pointer rounded-[18px] border border-ktr-border-light bg-white p-5 transition-[border-color,background,transform] hover:border-ktr-border-input hover:bg-ktr-primary-light active:scale-[0.998]">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-heading text-lg font-semibold text-ktr-text-primary">{group.name}</h3>
+                  <p className="mt-1 text-sm font-medium text-ktr-text-secondary">{group.members.length} siswa</p>
+                </div>
+                <StatusBadge status={group.status} />
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <InfoPill label="Upload terakhir" value={group.latestUpload} />
+                <InfoPill label="Aktif upload" value={group.activeUploaders} />
+                <InfoPill label="Review" value={`${group.pendingReviews} tertunda`} tone={group.pendingReviews > 0 ? "warning" : "neutral"} />
+                <InfoPill label="Submit final" value={group.submitStatus} tone={group.submitStatus === "Menunggu Review" || group.submitStatus === "Perlu Revisi" ? "warning" : "neutral"} />
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                {group.members.map((member) => (
+                  <span key={member} className="rounded-full border border-ktr-border-light bg-white px-3 py-1 text-xs font-semibold text-ktr-text-secondary">{member}</span>
+                ))}
+              </div>
+
+              <div className="mt-5 flex items-center justify-between border-t border-ktr-border-light pt-4 text-sm font-semibold">
+                <span className={group.attention === "Aktif" ? "text-ktr-success" : "text-[#9a620b]"}>{group.attention}</span>
+                <span className="inline-flex items-center gap-1 text-ktr-primary">Lihat detail <HugeiconsIcon icon={ArrowRight01Icon} size={14} /></span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ProjectMeta({ icon, label, value }: { icon: IconSvgElement; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-[16px] border border-ktr-border-light bg-white px-4 py-3">
+      <span className="flex size-9 items-center justify-center rounded-[12px] bg-ktr-secondary-bg-info-card text-ktr-secondary"><HugeiconsIcon icon={icon} size={18} /></span>
+      <div>
+        <p className="text-xs font-semibold text-ktr-text-tertiary">{label}</p>
+        <p className="text-sm font-semibold text-ktr-text-primary">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function InfoPill({ label, value, tone = "neutral" }: { label: string; value: string; tone?: "neutral" | "warning" }) {
+  return (
+    <div className={tone === "warning" ? "rounded-[14px] border border-ktr-warning/25 bg-ktr-warning-bg px-3 py-3" : "rounded-[14px] border border-ktr-border-light bg-white px-3 py-3"}>
+      <p className="text-xs font-semibold text-ktr-text-tertiary">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-ktr-text-primary">{value}</p>
     </div>
   );
 }

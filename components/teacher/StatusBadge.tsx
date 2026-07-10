@@ -1,45 +1,34 @@
-﻿import { Chip } from "@heroui/react/chip";
+﻿import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
   status: string;
   className?: string;
 }
 
+const statusStyles = {
+  success: "border-ktr-success/20 bg-ktr-success-bg text-ktr-success",
+  info: "border-ktr-info/20 bg-ktr-info-bg text-ktr-info",
+  warning: "border-ktr-warning/25 bg-ktr-warning-bg text-[#9a620b]",
+  danger: "border-ktr-project-need-attention/20 bg-ktr-project-need-attention-bg text-ktr-project-need-attention",
+  neutral: "border-ktr-border-light bg-ktr-surface-soft text-ktr-text-secondary",
+};
+
 export default function StatusBadge({ status, className }: StatusBadgeProps) {
-  type ChipColor = "default" | "primary" | "secondary" | "success" | "warning" | "danger";
-  type ChipVariant = "primary" | "secondary" | "tertiary";
+  let tone: keyof typeof statusStyles = "neutral";
 
-  let color: ChipColor = "default";
-  let variant: ChipVariant = "secondary";
-
-  // Contribution Statuses
-  if (status === "Tercatat Baik") {
-    color = "success";
-  } else if (status === "Cukup Terlihat") {
-    color = "primary";
-  } else if (status === "Perlu Ditinjau") {
-    color = "warning";
-  } else if (status === "Belum Cukup Data") {
-    color = "default";
-  }
-  // Project / Submit Statuses
-  else if (status === "Belum Dimulai") {
-    color = "default";
-  } else if (status === "Sedang Berjalan" || status === "Berjalan") {
-    color = "primary";
-  } else if (status === "Menunggu Tinjauan") {
-    color = "warning";
-  } else if (status === "Revisi" || status === "Sedang Diperbaiki") {
-    color = "warning";
-  } else if (status === "Dikirim Ulang") {
-    color = "danger";
-  } else if (status === "Selesai") {
-    color = "success";
+  if (["Tercatat Baik", "Sangat Aktif", "Aktif", "Valid", "Disetujui", "Selesai"].includes(status)) {
+    tone = "success";
+  } else if (["Cukup Terlihat", "Akan Datang", "Belum Direview", "Belum Submit", "Sedang Berjalan", "Berjalan"].includes(status)) {
+    tone = "info";
+  } else if (["Perlu Ditinjau", "Perlu Perhatian", "Menunggu Tinjauan", "Menunggu Review", "Perlu Klarifikasi", "Perlu Revisi", "Revisi", "Sedang Diperbaiki"].includes(status)) {
+    tone = "warning";
+  } else if (["Belum Lengkap", "Kurang Relevan", "Dikirim Ulang"].includes(status)) {
+    tone = "danger";
   }
 
   return (
-    <Chip color={color as any} variant={variant} size="sm" className={className}>
+    <span className={cn("inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-full border px-3 text-xs font-semibold", statusStyles[tone], className)}>
       {status}
-    </Chip>
+    </span>
   );
 }
