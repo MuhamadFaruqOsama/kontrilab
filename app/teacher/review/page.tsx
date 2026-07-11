@@ -66,9 +66,6 @@ export default function ReviewPage() {
           <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">
             Review
           </h1>
-          <p className="mt-1 text-sm font-medium text-ktr-text-secondary">
-            Tinjau bukti kerja siswa dan hasil akhir kelompok.
-          </p>
         </div>
         {pendingCount > 0 && (
           <div className="flex items-center gap-2 rounded-[14px] border border-ktr-warning/25 bg-ktr-warning-bg px-4 py-2.5">
@@ -82,15 +79,15 @@ export default function ReviewPage() {
 
       {/* Search */}
       <div className="relative">
-        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ktr-text-secondary">
-          <HugeiconsIcon icon={Search01Icon} size={17} />
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ktr-text-secondary">
+          <HugeiconsIcon icon={Search01Icon} size={17} strokeWidth={1.5} />
         </span>
         <input
           type="text"
           placeholder="Cari siswa, kelompok, atau ringkasan..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-11 w-full max-w-md rounded-[14px] border border-ktr-border-light bg-white py-2 pl-11 pr-4 text-sm text-ktr-text-primary placeholder:text-ktr-text-secondary hover:border-ktr-border-input focus:border-ktr-primary focus:outline-none focus:ring-3 focus:ring-ktr-primary/15"
+          className="h-10 w-full max-w-md rounded-[10px] border border-ktr-border-light bg-white py-1.5 pl-10 pr-3.5 text-sm text-ktr-text-primary placeholder:text-ktr-text-secondary hover:border-ktr-border-input focus:border-ktr-text-primary focus:outline-none focus:ring-3 focus:ring-ktr-text-primary/10"
         />
       </div>
 

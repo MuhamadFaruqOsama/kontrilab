@@ -73,6 +73,11 @@
   letter-spacing: 0;
 }
 
+
+.teacher-root svg {
+  stroke-width: 1.5px;
+}
+
 .teacher-root table {
   border-collapse: separate;
   border-spacing: 0;
@@ -101,7 +106,7 @@
 
 .teacher-dropdown-popover {
   transform-origin: top right;
-  box-shadow: 0 12px 30px rgb(43 48 51 / 0.08);
+  box-shadow: 0 10px 26px rgb(43 48 51 / 0.045);
   animation: teacher-dropdown-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 

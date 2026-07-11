@@ -238,7 +238,7 @@ export default function ReviewDetailPage() {
                     type="button"
                     disabled={savingDraft}
                     onClick={saveDraft}
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-[14px] border border-ktr-border-light px-5 text-sm font-semibold text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft disabled:opacity-60"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-ktr-border-light px-4 text-sm font-semibold text-ktr-text-primary transition-colors hover:bg-white disabled:opacity-60"
                   >
                     <HugeiconsIcon icon={FloppyDiskIcon} size={16} />
                     {savingDraft ? "Menyimpan…" : "Simpan Draft"}
@@ -246,7 +246,7 @@ export default function ReviewDetailPage() {
                   <button
                     type="button"
                     onClick={() => setSendOpen(true)}
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-[14px] bg-ktr-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-ktr-primary-hover active:scale-[0.995]"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-ktr-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-ktr-primary-hover active:scale-[0.995]"
                   >
                     <HugeiconsIcon icon={Message02Icon} size={16} />
                     Kirim Feedback

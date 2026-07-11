@@ -15,7 +15,7 @@ export default function ProjectDetail() {
   return (
     <div className="space-y-7">
       <div className="flex flex-col gap-5">
-        <Link href="/teacher/projects" className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-[14px] border border-ktr-border-light bg-white px-4 py-2 text-sm font-semibold text-ktr-text-primary transition-colors hover:border-ktr-border-input hover:bg-ktr-surface-soft active:scale-[0.995]" aria-label="Kembali ke daftar proyek">
+        <Link href="/teacher/projects" className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-[14px] border border-ktr-border-light bg-white px-4 py-2 text-sm font-semibold text-ktr-text-primary transition-colors hover:border-ktr-border-input hover:bg-white active:scale-[0.995]" aria-label="Kembali ke daftar proyek">
           <HugeiconsIcon icon={ArrowLeft01Icon} size={17} />
           Kembali
         </Link>
@@ -27,7 +27,6 @@ export default function ProjectDetail() {
               <span className="rounded-full border border-ktr-border-light bg-white px-3 py-1 text-xs font-semibold text-ktr-text-secondary">{project.className}</span>
             </div>
             <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">{project.name}</h1>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-ktr-text-secondary">{project.announcement}</p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -41,14 +40,13 @@ export default function ProjectDetail() {
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
             <h2 className="font-heading text-xl font-semibold text-ktr-text-primary">Kelompok</h2>
-            <p className="mt-1 text-sm font-medium text-ktr-text-secondary">Pantau status tiap kelompok langsung dari kartu.</p>
           </div>
           <span className="rounded-full bg-ktr-primary-light px-3 py-1 text-sm font-semibold text-ktr-primary">{groups.length} kelompok</span>
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
           {groups.map((group) => (
-            <Link key={group.id} href={`/teacher/projects/${project.id}/groups/${group.id}`} className="group block cursor-pointer rounded-[18px] border border-ktr-border-light bg-white p-5 transition-[border-color,background,transform] hover:border-ktr-border-input hover:bg-ktr-primary-light active:scale-[0.998]">
+            <Link key={group.id} href={`/teacher/projects/${project.id}/groups/${group.id}`} className="group block cursor-pointer rounded-[18px] border border-ktr-border-light bg-white p-5 transition-[border-color,background,transform] hover:border-ktr-border-input hover:bg-white active:scale-[0.998]">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="font-heading text-lg font-semibold text-ktr-text-primary">{group.name}</h3>

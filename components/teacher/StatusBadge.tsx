@@ -1,4 +1,4 @@
-﻿import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
   status: string;
@@ -6,11 +6,11 @@ interface StatusBadgeProps {
 }
 
 const statusStyles = {
-  success: "border-ktr-success/20 bg-ktr-success-bg text-ktr-success",
-  info: "border-ktr-info/20 bg-ktr-info-bg text-ktr-info",
-  warning: "border-ktr-warning/25 bg-ktr-warning-bg text-[#9a620b]",
-  danger: "border-ktr-project-need-attention/20 bg-ktr-project-need-attention-bg text-ktr-project-need-attention",
-  neutral: "border-ktr-border-light bg-ktr-surface-soft text-ktr-text-secondary",
+  success: "text-ktr-success",
+  info: "text-ktr-info",
+  warning: "text-ktr-warning",
+  danger: "text-ktr-project-need-attention",
+  neutral: "text-ktr-text-secondary",
 };
 
 export default function StatusBadge({ status, className }: StatusBadgeProps) {
@@ -27,7 +27,7 @@ export default function StatusBadge({ status, className }: StatusBadgeProps) {
   }
 
   return (
-    <span className={cn("inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-full border px-3 text-xs font-semibold", statusStyles[tone], className)}>
+    <span className={cn("inline-flex shrink-0 items-center whitespace-nowrap text-xs font-semibold leading-5", statusStyles[tone], className)}>
       {status}
     </span>
   );

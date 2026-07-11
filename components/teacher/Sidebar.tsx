@@ -17,11 +17,11 @@ export default function Sidebar() {
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <div className="flex h-20 items-center justify-center px-4 xl:justify-start xl:px-7">
+      <div className="flex h-[72px] items-center justify-center px-4 xl:justify-start xl:px-7">
         <span className="font-heading text-[24px] font-semibold tracking-normal text-ktr-text-primary xl:block">KontriLab</span>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-2 px-4 py-5" aria-label="Navigasi teacher">
+      <nav className="flex flex-1 flex-col gap-1.5 px-4 py-3" aria-label="Navigasi teacher">
         {navigation.map((item) => {
           const isActive = item.href === "/teacher" ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const iconRef = item.icon;
@@ -32,13 +32,13 @@ export default function Sidebar() {
               href={item.href}
               title={item.name}
               className={cn(
-                "group flex h-12 cursor-pointer items-center justify-center gap-3 rounded-[14px] px-3 text-sm font-medium transition-[background,color,transform] duration-150 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ktr-primary/20 active:scale-[0.995] xl:justify-start xl:px-4",
+                "group flex h-10 cursor-pointer items-center justify-center gap-3 rounded-[10px] px-3 text-sm font-medium transition-[background,color,border-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ktr-text-primary/10 active:scale-[0.997] xl:justify-start xl:px-4",
                 isActive
-                  ? "bg-ktr-primary text-ktr-text-white"
-                  : "text-ktr-text-secondary hover:bg-ktr-surface-soft hover:text-ktr-text-primary"
+                  ? "border border-ktr-text-primary bg-ktr-text-primary text-white"
+                  : "border border-transparent text-ktr-text-secondary hover:border-ktr-border-light hover:bg-white hover:text-ktr-text-primary"
               )}
             >
-              <HugeiconsIcon icon={iconRef} size={20} className="shrink-0" aria-hidden="true" />
+              <HugeiconsIcon icon={iconRef} size={20} strokeWidth={1.5} className="shrink-0" aria-hidden="true" />
               <span className="hidden xl:inline">{item.name}</span>
             </Link>
           );

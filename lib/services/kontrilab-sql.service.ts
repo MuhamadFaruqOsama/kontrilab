@@ -480,3 +480,106 @@ export async function deleteTeacherProject(id: string): Promise<TeacherProjectCa
   return getTeacherProjectCards();
 }
 
+async function getPrimaryStudentGroup() {
+  const { data: groups, error } = await supabaseAdmin
+    .from("project_group")
+    .select("id,id_project,name")
+    .order("created_at", { ascending: true })
+    .limit(1);
+  if (error) throw error;
+  const group = asRows(groups)[0];
+  const groupId = asNumberId(group?.id);
+  if (groupId === null) throw new Error("Kelompok belum tersedia di Supabase.");
+  return groupId;
+}
+
+async function getPrimaryGroupUserId(groupId: number) {
+  const { data: members, error } = await supabaseAdmin
+    .from("group_member")
+    .select("id_user")
+    .eq("id_project_group", groupId)
+    .order("created_at", { ascending: true })
+    .limit(1);
+  if (error) throw error;
+  const userId = asNumberId(asRows(members)[0]?.id_user);
+  if (userId === null) throw new Error("Anggota kelompok belum tersedia di Supabase.");
+  return userId;
+}
+
+export async function promoteStudentGroupMember(memberId: string): Promise<StudentGroupOverview> {
+  const parsedMemberId = Number(memberId);
+  if (!Number.isFinite(parsedMemberId)) throw new Error("ID anggota tidak valid.");
+
+  const { data: memberData, error: memberError } = await supabaseAdmin
+    .from("group_member")
+    .select("id,id_project_group")
+    .eq("id", parsedMemberId)
+    .single();
+  if (memberError) throw memberError;
+
+  const groupId = asNumberId((memberData as DbRow | null)?.id_project_group);
+  if (groupId === null) throw new Error("Kelompok anggota tidak ditemukan.");
+
+  const { error: demoteError } = await supabaseAdmin
+    .from("group_member")
+    .update({ role: "member" })
+    .eq("id_project_group", groupId)
+    .eq("role", "leader");
+  if (demoteError) throw demoteError;
+
+  const { error: promoteError } = await supabaseAdmin
+    .from("group_member")
+    .update({ role: "leader" })
+    .eq("id", parsedMemberId);
+  if (promoteError) throw promoteError;
+
+  return getStudentGroupOverview();
+}
+
+export async function removeStudentGroupMember(memberId: string): Promise<StudentGroupOverview> {
+  const parsedMemberId = Number(memberId);
+  if (!Number.isFinite(parsedMemberId)) throw new Error("ID anggota tidak valid.");
+
+  const { error } = await supabaseAdmin.from("group_member").delete().eq("id", parsedMemberId);
+  if (error) throw error;
+  return getStudentGroupOverview();
+}
+
+export async function createStudentProgress(input: { description?: string; document?: string }): Promise<StudentGroupOverview> {
+  const description = asString(input.description).trim();
+  const document = asString(input.document).trim();
+  if (!description) throw new Error("Catatan progres wajib diisi.");
+  if (!document) throw new Error("Bukti progres wajib diisi.");
+
+  const groupId = await getPrimaryStudentGroup();
+  const userId = await getPrimaryGroupUserId(groupId);
+
+  const { data: discussions, error: discussionReadError } = await supabaseAdmin
+    .from("discussion_session")
+    .select("id")
+    .eq("id_project_group", groupId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  if (discussionReadError) throw discussionReadError;
+
+  let discussionId = asNumberId(asRows(discussions)[0]?.id);
+  if (discussionId === null) {
+    const { data: inserted, error: discussionInsertError } = await supabaseAdmin
+      .from("discussion_session")
+      .insert({ id_project_group: groupId, title: "Progress Kelompok", status: "process", type: "online" })
+      .select("id")
+      .single();
+    if (discussionInsertError) throw discussionInsertError;
+    discussionId = asNumberId((inserted as DbRow | null)?.id);
+  }
+
+  if (discussionId === null) throw new Error("Sesi diskusi untuk progres tidak ditemukan.");
+
+  const { error } = await supabaseAdmin
+    .from("progress_discussion")
+    .insert({ id_discussion_session: discussionId, id_user: userId, document, description });
+  if (error) throw error;
+
+  return getStudentGroupOverview();
+}
+

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -195,14 +195,6 @@ export default function ProjectsPage() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">Proyek</h1>
-          <button
-            type="button"
-            onClick={openCreateForm}
-            className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-[14px] bg-ktr-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-ktr-primary-hover active:scale-[0.995]"
-          >
-            <HugeiconsIcon icon={PlusSignIcon} size={16} strokeWidth={1.5} />
-            Buat Proyek
-          </button>
         </div>
 
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -212,16 +204,26 @@ export default function ProjectsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <FilterSelect
-            className="w-full lg:w-40"
-            ariaLabel="Filter status"
-            defaultValue="semua"
-            options={["Semua", "Aktif", "Akan Datang", "Selesai", "Diarsipkan"].map((label) => ({
-              value: label.toLowerCase().replaceAll(" ", "-"),
-              label,
-            }))}
-            onChange={(v) => setStatusFilter(v)}
-          />
+          <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+            <FilterSelect
+              className="w-full sm:w-40"
+              ariaLabel="Filter status"
+              defaultValue="semua"
+              options={["Semua", "Aktif", "Akan Datang", "Selesai", "Diarsipkan"].map((label) => ({
+                value: label.toLowerCase().replaceAll(" ", "-"),
+                label,
+              }))}
+              onChange={(v) => setStatusFilter(v)}
+            />
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-ktr-text-primary bg-ktr-text-primary px-4 text-sm font-semibold text-white transition-[background-color,transform] hover:bg-black active:scale-[0.997]"
+            >
+              <HugeiconsIcon icon={PlusSignIcon} size={16} strokeWidth={1.5} />
+              Buat Proyek
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 text-sm font-medium text-ktr-text-secondary">
@@ -248,15 +250,15 @@ export default function ProjectsPage() {
             />
           ))}
           {!loading && filtered.length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center gap-3 rounded-[18px] border border-dashed border-ktr-border-light bg-white py-16 text-center">
-              <span className="flex size-12 items-center justify-center rounded-[14px] text-ktr-text-primary">
+            <div className="col-span-full flex flex-col items-center justify-center gap-3 rounded-[16px] border border-dashed border-ktr-border-light bg-white py-16 text-center">
+              <span className="flex size-12 items-center justify-center rounded-[10px] text-ktr-text-primary">
                 <HugeiconsIcon icon={Folder01Icon} size={22} strokeWidth={1.5} />
               </span>
               <p className="text-sm font-medium text-ktr-text-secondary">Belum ada proyek dari Supabase.</p>
             </div>
           )}
           {loading && (
-            <div className="col-span-full rounded-[18px] border border-ktr-border-light bg-white px-5 py-12 text-center text-sm font-medium text-ktr-text-secondary">
+            <div className="col-span-full rounded-[16px] border border-ktr-border-light bg-white px-5 py-12 text-center text-sm font-medium text-ktr-text-secondary">
               Memuat data proyek...
             </div>
           )}
@@ -293,7 +295,7 @@ export default function ProjectsPage() {
               value={draft.description}
               placeholder="Tambahkan arahan singkat proyek"
               onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
-              className="min-h-24 w-full resize-none rounded-[14px] border border-ktr-border-light bg-white px-3 py-2 text-sm font-medium text-ktr-text-primary outline-none transition-colors placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-primary focus:ring-3 focus:ring-ktr-primary/15"
+              className="min-h-24 w-full resize-none rounded-[10px] border border-ktr-border-light bg-white px-3 py-2 text-sm font-medium text-ktr-text-primary outline-none transition-colors placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary focus:ring-3 focus:ring-ktr-text-primary/10"
             />
           </label>
         </div>
@@ -326,23 +328,18 @@ function ProjectCard({
   }, []);
 
   return (
-    <Card className="group rounded-[18px] border border-ktr-border-light bg-white transition-[border-color,transform] hover:border-ktr-primary/35 active:scale-[0.998]">
+    <Card className="group rounded-[16px] border border-ktr-border-light bg-white transition-[border-color,transform] hover:border-ktr-border-input active:scale-[0.998]">
       <Card.Content className="relative p-5">
         <Link
           href={`/teacher/projects/${project.id}`}
-          className="absolute inset-0 cursor-pointer rounded-[18px] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ktr-primary/20"
+          className="absolute inset-0 cursor-pointer rounded-[16px] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ktr-text-primary/10"
           aria-label={`Lihat detail ${project.name}`}
         />
 
         <div className="pointer-events-none relative z-10 flex items-start justify-between gap-4">
-          <div className="flex min-w-0 items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] text-ktr-text-primary">
-              <HugeiconsIcon icon={Folder01Icon} size={21} strokeWidth={1.5} />
-            </span>
-            <div className="min-w-0">
-              <h2 className="truncate font-heading text-base font-semibold text-ktr-text-primary">{project.name}</h2>
-              <p className="mt-1 text-sm font-medium text-ktr-text-secondary">{project.className}</p>
-            </div>
+          <div className="min-w-0">
+            <h2 className="truncate font-heading text-base font-semibold text-ktr-text-primary">{project.name}</h2>
+            <p className="mt-1 text-sm font-medium text-ktr-text-secondary">{project.className}</p>
           </div>
 
           <div ref={menuRef} className="pointer-events-auto relative">
@@ -352,13 +349,13 @@ function ProjectCard({
               aria-haspopup="menu"
               aria-expanded={moreOpen}
               onClick={() => setMoreOpen((value) => !value)}
-              className="flex size-9 cursor-pointer items-center justify-center rounded-[12px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft focus-visible:outline-none active:scale-[0.995]"
+              className="flex size-9 cursor-pointer items-center justify-center rounded-[12px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft focus-visible:outline-none active:scale-[0.997]"
             >
               <HugeiconsIcon icon={MoreVerticalCircle01Icon} size={18} strokeWidth={1.5} />
             </button>
 
             {moreOpen && (
-              <div className="teacher-dropdown-popover absolute right-0 top-[calc(100%+8px)] z-30 w-44 rounded-[16px] border border-ktr-border-light bg-white p-1.5" role="menu">
+              <div className="teacher-dropdown-popover absolute right-0 top-[calc(100%+8px)] z-30 w-44 rounded-[12px] border border-ktr-border-light bg-white p-1" role="menu">
                 <ProjectMenuItem icon={Edit01Icon} label="Edit" onClick={() => { setMoreOpen(false); onEdit(); }} />
                 <ProjectMenuItem icon={Copy01Icon} label="Duplikat" onClick={() => { setMoreOpen(false); onDuplicate(); }} />
                 <ProjectMenuItem icon={ArchiveIcon} label="Arsipkan" onClick={() => { setMoreOpen(false); onArchive(); }} danger />
@@ -367,7 +364,7 @@ function ProjectCard({
           </div>
         </div>
 
-        <div className="pointer-events-none relative z-0 mt-6 space-y-3 text-sm font-medium">
+        <div className="pointer-events-none relative z-0 mt-7 space-y-4 text-sm font-medium">
           <InfoRow icon={CheckListIcon} label="Status" value={project.status} valueClassName={statusClassName(project.status)} />
           <InfoRow icon={Calendar03Icon} label="Deadline" value={project.finalDeadline} />
           <InfoRow icon={UserMultiple02Icon} label="Kelompok" value={`${project.groups} kelompok - ${project.students} siswa`} />
@@ -379,12 +376,6 @@ function ProjectCard({
             valueClassName={project.inactiveGroups > 0 ? "text-ktr-warning" : "text-ktr-success"}
           />
         </div>
-
-        {project.announcement && (
-          <div className="pointer-events-none relative z-0 mt-5 rounded-[14px] border border-ktr-border-light px-4 py-3">
-            <p className="text-xs font-medium leading-5 text-ktr-text-secondary">{project.announcement}</p>
-          </div>
-        )}
       </Card.Content>
     </Card>
   );
@@ -412,7 +403,7 @@ function ProjectMenuItem({
       type="button"
       role="menuitem"
       onClick={onClick}
-      className={`flex h-10 w-full cursor-pointer items-center gap-3 rounded-[12px] px-3 text-left text-sm font-semibold transition-colors hover:bg-ktr-surface-soft ${danger ? "text-ktr-project-need-attention" : "text-ktr-text-primary"}`}
+      className={`flex h-10 w-full cursor-pointer items-center gap-3 rounded-[10px] px-3 text-left text-sm font-semibold transition-colors hover:bg-ktr-surface-soft ${danger ? "text-ktr-project-need-attention" : "text-ktr-text-primary"}`}
     >
       <HugeiconsIcon icon={icon} size={16} strokeWidth={1.5} aria-hidden="true" />
       {label}
@@ -463,7 +454,7 @@ function ProjectField({
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="h-11 w-full rounded-[14px] border border-ktr-border-light bg-white px-3 text-sm font-medium text-ktr-text-primary outline-none transition-colors placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-primary focus:ring-3 focus:ring-ktr-primary/15"
+        className="h-10 w-full rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm font-medium text-ktr-text-primary outline-none transition-colors placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary focus:ring-3 focus:ring-ktr-text-primary/10"
       />
     </label>
   );

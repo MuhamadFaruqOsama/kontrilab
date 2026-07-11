@@ -251,7 +251,7 @@ export default function GroupDetail() {
                   type="button"
                   onClick={() => setSaveOpen(true)}
                   disabled={!notes || notes === savedNotes}
-                  className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-[14px] bg-ktr-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-ktr-primary-hover active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-ktr-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-ktr-primary-hover active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <HugeiconsIcon icon={FloppyDiskIcon} size={16} />
                   Simpan Catatan

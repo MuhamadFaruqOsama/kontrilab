@@ -960,6 +960,7 @@ export function InviteMemberSheet({ trigger }: { trigger: React.ReactNode }) {
 }
 
 type GroupMember = {
+  id: string;
   name: string;
   role: "Ketua" | "Anggota";
   initials: string;
@@ -985,10 +986,10 @@ type ProgresItem = {
 };
 
 const groupMembers: GroupMember[] = [
-  { name: "Alya Putri Ramadhani", role: "Ketua", initials: "AP", avatarClass: "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]" },
-  { name: "Bima Aditya Pratama", role: "Anggota", initials: "BA", avatarClass: "bg-[linear-gradient(135deg,#233046,#5b8fb9_48%,#f5a623)]" },
-  { name: "Raka Maulana Yusuf", role: "Anggota", initials: "RM", avatarClass: "bg-[linear-gradient(135deg,#f7d9c4,#f5a623_42%,#5b8fb9)]" },
-  { name: "Nadia Safira Lestari", role: "Anggota", initials: "NS", avatarClass: "bg-[linear-gradient(135deg,#d8ff00,#57c186_48%,#2f536f)]" },
+  { id: "1", name: "Alya Putri Ramadhani", role: "Ketua", initials: "AP", avatarClass: "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]" },
+  { id: "2", name: "Bima Aditya Pratama", role: "Anggota", initials: "BA", avatarClass: "bg-[linear-gradient(135deg,#233046,#5b8fb9_48%,#f5a623)]" },
+  { id: "3", name: "Raka Maulana Yusuf", role: "Anggota", initials: "RM", avatarClass: "bg-[linear-gradient(135deg,#f7d9c4,#f5a623_42%,#5b8fb9)]" },
+  { id: "4", name: "Nadia Safira Lestari", role: "Anggota", initials: "NS", avatarClass: "bg-[linear-gradient(135deg,#d8ff00,#57c186_48%,#2f536f)]" },
 ];
 
 const groupDiscussions: DiscussionItem[] = [
@@ -1108,7 +1109,7 @@ function MemberAvatar({ member, size = "size-[44px]" }: { member: Pick<GroupMemb
   return <span className={cn("flex shrink-0 items-center justify-center rounded-full text-[11px] font-semibold leading-none text-ktr-text-white", size, member.avatarClass)}>{member.initials}</span>;
 }
 
-function MemberRow({ member, showDivider = true }: { member: GroupMember; showDivider?: boolean }) {
+function MemberRow({ member, showDivider = true, onPromote, onRemove }: { member: GroupMember; showDivider?: boolean; onPromote?: (member: GroupMember) => void; onRemove?: (member: GroupMember) => void }) {
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   return (
@@ -1129,7 +1130,7 @@ function MemberRow({ member, showDivider = true }: { member: GroupMember; showDi
                 key: "promote",
                 label: "Jadikan ketua",
                 description: "Pindahkan peran ketua kelompok",
-                onSelect: () => toast.info("Peran belum diubah", { description: "Aksi ini nanti disambungkan ke data kelompok." }),
+                onSelect: () => onPromote?.(member),
               },
               {
                 key: "remove",
@@ -1151,7 +1152,7 @@ function MemberRow({ member, showDivider = true }: { member: GroupMember; showDi
         confirmText="Keluarkan"
         cancelText="Batal"
         tone="danger"
-        onConfirm={() => toast.success("Anggota dikeluarkan", { description: `${member.name} sudah dihapus dari kelompok.` })}
+        onConfirm={() => onRemove?.(member)}
       />
     </>
   );
@@ -1260,19 +1261,52 @@ export function GroupDetailPage({ role = "member" }: { role?: DiscussionRole } =
 
   React.useEffect(() => {
     let cancelled = false;
-    fetch("/api/student/group")
-      .then((response) => response.ok ? response.json() : null)
-      .then((data: StudentGroupApiData | null) => {
-        if (!cancelled && data) setGroupData(data);
-      })
-      .catch(() => {
+
+    async function loadGroupData() {
+      try {
+        const response = await fetch("/api/student/group", { cache: "no-store" });
+        if (!response.ok) throw new Error("Data kelompok belum bisa dimuat.");
+        const data = await response.json();
+        if (!cancelled) setGroupData(data);
+      } catch {
         if (!cancelled) setGroupData(null);
-      });
+      }
+    }
+
+    void loadGroupData();
 
     return () => {
       cancelled = true;
     };
   }, []);
+
+  async function promoteMember(member: GroupMember) {
+    try {
+      const response = await fetch("/api/student/group/member", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberId: member.id }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Peran anggota belum bisa diubah.");
+      setGroupData(data);
+      toast.success("Ketua kelompok diperbarui", { description: `${member.name} sekarang menjadi ketua.` });
+    } catch (error) {
+      toast.danger("Gagal mengubah peran", { description: error instanceof Error ? error.message : "Coba lagi sebentar lagi." });
+    }
+  }
+
+  async function removeMember(member: GroupMember) {
+    try {
+      const response = await fetch(`/api/student/group/member?id=${encodeURIComponent(member.id)}`, { method: "DELETE" });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Anggota belum bisa dikeluarkan.");
+      setGroupData(data);
+      toast.success("Anggota dikeluarkan", { description: `${member.name} sudah dihapus dari kelompok.` });
+    } catch (error) {
+      toast.danger("Gagal mengeluarkan anggota", { description: error instanceof Error ? error.message : "Coba lagi sebentar lagi." });
+    }
+  }
 
   function clearAddMenuTimer() {
     if (!addMenuCloseTimer.current) return;
@@ -1318,7 +1352,7 @@ export function GroupDetailPage({ role = "member" }: { role?: DiscussionRole } =
         <SectionTitle>Anggota Kelompok</SectionTitle>
         <section className="mb-6 rounded-[20px] border border-ktr-border-light bg-ktr-surface-card p-3">
           <div className="space-y-3">
-            {members.map((member, index) => <MemberRow key={member.name} member={member} showDivider={index < members.length - 1} />)}
+            {members.map((member, index) => <MemberRow key={member.id} member={member} showDivider={index < members.length - 1} onPromote={promoteMember} onRemove={removeMember} />)}
           </div>
         </section>
 
@@ -2334,6 +2368,8 @@ export function ProgressInputPage() {
   const [progress, setProgress] = React.useState("");
   const [evidenceLink, setEvidenceLink] = React.useState("");
   const [attachment, setAttachment] = React.useState<{ name: string; size: string } | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
+  const router = useRouter();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const canSubmit = progress.trim().length > 0 && (Boolean(attachment) || evidenceLink.trim().length > 0);
 
@@ -2345,9 +2381,28 @@ export function ProgressInputPage() {
     event.target.value = "";
   }
 
-  function submitProgress() {
-    if (!canSubmit) return;
-    toast.success("Progres berhasil dikirim.", { description: "Progresmu sudah tercatat untuk ditinjau kelompok." });
+  async function submitProgress() {
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/student/group/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: progress.trim(),
+          document: attachment?.name ?? evidenceLink.trim(),
+        }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Progres belum bisa disimpan.");
+      toast.success("Progres berhasil dikirim.", { description: "Progresmu sudah tercatat di Supabase." });
+      router.push("/student/group");
+      router.refresh();
+    } catch (error) {
+      toast.danger("Gagal mengirim progres", { description: error instanceof Error ? error.message : "Coba lagi sebentar lagi." });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -2408,7 +2463,7 @@ export function ProgressInputPage() {
         </div>
 
         <div className="pt-5">
-          <Button className="h-11 w-full rounded-[12px] text-[14px] font-semibold disabled:opacity-45" disabled={!canSubmit} onClick={submitProgress}>Kirim Progres</Button>
+          <Button className="h-11 w-full rounded-[12px] text-[14px] font-semibold disabled:opacity-45" disabled={!canSubmit || submitting} onClick={submitProgress}>{submitting ? "Mengirim..." : "Kirim Progres"}</Button>
         </div>
       </div>
     </ScreenShell>
