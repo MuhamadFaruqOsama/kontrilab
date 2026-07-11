@@ -10,7 +10,6 @@ import {
   CheckListIcon,
   Folder01Icon,
   MessageMultiple01Icon,
-  Notification03Icon,
   PlusSignIcon,
   UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
@@ -33,19 +32,34 @@ const semesterOptions = [
 ].map((label) => ({ value: label.toLowerCase().replaceAll(" ", "-"), label }));
 
 export default function TeacherDashboard() {
+  const [projects, setProjects] = React.useState<typeof teacherProjects>(teacherProjects);
   const router = useRouter();
   const [reminderOpen, setReminderOpen] = React.useState(false);
   const [reminderTarget, setReminderTarget] = React.useState("");
 
+
+  React.useEffect(() => {
+    let cancelled = false;
+    fetch("/api/teacher/projects")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: typeof teacherProjects | null) => {
+        if (!cancelled && Array.isArray(data) && data.length > 0) setProjects(data);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const needAttentionStudents = teacherStudents.filter(
     (s) => s.status === "Perlu Perhatian" || s.status === "Tidak Ada Aktivitas Terbaru"
   ).length;
-  const pendingReviews = teacherProjects.reduce(
+  const pendingReviews = projects.reduce(
     (total, p) => total + p.pendingUploadReviews + p.pendingFinalReviews,
     0
   );
-  const activeProjects = teacherProjects.filter((p) => p.status === "Aktif");
-  const inactiveGroups = teacherProjects.reduce((total, p) => total + p.inactiveGroups, 0);
+  const activeProjects = projects.filter((p) => p.status === "Aktif");
+  const inactiveGroups = projects.reduce((total, p) => total + p.inactiveGroups, 0);
 
   function handleFollowUpAction(item: (typeof followUps)[number]) {
     if (item.action === "Kirim Pengingat") {

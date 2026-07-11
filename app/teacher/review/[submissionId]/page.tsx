@@ -8,7 +8,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowLeft01Icon,
   CheckmarkCircle02Icon,
-  ExternalLink01Icon,
+  ExternalLinkIcon,
   FloppyDiskIcon,
   Message02Icon,
 } from "@hugeicons/core-free-icons";
@@ -136,7 +136,7 @@ export default function ReviewDetailPage() {
                         className="mt-2 inline-flex items-center gap-1.5 rounded-[12px] border border-ktr-border-light bg-ktr-surface-soft px-4 py-2 text-sm font-semibold text-ktr-primary transition-colors hover:border-ktr-primary/30"
                       >
                         {submission.file}
-                        <HugeiconsIcon icon={ExternalLink01Icon} size={14} />
+                        <HugeiconsIcon icon={ExternalLinkIcon} size={14} />
                       </a>
                     </div>
                     <div className="rounded-[14px] border border-ktr-border-light bg-ktr-surface-soft p-4 text-sm text-ktr-text-secondary">

@@ -10,7 +10,8 @@
         "prisma:generate": "prisma generate",
         "prisma:migrate": "prisma migrate dev",
         "prisma:studio": "prisma studio",
-        "db:push": "prisma db push"
+        "db:push": "prisma db push",
+        "seed:supabase": "node scripts/seed-supabase-kontrilab.cjs"
     },
     "dependencies": {
         "@heroui/react": "^3.2.1",

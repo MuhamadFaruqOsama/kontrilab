@@ -1,31 +1,71 @@
-import { NextResponse } from "next/server";
-import { ProjectService } from "@/lib/services/project.service";
-import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  createTeacherProject,
+  deleteTeacherProject,
+  duplicateTeacherProject,
+  getTeacherProjectCards,
+  updateTeacherProject,
+} from "@/lib/services/kontrilab-sql.service";
 
-export async function GET(request: Request) {
+function errorResponse(error: unknown) {
+  const message = error instanceof Error ? error.message : "Internal Server Error";
+  console.error("Teacher projects API error:", error);
+  return NextResponse.json({ error: message }, { status: 500 });
+}
+
+export async function GET() {
   try {
-    const firstTeacher = await prisma.user.findFirst({ where: { role: "TEACHER" } });
-    if (!firstTeacher) return NextResponse.json({ error: "No teacher found" }, { status: 404 });
-
-    const projects = await ProjectService.getProjects(firstTeacher.id);
+    const projects = await getTeacherProjectCards();
     return NextResponse.json(projects);
   } catch (error) {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const firstTeacher = await prisma.user.findFirst({ where: { role: "TEACHER" } });
-    if (!firstTeacher) return NextResponse.json({ error: "No teacher found" }, { status: 404 });
-
-    const data = await request.json();
-    const newProject = await ProjectService.createProject({
-      ...data,
-      ownerId: firstTeacher.id
-    });
-    return NextResponse.json(newProject);
+    const body = await request.json().catch(() => ({}));
+    const projects = typeof body?.duplicateFromId === "string" || typeof body?.duplicateFromId === "number"
+      ? await duplicateTeacherProject(String(body.duplicateFromId))
+      : await createTeacherProject({
+          title: body?.title,
+          className: body?.className,
+          description: body?.description,
+          dueDate: body?.dueDate,
+        });
+    return NextResponse.json(projects, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return errorResponse(error);
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const id = body?.id;
+    if (typeof id !== "string" && typeof id !== "number") {
+      return NextResponse.json({ error: "ID proyek wajib dikirim." }, { status: 400 });
+    }
+
+    const projects = await updateTeacherProject(String(id), {
+      title: body?.title,
+      className: body?.className,
+      description: body?.description,
+      dueDate: body?.dueDate,
+    });
+    return NextResponse.json(projects);
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const id = request.nextUrl.searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "ID proyek wajib dikirim." }, { status: 400 });
+    const projects = await deleteTeacherProject(id);
+    return NextResponse.json(projects);
+  } catch (error) {
+    return errorResponse(error);
   }
 }

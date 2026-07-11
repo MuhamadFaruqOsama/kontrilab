@@ -10,12 +10,14 @@ import {
   ArrowDown02Icon,
   Album02Icon,
   ArrowLeft02Icon,
+  Activity01Icon,
   ArrowRight02Icon,
   BubbleChatIcon,
   Briefcase01Icon,
   Calendar03Icon,
   Cancel01Icon,
   CheckmarkCircle02Icon,
+  ChatFeedback01Icon,
   Call02Icon,
   CallEnd01Icon,
   Clock01Icon,
@@ -24,7 +26,6 @@ import {
   Download01Icon,
   File02Icon,
   FileCheckIcon,
-  Flag01Icon,
   LabelImportantIcon,
   Login02Icon,
   MessageDone02Icon,
@@ -35,6 +36,7 @@ import {
   Task01Icon,
   TaskDone02Icon,
   Search01Icon,
+  Settings02Icon,
   StarIcon,
   CloudUploadIcon,
   Upload04Icon,
@@ -61,8 +63,12 @@ import {
 } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { studentSettingsStorage } from "@/lib/student-settings";
+import { getStudentProfileOverview, type RecentActivity, type StudentProfileOverview } from "@/lib/student-profile";
 
 type Status = "Belum Dimulai" | "Sedang Berjalan" | "Revisi" | "Selesai";
+
+
 
 type Project = {
   title: string;
@@ -71,6 +77,13 @@ type Project = {
   members: string;
   deadline: string;
   status: Status;
+};
+type ApiStudentProject = {
+  id: string;
+  title: string;
+  className: string;
+  deadline?: string | null;
+  status?: string | null;
 };
 
 const projects: Project[] = [
@@ -176,7 +189,7 @@ function ScreenShell({
   );
 }
 
-function Card({ children, className }: { children: React.ReactNode; className?: string }) {
+function Card({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <section className={cn("relative min-w-0 overflow-hidden rounded-[18px] border border-ktr-border-light bg-ktr-surface-card p-[14px]", className)}>{children}</section>;
 }
 
@@ -430,14 +443,14 @@ export function ProjectsPage() {
         if (res.ok) {
           const data = await res.json();
           // Map DB project to UI Project format
-          const mapped = data.map((p: any) => ({
+          const mapped: Project[] = (data as ApiStudentProject[]).map((p) => ({
             id: p.id,
             title: p.title,
             className: p.className,
             group: "Belum berkelompok",
             members: "0 anggota",
             deadline: p.deadline ? new Date(p.deadline).toLocaleDateString('id-ID') : "TBA",
-            status: p.status === "IN_PROGRESS" ? "Sedang Berjalan" : p.status === "NOT_STARTED" ? "Belum Dimulai" : p.status === "FINISHED" ? "Selesai" : "Revisi"
+            status: (p.status === "IN_PROGRESS" ? "Sedang Berjalan" : p.status === "NOT_STARTED" ? "Belum Dimulai" : p.status === "FINISHED" ? "Selesai" : "Revisi") as Status
           }));
           setApiProjects(mapped);
         }
@@ -984,7 +997,6 @@ const groupDiscussions: DiscussionItem[] = [
   { title: "Revisi Tampilan Kontak", status: "Selesai", statusClass: "text-ktr-project-finished", messages: "2 pesan", meta: "Semua anggota sudah memberi umpan balik" },
 ];
 
-const activeDiscussion = groupDiscussions.find((discussion) => discussion.status === "Sedang Berjalan");
 
 const groupProgres: ProgresItem[] = [
   { text: "Membuat draft tampilan awal untuk bagian hero landing page.", author: "Bima A.", time: "dikirim 5 menit lalu", avatarClass: "bg-[linear-gradient(135deg,#233046,#5b8fb9)]" },
@@ -1060,7 +1072,7 @@ function ProjectBriefSheet({ trigger }: { trigger: React.ReactNode }) {
   );
 }
 
-function ProjectHeaderBlock() {
+function ProjectHeaderBlock({ project = { title: "Landing Page UMKM", className: "XI - Desain Web", dueDate: "25 Juni 2026", status: "Belum Dimulai" } }: { project?: { title: string; className: string; dueDate: string; status: string } }) {
   return (
     <section className="mb-6">
       <div className="mb-6 flex items-center justify-between">
@@ -1075,17 +1087,17 @@ function ProjectHeaderBlock() {
         />
       </div>
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
-        <h1 className="min-w-0 text-[20px] font-semibold leading-[28px] text-ktr-text-primary">Landing Page UMKM</h1>
-        <p className="shrink-0 pt-0.5 text-right text-[14px] leading-[22px] text-ktr-text-secondary">XI - Desain Web</p>
+        <h1 className="min-w-0 text-[20px] font-semibold leading-[28px] text-ktr-text-primary">{project.title}</h1>
+        <p className="shrink-0 pt-0.5 text-right text-[14px] leading-[22px] text-ktr-text-secondary">{project.className}</p>
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-4 text-[13px] leading-5">
         <span className="flex items-center gap-1.5 text-ktr-primary">
           <Icon icon={Calendar03Icon} />
-          25 Juni 2026
+          {project.dueDate}
         </span>
         <span className="flex items-center gap-1.5 text-ktr-info">
           <Icon icon={statusIcon()} />
-          Belum Dimulai
+          {project.status}
         </span>
       </div>
     </section>
@@ -1182,7 +1194,7 @@ function DiscussionCard({ item }: { item: DiscussionItem }) {
   );
 }
 
-function ActiveDiscussionSection({ item }: { item: DiscussionItem }) {
+function ActiveDiscussionSection({ item, members = groupMembers }: { item: DiscussionItem; members?: GroupMember[] }) {
   return (
     <section className="mb-6">
       <SectionTitle>Diskusi Aktif</SectionTitle>
@@ -1195,7 +1207,7 @@ function ActiveDiscussionSection({ item }: { item: DiscussionItem }) {
         </div>
         <div className="mt-4 flex items-center justify-between gap-3">
           <div className="flex items-center pl-2">
-            {groupMembers.slice(0, 4).map((member) => (
+            {members.slice(0, 4).map((member) => (
               <MemberAvatar key={member.initials} member={member} size="-ml-2 size-7 border-2 border-ktr-surface-card" />
             ))}
           </div>
@@ -1224,68 +1236,161 @@ function ProgresRow({ item, showDivider = true }: { item: ProgresItem; showDivid
   );
 }
 
+type StudentGroupApiData = {
+  project: { title: string; className: string; dueDate: string; status: string };
+  members: GroupMember[];
+  progress: ProgresItem[];
+  discussions: DiscussionItem[];
+};
 export function GroupDetailPage({ role = "member" }: { role?: DiscussionRole } = {}) {
   const isLeader = role === "leader";
+  const [groupData, setGroupData] = React.useState<StudentGroupApiData | null>(null);
+  const [showAllProgress, setShowAllProgress] = React.useState(false);
+  const [addMenuState, setAddMenuState] = React.useState<"closed" | "open" | "closing">("closed");
+  const addMenuCloseTimer = React.useRef<number | null>(null);
+  const addMenuOpen = addMenuState === "open";
+  const addMenuVisible = addMenuState !== "closed";
+  const addMenuExiting = addMenuState === "closing";
+  const projectInfo = groupData?.project ?? { title: "Landing Page UMKM", className: "XI - Desain Web", dueDate: "25 Juni 2026", status: "Belum Dimulai" };
+  const members = groupData?.members?.length ? groupData.members : groupMembers;
+  const progressItems = groupData?.progress?.length ? groupData.progress : groupProgres;
+  const visibleProgressItems = showAllProgress ? progressItems : progressItems.slice(0, 5);
+  const discussions = groupData?.discussions?.length ? groupData.discussions : groupDiscussions;
+  const currentActiveDiscussion = discussions.find((discussion) => discussion.status === "Sedang Berjalan") ?? null;
+
+  React.useEffect(() => {
+    let cancelled = false;
+    fetch("/api/student/group")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: StudentGroupApiData | null) => {
+        if (!cancelled && data) setGroupData(data);
+      })
+      .catch(() => {
+        if (!cancelled) setGroupData(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function clearAddMenuTimer() {
+    if (!addMenuCloseTimer.current) return;
+    window.clearTimeout(addMenuCloseTimer.current);
+    addMenuCloseTimer.current = null;
+  }
+
+  function openAddMenu() {
+    clearAddMenuTimer();
+    setAddMenuState("open");
+  }
+
+  function closeAddMenu() {
+    if (addMenuState === "closed") return;
+    clearAddMenuTimer();
+    setAddMenuState("closing");
+    addMenuCloseTimer.current = window.setTimeout(() => {
+      setAddMenuState("closed");
+      addMenuCloseTimer.current = null;
+    }, 150);
+  }
+
+  function toggleAddMenu() {
+    if (addMenuOpen) {
+      closeAddMenu();
+      return;
+    }
+
+    openAddMenu();
+  }
+
+  React.useEffect(() => () => {
+    if (addMenuCloseTimer.current) window.clearTimeout(addMenuCloseTimer.current);
+  }, []);
 
   return (
-    <main className={cn("relative min-h-dvh w-full bg-background px-4 pt-6 text-ktr-text-primary", isLeader ? "pb-[132px]" : "pb-10")}>
+    <main className="relative min-h-dvh w-full bg-background px-4 pb-[116px] pt-6 text-ktr-text-primary">
       <div className="mx-auto w-full max-w-[430px]">
-        <ProjectHeaderBlock />
+        <ProjectHeaderBlock project={projectInfo} />
 
-        {activeDiscussion ? <ActiveDiscussionSection item={activeDiscussion} /> : null}
+        {currentActiveDiscussion ? <ActiveDiscussionSection item={currentActiveDiscussion} members={members} /> : null}
 
         <SectionTitle>Anggota Kelompok</SectionTitle>
         <section className="mb-6 rounded-[20px] border border-ktr-border-light bg-ktr-surface-card p-3">
           <div className="space-y-3">
-            {groupMembers.map((member, index) => <MemberRow key={member.name} member={member} showDivider={index < groupMembers.length - 1} />)}
-            {isLeader ? (
-              <InviteMemberSheet
-                trigger={
-                  <button type="button" className="flex h-[46px] w-full items-center gap-3 px-0 text-left text-[14px] font-medium leading-[22px] text-ktr-primary">
-                    <Icon icon={Add01Icon} className="size-6" />
-                    Tambah Anggota
-                  </button>
-                }
-              />
-            ) : null}
+            {members.map((member, index) => <MemberRow key={member.name} member={member} showDivider={index < members.length - 1} />)}
           </div>
         </section>
 
         <div className="mb-3 flex min-w-0 items-center justify-between gap-3">
           <h2 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Progres Kelompok</h2>
-          <Link href="/student/progress/new" className="inline-flex h-8 shrink-0 items-center gap-1.5 text-[14px] font-medium leading-[22px] text-ktr-primary" onClick={() => toast.info("Siapkan progresmu", { description: "Tambahkan catatan dan bukti pekerjaan terbaru." })}>
-            <Icon icon={Add01Icon} className="size-5" />
-            Tambah Progres
-          </Link>
         </div>
         <section className="mb-6 rounded-[20px] border border-ktr-border-light bg-ktr-surface-card p-3">
           <div className="space-y-3">
-            {groupProgres.slice(0, 5).map((item) => <ProgresRow key={item.text} item={item} />)}
-            <button type="button" className="flex h-[46px] w-full items-center justify-center gap-2 px-0 text-[14px] font-medium leading-[22px] text-ktr-text-secondary transition-colors hover:text-ktr-primary">
-              Lihat lebih banyak
-              <Icon icon={ArrowDown02Icon} className="size-4" />
-            </button>
+            {visibleProgressItems.map((item, index) => <ProgresRow key={`${item.author}-${item.text}`} item={item} showDivider={index < visibleProgressItems.length - 1 || progressItems.length > 5} />)}
+            {progressItems.length > 5 ? (
+              <button type="button" className="flex h-[46px] w-full items-center justify-center gap-2 px-0 text-[14px] font-medium leading-[22px] text-ktr-text-secondary transition-colors hover:text-ktr-primary" onClick={() => setShowAllProgress((value) => !value)}>
+                {showAllProgress ? "Tampilkan lebih sedikit" : "Lihat lebih banyak"}
+                <Icon icon={ArrowDown02Icon} className={cn("size-4 transition-transform", showAllProgress ? "rotate-180" : "rotate-0")} />
+              </button>
+            ) : null}
           </div>
         </section>
 
         <SectionTitle>Diskusi Kelompok</SectionTitle>
         <div className="space-y-3">
-          {groupDiscussions.map((item) => <DiscussionCard key={item.title} item={item} />)}
+          {discussions.map((item) => <DiscussionCard key={item.title} item={item} />)}
         </div>
       </div>
 
-      {isLeader ? (
-        <div className="fixed inset-x-0 bottom-6 z-30 mx-auto w-full max-w-[430px] px-4">
-          <CreateDiscussionSheet
-            trigger={
-              <button type="button" className="mx-auto flex h-12 items-center justify-center gap-2 rounded-[18px] bg-ktr-primary px-5 text-[14px] font-semibold leading-[22px] text-ktr-text-white shadow-[0_16px_36px_rgba(87,193,134,0.32)] transition-all hover:-translate-y-0.5 hover:bg-ktr-primary-hover active:translate-y-0">
-                <Icon icon={Add01Icon} className="size-5" />
-                Buat Diskusi Baru
-              </button>
-            }
-          />
+      <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 mx-auto w-full max-w-[430px] px-4">
+        <div className="relative flex justify-end">
+          {addMenuVisible ? (
+            <div className="ktr-dropdown-popover pointer-events-auto absolute bottom-[60px] right-0 w-[224px] rounded-[16px] border border-ktr-border-light bg-ktr-surface-card p-1 shadow-[0_14px_34px_rgba(43,48,51,0.10)]" data-entering={addMenuOpen && !addMenuExiting ? true : undefined} data-exiting={addMenuExiting ? true : undefined}>
+              <Link
+                href="/student/progress/new"
+                className="flex h-11 w-full items-center gap-3 rounded-[12px] px-3 text-left text-[14px] font-medium leading-[22px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
+                onClick={() => {
+                  closeAddMenu();
+                  toast.info("Siapkan progresmu", { description: "Tambahkan catatan dan bukti pekerjaan terbaru." });
+                }}
+              >
+                <Icon icon={Upload04Icon} className="size-5 text-ktr-text-primary" />
+                Tambah Progres
+              </Link>
+              {isLeader ? (
+                <>
+                  <InviteMemberSheet
+                    trigger={
+                      <button type="button" className="flex h-11 w-full items-center gap-3 rounded-[12px] px-3 text-left text-[14px] font-medium leading-[22px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft">
+                        <Icon icon={UserGroupIcon} className="size-5 text-ktr-text-primary" />
+                        Tambah Anggota
+                      </button>
+                    }
+                  />
+                  <CreateDiscussionSheet
+                    trigger={
+                      <button type="button" className="flex h-11 w-full items-center gap-3 rounded-[12px] px-3 text-left text-[14px] font-medium leading-[22px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft">
+                        <Icon icon={BubbleChatIcon} className="size-5 text-ktr-text-primary" />
+                        Tambah Diskusi
+                      </button>
+                    }
+                  />
+                </>
+              ) : null}
+            </div>
+          ) : null}
+          <button
+            type="button"
+            className="pointer-events-auto flex size-12 items-center justify-center rounded-full border border-ktr-primary bg-ktr-primary text-ktr-text-white transition-[background-color,transform] duration-150 hover:bg-ktr-primary-hover active:scale-[0.98]"
+            aria-label="Tambah aksi proyek"
+            aria-expanded={addMenuOpen}
+            onClick={toggleAddMenu}
+          >
+            <Icon icon={Add01Icon} className={cn("size-6 transition-transform duration-200", addMenuOpen ? "rotate-45" : "rotate-0")} />
+          </button>
         </div>
-      ) : null}
+      </div>
     </main>
   );
 }
@@ -1309,9 +1414,9 @@ const sessionParticipants = [
 ];
 
 const sessionProgres = [
-  { author: "Bima A.", title: "Desain hero section", meta: "1 lampiran • 09.24", initials: "BA", avatarClass: "bg-[linear-gradient(135deg,#233046,#5b8fb9)]" },
-  { author: "Raka M.", title: "Draft konten produk", meta: "1 link • 09.36", initials: "RM", avatarClass: "bg-[linear-gradient(135deg,#f5a623,#5b8fb9)]" },
-  { author: "Nadia S.", title: "Layout halaman kontak", meta: "1 lampiran • 09.45", initials: "NS", avatarClass: "bg-[linear-gradient(135deg,#57c186,#2f536f)]" },
+  { author: "Bima A.", title: "Desain hero section", meta: "1 lampiran - 09.24", initials: "BA", avatarClass: "bg-[linear-gradient(135deg,#233046,#5b8fb9)]" },
+  { author: "Raka M.", title: "Draft konten produk", meta: "1 link - 09.36", initials: "RM", avatarClass: "bg-[linear-gradient(135deg,#f5a623,#5b8fb9)]" },
+  { author: "Nadia S.", title: "Layout halaman kontak", meta: "1 lampiran - 09.45", initials: "NS", avatarClass: "bg-[linear-gradient(135deg,#57c186,#2f536f)]" },
 ];
 
 function SessionParticipantBadge() {
@@ -1424,7 +1529,7 @@ function SessionProgresRow({ item, showDivider = true }: { item: (typeof session
         <MemberAvatar member={item} size="size-8" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[14px] font-normal leading-[22px] text-ktr-text-primary">{item.title}</p>
-          <p className="text-[12px] leading-[18px] text-ktr-text-secondary">{item.author} • {item.meta}</p>
+          <p className="text-[12px] leading-[18px] text-ktr-text-secondary">{item.author} - {item.meta}</p>
         </div>
       </div>
       {showDivider ? <div className="h-[0.6px] w-full bg-ktr-border-light" aria-hidden="true" /> : null}
@@ -1511,7 +1616,7 @@ function EndDiscussionSheet({ trigger }: { trigger: React.ReactNode }) {
   );
 }
 
-// ─── Chat Types & Data ────────────────────────────────────────────────────
+// Chat Types & Data
 
 type ChatMessage = {
   id: string;
@@ -1578,7 +1683,7 @@ function formatCallTime(s: number) {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 }
 
-// ─── Call UI (Zoom-style) ─────────────────────────────────────────────────
+// Call UI (Zoom-style)
 function CallMicStatus({ muted, className, variant = "light" }: { muted: boolean; className?: string; variant?: "light" | "dark" }) {
   const statusClass = muted ? (variant === "dark" ? "text-ktr-text-white/45" : "text-ktr-text-tertiary") : "text-ktr-primary";
 
@@ -1628,14 +1733,14 @@ function CallParticipantTile({ participant, muted, voiceLevel }: { participant: 
   return (
     <div
       className={cn(
-        "relative flex min-h-0 flex-col items-center justify-center gap-3 rounded-[20px] bg-ktr-call-card p-4 transition-[border-color,box-shadow,transform] duration-200",
-        isSpeaking ? "call-participant-speaking" : "border border-transparent"
+        "relative flex min-h-0 flex-col items-center justify-center gap-3 rounded-[20px] border border-ktr-border-light bg-ktr-surface-card p-4 transition-[border-color,box-shadow,transform] duration-200",
+        isSpeaking ? "call-participant-speaking" : ""
       )}
       style={isSpeaking ? ({ "--voice-level": voiceLevel.toFixed(2) } as React.CSSProperties) : undefined}
     >
-      <CallMicStatus muted={participantMuted} variant="dark" className="absolute right-3 top-3" />
+      <CallMicStatus muted={participantMuted} variant="light" className="absolute right-3 top-3" />
       <MemberAvatar member={participant} size="size-16" />
-      <p className="text-center text-[14px] font-medium leading-[22px] text-ktr-text-white">{participant.name}</p>
+      <p className="text-center text-[14px] font-medium leading-[22px] text-ktr-text-primary">{participant.name}</p>
     </div>
   );
 }
@@ -1644,15 +1749,15 @@ function CallOverflowTile({ count, onClick }: { count: number; onClick: () => vo
   const overflowParticipants = callParticipantsList.slice(5, 8);
 
   return (
-    <button type="button" className="flex min-h-0 flex-col items-center justify-center gap-3 rounded-[20px] bg-ktr-call-card p-4 text-ktr-text-white transition-colors hover:bg-ktr-call-card-hover" onClick={onClick}>
+    <button type="button" className="flex min-h-0 flex-col items-center justify-center gap-3 rounded-[20px] border border-ktr-border-light bg-ktr-surface-card p-4 text-ktr-text-primary transition-[border-color,transform] hover:border-ktr-primary/35 active:scale-[0.99]" onClick={onClick}>
       <div className="flex items-center justify-center pl-4">
         {overflowParticipants.map((participant) => (
-          <MemberAvatar key={participant.initials} member={participant} size="-ml-4 size-12 border-2 border-ktr-call-card" />
+          <MemberAvatar key={participant.initials} member={participant} size="-ml-4 size-12 border-2 border-ktr-surface-card" />
         ))}
       </div>
       <div className="text-center">
         <p className="text-[16px] font-semibold leading-[24px]">+{count}</p>
-        <p className="mt-0.5 text-[11px] leading-4 text-ktr-text-white/50">peserta lainnya</p>
+        <p className="mt-0.5 text-[11px] leading-4 text-ktr-text-tertiary">peserta lainnya</p>
       </div>
     </button>
   );
@@ -1665,13 +1770,13 @@ function CallControlButton({ label, children, onClick, active = false, danger = 
         type="button"
         onClick={onClick}
         className={cn(
-          "flex size-14 items-center justify-center rounded-full text-ktr-text-white transition-colors",
-          danger ? "bg-ktr-project-need-attention active:bg-ktr-project-need-attention" : active ? "bg-ktr-text-white/25" : "bg-ktr-text-white/[0.12]"
+          "flex size-14 items-center justify-center rounded-full border transition-[background-color,border-color,transform] active:scale-[0.98]",
+          danger ? "border-ktr-project-need-attention bg-ktr-project-need-attention text-ktr-text-white" : active ? "border-ktr-primary/25 bg-ktr-primary-soft text-ktr-primary" : "border-ktr-border-light bg-ktr-surface-soft text-ktr-text-primary"
         )}
       >
         {children}
       </button>
-      <span className="text-[11px] leading-4 text-ktr-text-white/50">{label}</span>
+      <span className="text-[11px] leading-4 text-ktr-text-secondary">{label}</span>
     </div>
   );
 }
@@ -1690,7 +1795,7 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
   return (
     <>
       <div
-        className="fixed inset-0 z-50 mx-auto flex w-full max-w-[430px] flex-col bg-ktr-call-surface"
+        className="fixed inset-0 z-50 mx-auto flex w-full max-w-[430px] flex-col bg-ktr-surface-bg-app text-ktr-text-primary"
         style={{ left: "50%", right: "auto", transform: "translateX(-50%)" }}
       >
         {/* Header */}
@@ -1698,16 +1803,16 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
           <button
             type="button"
             onClick={onBack}
-            className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-ktr-call-surface text-ktr-text-white transition-colors hover:bg-ktr-text-white/10"
+            className="flex size-10 shrink-0 items-center justify-center rounded-[12px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
             aria-label="Kembali ke diskusi"
           >
             <HugeiconsIcon icon={ArrowLeft02Icon} size={20} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
           </button>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[17px] font-semibold leading-[26px] text-ktr-text-white">Kelompok 1</p>
-            <p className="mt-0.5 truncate text-[12px] leading-4 text-ktr-text-white/50">Landing Page UMKM</p>
+            <p className="truncate text-[17px] font-semibold leading-[26px] text-ktr-text-primary">Kelompok 1</p>
+            <p className="mt-0.5 truncate text-[12px] leading-4 text-ktr-text-secondary">Landing Page UMKM</p>
           </div>
-          <p className="shrink-0 pt-1 text-[14px] font-medium tabular-nums text-ktr-text-white/60">{formatCallTime(elapsed)}</p>
+          <p className="shrink-0 pt-1 text-[14px] font-medium tabular-nums text-ktr-text-secondary">{formatCallTime(elapsed)}</p>
         </div>
 
         {/* Participant grid */}
@@ -1717,7 +1822,7 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
         </div>
 
         {/* Controls */}
-        <div className="grid shrink-0 grid-cols-4 gap-3 px-6 pb-16 pt-8">
+        <div className="grid shrink-0 grid-cols-4 gap-3 px-6 pb-8 pt-6">
           <CallControlButton label="Peserta" onClick={() => setParticipantsOpen(true)}>
             <HugeiconsIcon icon={UserGroupIcon} size={22} strokeWidth={1.8} color="currentColor" aria-hidden="true" />
           </CallControlButton>
@@ -1729,10 +1834,10 @@ function CallOverlay({ elapsed, hostInitials, onBack, onLeave, onEndCall }: { el
           </CallControlButton>
           <div className="relative flex min-w-0 justify-center">
             {isCurrentUserHost && exitMenuOpen ? (
-              <div className="ktr-dropdown-popover absolute bottom-[76px] right-0 z-10 w-[214px] rounded-[16px] border border-ktr-text-white/10 bg-ktr-call-card p-1 shadow-[0_18px_42px_rgba(43,48,51,0.35)]">
+              <div className="ktr-dropdown-popover absolute bottom-[76px] right-0 z-10 w-[214px] rounded-[16px] border border-ktr-border-light bg-ktr-surface-card p-1 shadow-[0_14px_34px_rgba(43,48,51,0.10)]">
                 <button
                   type="button"
-                  className="block w-full rounded-[12px] px-3 py-2 text-left text-[14px] font-medium leading-[22px] text-ktr-text-white transition-colors hover:bg-ktr-text-white/10"
+                  className="block w-full rounded-[12px] px-3 py-2 text-left text-[14px] font-medium leading-[22px] text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
                   onClick={() => {
                     setExitMenuOpen(false);
                     onLeave();
@@ -1793,12 +1898,13 @@ function CallSummaryPage({ duration, onDone }: { duration: number; onDone: () =>
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true);
+    const id = window.setTimeout(() => setMounted(true), 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   const summaryContent = (
-    <main className="fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden rounded-none bg-ktr-call-surface text-ktr-text-white">
-      <div className="call-summary-enter relative h-full w-full overflow-hidden rounded-none bg-ktr-call-surface text-center">
+    <main className="fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden rounded-none bg-ktr-surface-bg-app text-ktr-text-primary">
+      <div className="call-summary-enter relative h-full w-full overflow-hidden rounded-none bg-ktr-surface-bg-app text-center">
         <Image
           src="/icons/ringkasan-panggilan.svg"
           alt=""
@@ -1810,27 +1916,27 @@ function CallSummaryPage({ duration, onDone }: { duration: number; onDone: () =>
 
         <section className="absolute left-[101px] top-[384px] flex w-[228px] flex-col items-center gap-6">
           <div className="flex w-full flex-col items-center gap-3.5">
-            <p className="w-full text-center text-[36px] font-semibold leading-[40px] tabular-nums text-ktr-text-white">{formatCallTime(duration)}</p>
+            <p className="w-full text-center text-[36px] font-semibold leading-[40px] tabular-nums text-ktr-text-primary">{formatCallTime(duration)}</p>
             <div className="-mx-12 w-[324px] space-y-1 text-center">
-              <h1 className="text-[24px] font-semibold leading-8 text-ktr-text-white">Panggilan Berakhir</h1>
-              <p className="whitespace-nowrap text-[14px] font-normal leading-[22px] text-ktr-call-text-muted">Lanjutkan pekerjaan Anda di proyek.</p>
+              <h1 className="text-[24px] font-semibold leading-8 text-ktr-text-primary">Panggilan Berakhir</h1>
+              <p className="whitespace-nowrap text-[14px] font-normal leading-[22px] text-ktr-text-secondary">Lanjutkan pekerjaan Anda di proyek.</p>
             </div>
           </div>
 
-          <div className="inline-flex h-9 w-[154px] items-center rounded-[10px] bg-ktr-call-card px-2 py-1.5">
+          <div className="inline-flex h-9 w-[154px] items-center rounded-[10px] border border-ktr-border-light bg-ktr-surface-card px-2 py-1.5">
             <div className="flex w-[72px] shrink-0 items-center pl-0">
               {callParticipantsList.slice(0, 4).map((participant) => (
-                <MemberAvatar key={participant.initials} member={participant} size="-ml-2 first:ml-0 size-6 border border-ktr-call-card" />
+                <MemberAvatar key={participant.initials} member={participant} size="-ml-2 first:ml-0 size-6 border border-ktr-surface-card" />
               ))}
             </div>
-            <span className="ml-1.5 shrink-0 text-left text-[14px] font-normal leading-[22px] text-ktr-text-white">{participantCount} peserta</span>
+            <span className="ml-1.5 shrink-0 text-left text-[14px] font-normal leading-[22px] text-ktr-text-primary">{participantCount} peserta</span>
           </div>
         </section>
 
         <button
           type="button"
           onClick={onDone}
-          className="absolute left-1/2 top-[588px] inline-flex h-[42px] -translate-x-1/2 items-center justify-center whitespace-nowrap rounded-[12px] bg-ktr-surface-card px-6 py-2.5 text-[16px] font-semibold leading-[22px] text-ktr-primary transition-colors hover:bg-ktr-text-white/92"
+          className="absolute left-1/2 top-[588px] inline-flex h-[42px] -translate-x-1/2 items-center justify-center whitespace-nowrap rounded-[12px] bg-ktr-primary px-6 py-2.5 text-[16px] font-semibold leading-[22px] text-ktr-text-white transition-colors hover:bg-ktr-primary-hover"
         >
           Kembali ke Diskusi
         </button>
@@ -1869,7 +1975,10 @@ export function DiscussionChatPage({
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.location.hash === "#call" && callActive) setInCall(true);
+    const id = window.setTimeout(() => {
+      if (window.location.hash === "#call" && callActive) setInCall(true);
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [callActive]);
 
   React.useEffect(() => {
@@ -2398,11 +2507,14 @@ export function PeerAssessmentPage({ currentUserInitials = "AP", allMembersCompl
     const firstIncompleteMember = targetMembers.find((item) => !storedCompleted.includes(item.name))?.name ?? "";
     const nextMember = pendingIsValid ? pendingMember : firstIncompleteMember;
 
-    setCompletedMembers(storedCompleted);
-    setMember(nextMember);
-    setRatings({});
-    setDescription("");
-    window.localStorage.removeItem(peerAssessmentSelectedKey);
+    const id = window.setTimeout(() => {
+      setCompletedMembers(storedCompleted);
+      setMember(nextMember);
+      setRatings({});
+      setDescription("");
+      window.localStorage.removeItem(peerAssessmentSelectedKey);
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [currentUserInitials]);
 
   function updateRating(key: AssessmentQuestionKey, value: number) {
@@ -2480,6 +2592,8 @@ function SummaryStat({ label, value }: { label: string; value: string }) {
 }
 
 export function SessionSummaryPage({ role = "member", projectReadyToSubmit = false, currentUserInitials = "AP" }: { role?: DiscussionRole; projectReadyToSubmit?: boolean; currentUserInitials?: string } = {}) {
+  void role;
+  void projectReadyToSubmit;
   const progresItems = [
     ["Bima A.", "Desain hero section", "1 lampiran", "09.24", "bg-[linear-gradient(135deg,#233046,#5b8fb9)]"],
     ["Raka M.", "Draft konten produk", "1 link", "09.36", "bg-[linear-gradient(135deg,#f5a623,#5b8fb9)]"],
@@ -2749,24 +2863,135 @@ export function ContributionSummaryPage() {
   return <ScreenShell title="Ringkasan Kontribusi" subtitle="Lihat gambaran kontribusi anggota berdasarkan diskusi, progres, bukti kerja, dan umpan balik."><Card className="mb-4 bg-ktr-primary text-ktr-text-white"><p className="text-[14px] font-semibold leading-[22px] text-ktr-accent-lime">Minggu Ini</p><div className="mt-3 grid min-w-0 grid-cols-2 gap-3 text-[13px] leading-5"><span>4 anggota aktif</span><span>6 progres diunggah</span><span>3 bukti kerja ditambahkan</span><span>2 sesi diskusi berlangsung</span></div></Card><div className="space-y-3">{members.map(([name, role, a, b]) => <Card key={name}><div className="flex min-w-0 items-start justify-between gap-3"><div className="min-w-0"><h3 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">{name}</h3><p className="text-[13px] leading-5 text-ktr-text-secondary">{role}</p></div><Icon icon={StarIcon} className="text-ktr-warning" /></div><div className="mt-3 flex min-w-0 flex-wrap gap-2"><span className="min-w-0 rounded-full bg-ktr-primary-soft px-3 py-1 text-[12px] text-ktr-primary">{a}</span><span className="min-w-0 rounded-full bg-ktr-secondary-bg-info-card px-3 py-1 text-[12px] text-ktr-secondary">{b}</span></div></Card>)}</div><Card className="mt-4 bg-ktr-secondary-bg-info-card"><p className="text-[13px] leading-5 text-ktr-text-secondary">Ringkasan ini membantu membaca aktivitas kelompok, bukan menentukan nilai akhir.</p></Card></ScreenShell>;
 }
 
+function ProfileStatusBadge({ status }: { status: StudentProfileOverview["user"]["activityStatus"] }) {
+  const className = status === "Perlu Perhatian" ? "text-ktr-project-need-attention" : status === "Tidak Ada Aktivitas Terbaru" ? "text-ktr-text-secondary" : "text-ktr-primary";
+  return <span className={cn("inline-flex items-center gap-1.5 rounded-full border border-ktr-border-light bg-ktr-surface-card px-2.5 py-1 text-[12px] font-semibold leading-4", className)}><span className="size-1.5 rounded-full bg-current" aria-hidden="true" />{status}</span>;
+}
+
+function ProfileEmptyState({ title, description, action }: { title: string; description?: string; action?: React.ReactNode }) {
+  return <Card className="text-center"><p className="text-[15px] font-semibold leading-[22px] text-ktr-text-primary">{title}</p>{description ? <p className="mt-1 text-[13px] leading-5 text-ktr-text-secondary">{description}</p> : null}{action ? <div className="mt-3">{action}</div> : null}</Card>;
+}
+
+function ProfileLoadingState() {
+  return <div className="space-y-4" aria-label="Memuat profil"><Card className="h-[190px] animate-pulse bg-ktr-surface-soft" /><div className="grid grid-cols-2 gap-2">{Array.from({ length: 4 }).map((_, index) => <Card key={index} className="h-[96px] animate-pulse bg-ktr-surface-soft" />)}</div><Card className="h-[150px] animate-pulse bg-ktr-surface-soft" /></div>;
+}
+
+const activityIconMap: Record<RecentActivity["type"], Parameters<typeof HugeiconsIcon>[0]["icon"]> = {
+  "Upload Progress": Upload04Icon,
+  "Feedback Guru": ChatFeedback01Icon,
+  "Respons Feedback": MessageDone02Icon,
+  "Pesan Diskusi": BubbleChatIcon,
+  "Submit Final Kelompok": TaskDone02Icon,
+  Asesmen: UserGroupIcon,
+};
+
 export function ProfilePage() {
+  const [data, setData] = React.useState<StudentProfileOverview | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
+  const [openedFeedbackIds, setOpenedFeedbackIds] = React.useState<string[]>([]);
+
+  const loadProfile = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const overview = await getStudentProfileOverview();
+      const savedProfile = studentSettingsStorage.getProfile();
+      setData({
+        ...overview,
+        user: {
+          ...overview.user,
+          fullName: savedProfile.name || overview.user.fullName,
+          email: savedProfile.email || overview.user.email,
+          avatarUrl: savedProfile.avatarDataUrl || overview.user.avatarUrl,
+        },
+      });
+    } catch {
+      setError("Profil belum bisa dimuat.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const id = window.setTimeout(() => { void loadProfile(); }, 0);
+    return () => window.clearTimeout(id);
+  }, [loadProfile]);
+
+  const unreadFeedbackCount = data ? Math.max(0, data.summary.unreadFeedbackCount - openedFeedbackIds.length) : 0;
+  const summaryItems = data ? [
+    { label: "Upload Progress", value: data.summary.uploadProgressCount, icon: Upload04Icon },
+    { label: "Bukti Tervalidasi", value: data.summary.validatedEvidenceCount, icon: FileCheckIcon },
+    { label: "Proyek Aktif", value: data.summary.activeProjectCount, icon: Briefcase01Icon },
+    { label: "Feedback Baru", value: unreadFeedbackCount, icon: ChatFeedback01Icon },
+  ] : [];
+  const visibleProjects = data?.projects.slice(0, 3) ?? [];
+  const visibleActivities = data?.recentActivities.slice(0, 5) ?? [];
+  const statusRows: Array<{ label: string; value?: string; icon: Parameters<typeof HugeiconsIcon>[0]["icon"] }> = data ? [
+    { label: "Upload Terakhir", value: data.activityStatus.lastProgressUpload, icon: Upload04Icon },
+    { label: "Respons Feedback", value: data.activityStatus.lastFeedbackResponse, icon: MessageDone02Icon },
+    { label: "Aktivitas Diskusi", value: data.activityStatus.lastDiscussionActivity, icon: BubbleChatIcon },
+  ] : [];
+  const initials = data?.user.fullName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "AK";
+
   return (
-    <ScreenShell title="Profil" subtitle="Identitas dan ringkasan aktivitasmu di KontriLab." showBottomNav>
-      <Card className="mb-4 flex items-center gap-3">
-        <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-ktr-primary-soft text-ktr-primary"><Icon icon={UserGroupIcon} /></span>
-        <div className="min-w-0">
-          <h2 className="text-[18px] font-semibold leading-[28px] text-ktr-text-primary">Akagami</h2>
-          <p className="text-[14px] leading-[22px] text-ktr-text-secondary">Student - XII Pemrograman Web</p>
+    <ScreenShell
+      title="Profil"
+      showBottomNav
+      action={<Link href="/settings" aria-label="Buka pengaturan" className="flex size-11 items-center justify-center rounded-[14px] border border-ktr-border-light bg-ktr-surface-card text-ktr-text-primary transition-[border-color,transform] hover:border-ktr-border-input active:scale-[0.995]"><Icon icon={Settings02Icon} /></Link>}
+    >
+      {loading ? <ProfileLoadingState /> : error ? (
+        <ProfileEmptyState title="Profil Belum Tersedia" description={error} action={<Button type="button" variant="outline" className="h-10 rounded-[12px] border-ktr-border-light px-4 text-[14px] font-semibold text-ktr-text-primary" onClick={() => void loadProfile()}>Coba Lagi</Button>} />
+      ) : data ? (
+        <div className="space-y-5">
+          <Card className="border-ktr-primary/20 bg-ktr-primary-soft p-4">
+            <div className="flex items-start gap-4">
+              <div className="flex size-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-ktr-primary/15 bg-ktr-surface-card text-[22px] font-semibold text-ktr-primary">
+                {data.user.avatarUrl ? <Image src={data.user.avatarUrl} alt="Foto profil" width={72} height={72} unoptimized className="h-full w-full object-cover" /> : initials}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="break-words text-[20px] font-semibold leading-[28px] text-ktr-text-primary">{data.user.fullName}</h2>
+                {data.user.username ? <p className="mt-0.5 truncate text-[14px] leading-[22px] text-ktr-text-secondary">@{data.user.username}</p> : data.user.displayName ? <p className="mt-0.5 truncate text-[14px] leading-[22px] text-ktr-text-secondary">{data.user.displayName}</p> : null}
+                <p className="mt-2 break-words text-[13px] leading-5 text-ktr-text-secondary">{data.user.email}</p>
+                <div className="mt-3"><ProfileStatusBadge status={data.user.activityStatus} /></div>
+              </div>
+            </div>
+            <Button asChild className="mt-4 h-11 w-full rounded-[12px] text-[14px] font-semibold"><Link href="/settings/profile">Edit Profil</Link></Button>
+          </Card>
+
+          <section>
+            <SectionTitle>Ringkasan Aktivitas</SectionTitle>
+            <div className="grid grid-cols-2 gap-2">
+              {summaryItems.map((item) => <Card key={item.label} className="p-3"><Icon icon={item.icon} className="mb-3 text-ktr-primary" /><p className="text-[22px] font-semibold leading-[30px] text-ktr-text-primary">{item.value}</p><p className="text-[13px] leading-5 text-ktr-text-secondary">{item.label}</p></Card>)}
+            </div>
+          </section>
+
+          <section>
+            <SectionTitle>Status Aktivitas</SectionTitle>
+            <Card>
+              <div className="flex items-start justify-between gap-3"><p className="min-w-0 text-[14px] leading-[22px] text-ktr-text-secondary">{data.activityStatus.reason || "Belum Ada Aktivitas"}</p><ProfileStatusBadge status={data.activityStatus.status} /></div>
+              <div className="mt-4 space-y-3 text-[13px] leading-5">
+                {statusRows.map((row) => <div key={row.label} className="flex items-center gap-3"><Icon icon={row.icon} className="shrink-0 text-ktr-primary" /><span className="min-w-0 flex-1 text-ktr-text-secondary">{row.label}</span><span className="max-w-[45%] text-right font-semibold text-ktr-text-primary">{row.value || "Belum Ada Aktivitas"}</span></div>)}
+              </div>
+            </Card>
+          </section>
+
+          <section>
+            <div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Proyek yang Diikuti</h2>{data.projects.length > visibleProjects.length ? <Link href="/student/projects" className="text-[13px] font-semibold leading-5 text-ktr-primary">Lihat Semua</Link> : null}</div>
+            {visibleProjects.length ? <div className="space-y-2">{visibleProjects.map((project) => <Link key={project.projectId} href={project.targetRoute} className="block"><Card className="transition-[border-color,transform] hover:border-ktr-primary/35 active:scale-[0.995]"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><h3 className="text-[15px] font-semibold leading-[22px] text-ktr-text-primary">{project.projectName}</h3><p className="mt-0.5 text-[13px] leading-5 text-ktr-text-secondary">{[project.groupName, project.role].filter(Boolean).join(" - ")}</p></div><Icon icon={ArrowRight02Icon} className="mt-1 shrink-0 text-ktr-text-primary" /></div><div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[12px] leading-[18px]"><span className="text-ktr-text-tertiary">Upload Terakhir</span><span className="text-right font-semibold text-ktr-text-primary">{project.lastProgressUpload || "Belum Ada Aktivitas"}</span><span className="text-ktr-text-tertiary">Deadline Submit Final</span><span className="text-right font-semibold text-ktr-text-primary">{project.finalSubmissionDeadline}</span><span className="text-ktr-text-tertiary">Submit Final</span><span className="text-right font-semibold text-ktr-text-primary">{project.finalSubmissionStatus}</span></div></Card></Link>)}</div> : <ProfileEmptyState title="Belum Ada Proyek" description="Kamu belum tergabung di proyek aktif." action={<Button asChild variant="outline" className="h-10 rounded-[12px] border-ktr-border-light px-4 text-[14px] font-semibold text-ktr-text-primary"><Link href="/student/projects">Jelajahi Proyek</Link></Button>} />}
+          </section>
+
+          <section>
+            <SectionTitle>Feedback Terbaru</SectionTitle>
+            {data.feedback ? <Link href={data.feedback.targetRoute} className="block" onClick={() => setOpenedFeedbackIds((current) => current.includes(data.feedback!.id) ? current : [...current, data.feedback!.id])}><Card className="border-ktr-primary/20 bg-ktr-primary-soft/60 transition-[border-color,transform] hover:border-ktr-primary/35 active:scale-[0.995]"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-[13px] font-semibold leading-5 text-ktr-primary">{data.feedback.status}</p><h3 className="mt-1 text-[15px] font-semibold leading-[22px] text-ktr-text-primary">{data.feedback.projectName}</h3><p className="mt-0.5 text-[13px] leading-5 text-ktr-text-secondary">{data.feedback.senderName} - {data.feedback.createdAt}</p></div><Icon icon={ArrowRight02Icon} className="mt-1 shrink-0 text-ktr-text-primary" /></div><p className="mt-3 line-clamp-3 text-[14px] leading-[22px] text-ktr-text-secondary">{data.feedback.contentPreview}</p></Card></Link> : <ProfileEmptyState title="Belum Ada Feedback" description="Feedback terbaru akan muncul di sini." />}
+          </section>
+
+          <section>
+            <div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-[16px] font-semibold leading-[22px] text-ktr-text-primary">Aktivitas Terbaru</h2>{data.recentActivities.length > visibleActivities.length ? <Link href="/student/activities" className="text-[13px] font-semibold leading-5 text-ktr-primary">Lihat Semua</Link> : null}</div>
+            {visibleActivities.length ? <Card className="px-[14px] py-3"><div className="divide-y divide-ktr-border-light">{visibleActivities.map((activity) => <Link key={activity.id} href={activity.targetRoute} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0"><span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-ktr-primary-soft text-ktr-primary"><Icon icon={activityIconMap[activity.type] || Activity01Icon} /></span><span className="min-w-0 flex-1"><span className="block text-[14px] font-semibold leading-[22px] text-ktr-text-primary">{activity.title}</span><span className="mt-0.5 block text-[13px] leading-5 text-ktr-text-secondary">{activity.context}</span></span><span className="shrink-0 text-[12px] leading-[18px] text-ktr-text-tertiary">{activity.createdAt}</span></Link>)}</div></Card> : <ProfileEmptyState title="Belum Ada Aktivitas" description="Aktivitas terbaru akan muncul setelah kamu mulai berkontribusi." />}
+          </section>
         </div>
-      </Card>
-      <div className="grid min-w-0 grid-cols-2 gap-2">
-        <Card><Icon icon={Flag01Icon} className="mb-3 text-ktr-primary" /><p className="text-[20px] font-semibold leading-[28px] text-ktr-text-primary">1</p><p className="text-[13px] leading-5 text-ktr-text-secondary">Proyek aktif</p></Card>
-        <Card><Icon icon={TaskDone02Icon} className="mb-3 text-ktr-primary" /><p className="text-[20px] font-semibold leading-[28px] text-ktr-text-primary">6</p><p className="text-[13px] leading-5 text-ktr-text-secondary">Kontribusi tercatat</p></Card>
-      </div>
-      <Card className="mt-4">
-        <p className="text-[14px] font-semibold leading-[22px] text-ktr-text-primary">Akun MVP</p>
-        <p className="mt-1 text-[13px] leading-5 text-ktr-text-secondary">Data profil ini mengikuti alur IA student dan akan tersambung ke tabel users serta user_profile.</p>
-      </Card>
+      ) : null}
     </ScreenShell>
   );
 }
