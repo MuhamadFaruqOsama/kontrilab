@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { Card } from "@heroui/react/card";
@@ -22,13 +22,13 @@ const noteStyles: Record<NonNullable<StatCardProps["tone"]>, string> = {
 
 export default function StatCard({ title, value, icon, note, tone = "neutral" }: StatCardProps) {
   return (
-    <Card className="rounded-[18px] border border-ktr-border-light bg-white transition-colors hover:border-ktr-border-input">
+    <Card className="rounded-[12px] border border-ktr-border-light bg-white transition-colors hover:border-ktr-border-input">
       <Card.Content className="p-5">
         <div className="flex items-start justify-between gap-4">
           <p className="max-w-[11rem] text-[13px] font-semibold leading-5 tracking-normal text-ktr-text-secondary">{title}</p>
           {icon ? (
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ktr-surface-soft text-ktr-text-primary">
-              <HugeiconsIcon icon={icon} size={18} strokeWidth={1.5} aria-hidden="true" />
+              <HugeiconsIcon icon={icon} size={18} strokeWidth={2} aria-hidden="true" />
             </span>
           ) : null}
         </div>

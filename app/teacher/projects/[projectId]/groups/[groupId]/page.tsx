@@ -6,12 +6,12 @@ import { useParams } from "next/navigation";
 import { Card } from "@heroui/react/card";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ArrowLeft01Icon,
   ArrowRight01Icon,
   FloppyDiskIcon,
   UserGroupIcon,
 } from "@hugeicons/core-free-icons";
 import StatusBadge from "@/components/teacher/StatusBadge";
+import TeacherBackButton from "@/components/teacher/BackButton";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { toast } from "@/components/ui/toast";
 import {
@@ -36,6 +36,12 @@ export default function GroupDetail() {
   const [notes, setNotes] = React.useState("");
   const [saveOpen, setSaveOpen] = React.useState(false);
   const [savedNotes, setSavedNotes] = React.useState("");
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const loadingTimer = window.setTimeout(() => setLoading(false), 120);
+    return () => window.clearTimeout(loadingTimer);
+  }, []);
 
   function confirmSaveNotes() {
     setSavedNotes(notes);
@@ -44,19 +50,14 @@ export default function GroupDetail() {
     });
   }
 
+  if (loading) return <GroupDetailSkeleton />;
+
   return (
     <>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-start gap-4">
-          <Link
-            href={`/teacher/projects/${project.id}`}
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] border border-ktr-border-light bg-white transition-colors hover:bg-ktr-surface-soft"
-            aria-label="Kembali ke detail proyek"
-          >
-            <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
-          </Link>
-          <div className="min-w-0">
+        <TeacherBackButton href={`/teacher/projects/${project.id}`} label="Kembali ke detail proyek" />
+
+        <div className="min-w-0">
             <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">
               {group.name}
             </h1>
@@ -68,7 +69,6 @@ export default function GroupDetail() {
               <StatusBadge status={group.submitStatus} />
             </div>
           </div>
-        </div>
 
         {/* Quick stats */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -88,7 +88,7 @@ export default function GroupDetail() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className={`rounded-[16px] border p-4 ${
+              className={`rounded-[12px] border p-4 ${
                 stat.warning
                   ? "border-ktr-warning/25 bg-ktr-warning-bg"
                   : "border-ktr-border-light bg-white"
@@ -98,7 +98,7 @@ export default function GroupDetail() {
               <p
                 className={`mt-1.5 text-sm font-semibold ${
                   stat.warning
-                    ? "text-[#9a620b]"
+                    ? "text-ktr-warning"
                     : stat.success
                     ? "text-ktr-success"
                     : "text-ktr-text-primary"
@@ -113,13 +113,13 @@ export default function GroupDetail() {
         <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <div className="space-y-6">
             {/* Member table */}
-            <Card className="overflow-hidden rounded-[18px] border border-ktr-border-light bg-white">
+            <Card className="overflow-hidden rounded-[12px] border border-ktr-border-light bg-white">
               <Card.Header className="flex items-center justify-between border-b border-ktr-border-light px-6 py-4">
                 <h2 className="font-heading text-lg font-semibold text-ktr-text-primary">
                   Anggota &amp; Upload Progress
                 </h2>
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-ktr-text-secondary">
-                  <HugeiconsIcon icon={UserGroupIcon} size={14} />
+                  <HugeiconsIcon icon={UserGroupIcon} size={14} strokeWidth={2} />
                   {group.members.length} siswa
                 </span>
               </Card.Header>
@@ -150,10 +150,10 @@ export default function GroupDetail() {
                         <td className="px-5 py-4">
                           <Link
                             href={`/teacher/students/${student.id}`}
-                            className="inline-flex items-center gap-1 text-sm font-semibold text-ktr-primary hover:underline"
+                            className="inline-flex items-center gap-1 text-sm font-semibold text-ktr-text-primary hover:underline"
                           >
                             Detail
-                            <HugeiconsIcon icon={ArrowRight01Icon} size={12} />
+                            <HugeiconsIcon icon={ArrowRight01Icon} size={12} strokeWidth={2} />
                           </Link>
                         </td>
                       </tr>
@@ -164,7 +164,7 @@ export default function GroupDetail() {
             </Card>
 
             {/* Contribution timeline */}
-            <Card className="rounded-[18px] border border-ktr-border-light bg-white">
+            <Card className="rounded-[12px] border border-ktr-border-light bg-white">
               <Card.Header className="border-b border-ktr-border-light px-6 py-4">
                 <h2 className="font-heading text-lg font-semibold text-ktr-text-primary">
                   Timeline Kontribusi
@@ -181,8 +181,8 @@ export default function GroupDetail() {
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-ktr-text-primary">{item.student}</p>
                         <p className="mt-1 text-sm leading-5 text-ktr-text-secondary">{item.summary}</p>
-                        <p className="mt-2 text-xs text-ktr-text-tertiary">
-                          {item.evidenceType} · {item.time}
+                        <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ktr-text-tertiary">
+                          <span>{item.evidenceType}</span><DotSeparator /><span>{item.time}</span>
                         </p>
                       </div>
                       <StatusBadge status={item.status} />
@@ -200,7 +200,7 @@ export default function GroupDetail() {
 
           {/* Sidebar: summary + notes */}
           <div className="space-y-6">
-            <Card className="rounded-[18px] border border-ktr-border-light bg-white">
+            <Card className="rounded-[12px] border border-ktr-border-light bg-white">
               <Card.Header className="border-b border-ktr-border-light px-6 py-4">
                 <h2 className="font-heading text-lg font-semibold text-ktr-text-primary">
                   Ringkasan Kelompok
@@ -223,14 +223,14 @@ export default function GroupDetail() {
                 </p>
                 <p className="text-ktr-text-secondary">
                   Status perhatian:{" "}
-                  <span className={`font-semibold ${group.attention === "Aktif" ? "text-ktr-success" : "text-[#9a620b]"}`}>
+                  <span className={`font-semibold ${group.attention === "Aktif" ? "text-ktr-success" : "text-ktr-warning"}`}>
                     {group.attention}
                   </span>
                 </p>
               </Card.Content>
             </Card>
 
-            <Card className="rounded-[18px] border border-ktr-border-light bg-white">
+            <Card className="rounded-[12px] border border-ktr-border-light bg-white">
               <Card.Header className="border-b border-ktr-border-light px-6 py-4">
                 <h2 className="font-heading text-lg font-semibold text-ktr-text-primary">
                   Catatan Guru
@@ -241,7 +241,7 @@ export default function GroupDetail() {
                   rows={6}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full resize-none rounded-[14px] border border-ktr-border-light bg-white p-3 text-sm leading-6 text-ktr-text-primary placeholder:text-ktr-text-tertiary focus:border-ktr-primary focus:outline-none focus:ring-2 focus:ring-ktr-primary/20"
+                  className="w-full resize-none rounded-[12px] border border-ktr-border-light bg-white p-3 text-sm leading-6 text-ktr-text-primary placeholder:text-ktr-text-tertiary focus:border-ktr-text-primary focus:outline-none"
                   placeholder="Tambahkan catatan internal untuk kelompok ini. Catatan ini tidak terlihat oleh siswa."
                 />
                 {savedNotes && (
@@ -251,9 +251,9 @@ export default function GroupDetail() {
                   type="button"
                   onClick={() => setSaveOpen(true)}
                   disabled={!notes || notes === savedNotes}
-                  className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-ktr-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-ktr-primary-hover active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-ktr-text-primary px-4 text-sm font-semibold text-ktr-text-white transition-colors hover:bg-ktr-text-primary/95 active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <HugeiconsIcon icon={FloppyDiskIcon} size={16} />
+                  <HugeiconsIcon icon={FloppyDiskIcon} size={16} strokeWidth={2} />
                   Simpan Catatan
                 </button>
               </Card.Content>
@@ -263,6 +263,7 @@ export default function GroupDetail() {
       </div>
 
       <ConfirmModal
+        theme="teacher"
         open={saveOpen}
         onOpenChange={setSaveOpen}
         title="Simpan catatan?"
@@ -271,5 +272,69 @@ export default function GroupDetail() {
         onConfirm={confirmSaveNotes}
       />
     </>
+  );
+}
+
+function DotSeparator() {
+  return <span className="size-1 rounded-full bg-ktr-text-tertiary/35" aria-hidden="true" />;
+}
+
+function GroupDetailSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-start gap-4">
+        <div className="teacher-skeleton size-11" />
+        <div className="min-w-0">
+          <div className="teacher-skeleton h-9 w-44" />
+          <div className="mt-3 flex gap-2">
+            <div className="teacher-skeleton h-6 w-40" />
+            <div className="teacher-skeleton h-6 w-20" />
+            <div className="teacher-skeleton h-6 w-28" />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="rounded-[12px] border border-ktr-border-light bg-white p-4">
+            <div className="teacher-skeleton h-4 w-24" />
+            <div className="teacher-skeleton mt-2 h-5 w-20" />
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="space-y-6">
+          <div className="rounded-[12px] border border-ktr-border-light bg-white p-6">
+            <div className="flex items-center justify-between">
+              <div className="teacher-skeleton h-6 w-56" />
+              <div className="teacher-skeleton h-4 w-16" />
+            </div>
+            <div className="mt-6 space-y-4">
+              {Array.from({ length: 4 }).map((_, index) => <div key={index} className="teacher-skeleton h-10 w-full" />)}
+            </div>
+          </div>
+          <div className="rounded-[12px] border border-ktr-border-light bg-white p-6">
+            <div className="teacher-skeleton h-6 w-44" />
+            <div className="mt-5 space-y-4">
+              {Array.from({ length: 5 }).map((_, index) => <div key={index} className="teacher-skeleton h-12 w-full" />)}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className="rounded-[12px] border border-ktr-border-light bg-white p-6">
+            <div className="teacher-skeleton h-6 w-40" />
+            <div className="mt-5 space-y-3">
+              {Array.from({ length: 4 }).map((_, index) => <div key={index} className="teacher-skeleton h-4 w-full" />)}
+            </div>
+          </div>
+          <div className="rounded-[12px] border border-ktr-border-light bg-white p-5">
+            <div className="teacher-skeleton h-6 w-32" />
+            <div className="teacher-skeleton mt-5 h-36 w-full" />
+            <div className="teacher-skeleton mt-4 h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

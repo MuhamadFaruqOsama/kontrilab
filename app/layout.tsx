@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Nunito_Sans } from "next/font/google";
+import { Inter, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import SocketProvider from "./components/providers/SocketProvider";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,6 +7,12 @@ import { appConfig } from "@/lib/env";
 
 const nunitoSans = Nunito_Sans({
   variable: "--font-nunito-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
@@ -36,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${nunitoSans.variable} h-full antialiased`}>
+    <html lang="en" className={`${nunitoSans.variable} ${inter.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <script dangerouslySetInnerHTML={{ __html: hideNextDevToolsScript }} />
         <SocketProvider>{children}</SocketProvider>

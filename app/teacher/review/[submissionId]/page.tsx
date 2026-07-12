@@ -6,7 +6,6 @@ import { useParams } from "next/navigation";
 import { Card } from "@heroui/react/card";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ArrowLeft01Icon,
   CheckmarkCircle02Icon,
   ExternalLinkIcon,
   FloppyDiskIcon,
@@ -14,6 +13,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import FilterSelect from "@/components/teacher/FilterSelect";
 import StatusBadge from "@/components/teacher/StatusBadge";
+import TeacherBackButton from "@/components/teacher/BackButton";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { toast } from "@/components/ui/toast";
 import { finalSubmissions, uploadProgress } from "@/components/teacher/mock-data";
@@ -29,7 +29,7 @@ const finalStatusOptions = ["Disetujui", "Perlu Revisi", "Belum Lengkap"].map((l
 
 export default function ReviewDetailPage() {
   const params = useParams<{ submissionId: string }>();
-  const upload = uploadProgress.find((item) => item.id === params.submissionId) ?? uploadProgress[0];
+  const upload = uploadProgress.find((item) => item.id === params.submissionId) || uploadProgress[0];
   const submission = finalSubmissions.find((item) => item.id === params.submissionId);
   const isFinal = Boolean(submission);
 
@@ -40,6 +40,12 @@ export default function ReviewDetailPage() {
   const [sendOpen, setSendOpen] = React.useState(false);
   const [savingDraft, setSavingDraft] = React.useState(false);
   const [sent, setSent] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const loadingTimer = window.setTimeout(() => setLoading(false), 120);
+    return () => window.clearTimeout(loadingTimer);
+  }, []);
 
   async function saveDraft() {
     setSavingDraft(true);
@@ -57,11 +63,13 @@ export default function ReviewDetailPage() {
     });
   }
 
+  if (loading) return <ReviewDetailSkeleton />;
+
   if (sent) {
     return (
       <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
         <span className="flex size-20 items-center justify-center rounded-full bg-ktr-success-bg text-ktr-success">
-          <HugeiconsIcon icon={CheckmarkCircle02Icon} size={40} />
+          <HugeiconsIcon icon={CheckmarkCircle02Icon} size={40} strokeWidth={2} />
         </span>
         <div>
           <h2 className="font-heading text-2xl font-semibold text-ktr-text-primary">
@@ -73,7 +81,7 @@ export default function ReviewDetailPage() {
         </div>
         <Link
           href="/teacher/review"
-          className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-[14px] border border-ktr-border-light px-5 text-sm font-semibold text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
+          className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-[12px] border border-ktr-border-light px-5 text-sm font-semibold text-ktr-text-primary transition-colors hover:bg-ktr-surface-soft"
         >
           Kembali ke daftar review
         </Link>
@@ -84,15 +92,9 @@ export default function ReviewDetailPage() {
   return (
     <>
       <div className="space-y-6">
-        <div className="flex items-start gap-4">
-          <Link
-            href="/teacher/review"
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] border border-ktr-border-light bg-white transition-colors hover:bg-ktr-surface-soft"
-            aria-label="Kembali ke daftar review"
-          >
-            <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
-          </Link>
-          <div>
+        <TeacherBackButton href="/teacher/review" label="Kembali ke daftar review" />
+
+        <div>
             <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">
               {isFinal ? "Review Submit Final" : "Review Upload Progress"}
             </h1>
@@ -108,12 +110,11 @@ export default function ReviewDetailPage() {
               )}
             </div>
           </div>
-        </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           {/* Evidence panel */}
           <div className="space-y-5">
-            <Card className="rounded-[18px] border border-ktr-border-light bg-white">
+            <Card className="rounded-[12px] border border-ktr-border-light bg-white">
               <Card.Header className="border-b border-ktr-border-light px-6 py-4">
                 <h2 className="font-heading text-lg font-semibold text-ktr-text-primary">
                   {isFinal ? "Hasil Akhir Kelompok" : "Bukti Kerja Siswa"}
@@ -126,20 +127,20 @@ export default function ReviewDetailPage() {
                     <DetailRow label="Anggota" value={submission.members} />
                     <DetailRow label="Waktu Submit" value={submission.submittedAt} />
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-ktr-text-tertiary">
+                      <p className="text-xs font-semibold text-ktr-text-tertiary">
                         File / Link Hasil Akhir
                       </p>
                       <a
                         href={`https://${submission.file}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-2 inline-flex items-center gap-1.5 rounded-[12px] border border-ktr-border-light bg-ktr-surface-soft px-4 py-2 text-sm font-semibold text-ktr-primary transition-colors hover:border-ktr-primary/30"
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-[12px] border border-ktr-border-light bg-ktr-surface-soft px-4 py-2 text-sm font-semibold text-ktr-text-primary transition-colors hover:border-ktr-border-input"
                       >
                         {submission.file}
-                        <HugeiconsIcon icon={ExternalLinkIcon} size={14} />
+                        <HugeiconsIcon icon={ExternalLinkIcon} size={14} strokeWidth={2} />
                       </a>
                     </div>
-                    <div className="rounded-[14px] border border-ktr-border-light bg-ktr-surface-soft p-4 text-sm text-ktr-text-secondary">
+                    <div className="rounded-[12px] border border-ktr-border-light bg-ktr-surface-soft p-4 text-sm text-ktr-text-secondary">
                       <p className="font-semibold text-ktr-text-primary">Riwayat Revisi</p>
                       <p className="mt-1">Submit awal sudah diterima dan menunggu keputusan guru.</p>
                     </div>
@@ -151,15 +152,15 @@ export default function ReviewDetailPage() {
                     <DetailRow label="Jenis Bukti" value={upload.evidenceType} />
                     <DetailRow label="Waktu Upload" value={upload.time} />
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-ktr-text-tertiary">
+                      <p className="text-xs font-semibold text-ktr-text-tertiary">
                         Isi Upload Progress
                       </p>
                       <p className="mt-2 leading-6 text-ktr-text-secondary">{upload.summary}</p>
                     </div>
-                    <div className="rounded-[14px] border border-ktr-border-light bg-ktr-surface-soft p-4">
+                    <div className="rounded-[12px] border border-ktr-border-light bg-ktr-surface-soft p-4">
                       <p className="text-xs font-semibold text-ktr-text-tertiary">Preview Bukti</p>
-                      <p className="mt-2 text-sm text-ktr-text-secondary">
-                        {upload.evidenceType} · {upload.relevance}
+                      <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ktr-text-secondary">
+                        <span>{upload.evidenceType}</span><DotSeparator /><span>{upload.relevance}</span>
                       </p>
                     </div>
                   </>
@@ -168,7 +169,7 @@ export default function ReviewDetailPage() {
             </Card>
 
             {/* Rubric card */}
-            <Card className="rounded-[18px] border border-ktr-border-light bg-white">
+            <Card className="rounded-[12px] border border-ktr-border-light bg-white">
               <Card.Header className="border-b border-ktr-border-light px-6 py-4">
                 <h2 className="font-heading text-base font-semibold text-ktr-text-primary">
                   Rubrik Penilaian
@@ -187,7 +188,8 @@ export default function ReviewDetailPage() {
                       <HugeiconsIcon
                         icon={CheckmarkCircle02Icon}
                         size={15}
-                        className="mt-0.5 shrink-0 text-ktr-primary"
+                        strokeWidth={2}
+                        className="mt-0.5 shrink-0 text-ktr-text-primary"
                       />
                       {item}
                     </li>
@@ -199,7 +201,7 @@ export default function ReviewDetailPage() {
 
           {/* Review panel */}
           <div className="space-y-5">
-            <Card className="rounded-[18px] border border-ktr-border-light bg-white">
+            <Card className="rounded-[12px] border border-ktr-border-light bg-white">
               <Card.Header className="border-b border-ktr-border-light px-6 py-4">
                 <h2 className="font-heading text-lg font-semibold text-ktr-text-primary">
                   Panel Review
@@ -227,7 +229,7 @@ export default function ReviewDetailPage() {
                     rows={6}
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
-                    className="w-full resize-none rounded-[14px] border border-ktr-border-light bg-white p-3 text-sm leading-6 text-ktr-text-primary placeholder:text-ktr-text-tertiary focus:border-ktr-primary focus:outline-none focus:ring-2 focus:ring-ktr-primary/20"
+                    className="w-full resize-none rounded-[12px] border border-ktr-border-light bg-white p-3 text-sm leading-6 text-ktr-text-primary placeholder:text-ktr-text-tertiary focus:border-ktr-text-primary focus:outline-none"
                     placeholder={`Tulis feedback untuk ${isFinal ? "kelompok" : "siswa"} ini. Semakin spesifik, semakin membantu.`}
                   />
                   <p className="text-xs text-ktr-text-tertiary">{feedback.length} karakter</p>
@@ -240,15 +242,15 @@ export default function ReviewDetailPage() {
                     onClick={saveDraft}
                     className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-ktr-border-light px-4 text-sm font-semibold text-ktr-text-primary transition-colors hover:bg-white disabled:opacity-60"
                   >
-                    <HugeiconsIcon icon={FloppyDiskIcon} size={16} />
-                    {savingDraft ? "Menyimpan…" : "Simpan Draft"}
+                    <HugeiconsIcon icon={FloppyDiskIcon} size={16} strokeWidth={2} />
+                    {savingDraft ? "Menyimpan..." : "Simpan Draft"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setSendOpen(true)}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-ktr-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-ktr-primary-hover active:scale-[0.995]"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-ktr-text-primary px-4 text-sm font-semibold text-ktr-text-white transition-colors hover:bg-ktr-text-primary/95 active:scale-[0.995]"
                   >
-                    <HugeiconsIcon icon={Message02Icon} size={16} />
+                    <HugeiconsIcon icon={Message02Icon} size={16} strokeWidth={2} />
                     Kirim Feedback
                   </button>
                 </div>
@@ -259,6 +261,7 @@ export default function ReviewDetailPage() {
       </div>
 
       <ConfirmModal
+        theme="teacher"
         open={sendOpen}
         onOpenChange={setSendOpen}
         title="Kirim Feedback?"
@@ -270,11 +273,76 @@ export default function ReviewDetailPage() {
   );
 }
 
+function DotSeparator() {
+  return <span className="size-1 rounded-full bg-ktr-text-tertiary/35" aria-hidden="true" />;
+}
+
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-ktr-text-tertiary">{label}</p>
+      <p className="text-xs font-semibold text-ktr-text-tertiary">{label}</p>
       <p className="mt-1 font-semibold text-ktr-text-primary">{value}</p>
+    </div>
+  );
+}
+
+function ReviewDetailSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="teacher-skeleton size-11 rounded-[12px]" />
+
+      <div className="space-y-3">
+        <div className="teacher-skeleton h-9 w-72 max-w-full" />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="teacher-skeleton h-7 w-28 rounded-full" />
+          <div className="teacher-skeleton h-7 w-32 rounded-full" />
+          <div className="teacher-skeleton h-7 w-24 rounded-full" />
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="space-y-5">
+          <Card className="rounded-[12px] border border-ktr-border-light bg-white">
+            <Card.Header className="border-b border-ktr-border-light px-6 py-4">
+              <div className="teacher-skeleton h-6 w-40" />
+            </Card.Header>
+            <Card.Content className="space-y-5 p-6">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="teacher-skeleton h-4 w-24" />
+                  <div className="teacher-skeleton h-5 w-52 max-w-full" />
+                </div>
+              ))}
+              <div className="teacher-skeleton h-24 w-full rounded-[12px]" />
+            </Card.Content>
+          </Card>
+
+          <Card className="rounded-[12px] border border-ktr-border-light bg-white">
+            <Card.Header className="border-b border-ktr-border-light px-6 py-4">
+              <div className="teacher-skeleton h-5 w-36" />
+            </Card.Header>
+            <Card.Content className="space-y-3 p-5">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="teacher-skeleton h-4 w-full" />
+              ))}
+            </Card.Content>
+          </Card>
+        </div>
+
+        <Card className="rounded-[12px] border border-ktr-border-light bg-white">
+          <Card.Header className="border-b border-ktr-border-light px-6 py-4">
+            <div className="teacher-skeleton h-6 w-32" />
+          </Card.Header>
+          <Card.Content className="space-y-5 p-6">
+            <div className="teacher-skeleton h-10 w-full" />
+            <div className="teacher-skeleton h-36 w-full rounded-[12px]" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="teacher-skeleton h-10 w-full" />
+              <div className="teacher-skeleton h-10 w-full" />
+            </div>
+          </Card.Content>
+        </Card>
+      </div>
     </div>
   );
 }

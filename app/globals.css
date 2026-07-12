@@ -54,11 +54,11 @@
 
 @custom-variant dark (&:is(.dark *));
 .teacher-root {
-  --font-heading: "Open Sans", system-ui, sans-serif;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-heading: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
   --teacher-border: #eceff1;
   --teacher-soft: #fafafa;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
   background: #ffffff;
 }
 
@@ -66,7 +66,7 @@
 .teacher-root h1,
 .teacher-root h2,
 .teacher-root h3 {
-  font-family: "Open Sans", system-ui, sans-serif;
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
 }
 
 .teacher-root h1 {
@@ -75,7 +75,7 @@
 
 
 .teacher-root svg {
-  stroke-width: 1.5px;
+  stroke-width: 2px;
 }
 
 .teacher-root table {
@@ -99,14 +99,50 @@
   height: 56px;
 }
 
+.teacher-root button,
 .teacher-root input,
-.teacher-root textarea {
-  border-radius: 14px;
+.teacher-root textarea,
+.teacher-root select {
+  border-radius: 10px;
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+}
+
+.teacher-root :where(input, textarea, button, [role="button"]):focus,
+.teacher-root :where(input, textarea, button, [role="button"]):focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.teacher-root :where(input, textarea, button, [role="button"]) {
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.teacher-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f4f6f5;
+}
+
+.teacher-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 72%), transparent);
+  animation: teacher-skeleton-shimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes teacher-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .teacher-dropdown-popover {
   transform-origin: top right;
-  box-shadow: 0 10px 26px rgb(43 48 51 / 0.045);
+  box-shadow: 0 12px 28px rgb(43 48 51 / 0.035);
   animation: teacher-dropdown-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
