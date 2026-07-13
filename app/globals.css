@@ -61,6 +61,12 @@
   font-family: var(--font-inter), "Inter", system-ui, sans-serif;
   background: #ffffff;
 }
+.teacher-root,
+.teacher-root *,
+[data-teacher-modal],
+[data-teacher-modal] * {
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif !important;
+}
 
 .teacher-root .font-heading,
 .teacher-root h1,

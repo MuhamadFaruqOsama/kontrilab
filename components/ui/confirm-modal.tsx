@@ -48,6 +48,7 @@ function ConfirmModal({
       >
         <Modal.Container placement="center" className="ktr-modal-container w-full max-w-[398px] outline-none">
           <Modal.Dialog
+            data-teacher-modal={isTeacher ? true : undefined}
             className={cn(
               "rounded-[12px] border border-ktr-border-light bg-ktr-surface-card p-4 text-ktr-text-primary outline-none",
               isTeacher && "font-sans [font-family:var(--font-inter),Inter,system-ui,sans-serif]"

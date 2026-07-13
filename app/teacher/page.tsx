@@ -164,12 +164,16 @@ export default function TeacherDashboard() {
                 {topFollowUps.map((item) => (
                   <div key={item.title} className="flex w-full items-center justify-between gap-4 border-b border-ktr-border-light py-4 text-left transition-colors first:pt-0 last:border-b-0 last:pb-0">
                     <div className="min-w-0">
-                      <button type="button" onClick={() => handleFollowUpAction(item)} className="block max-w-full cursor-pointer truncate text-sm font-semibold text-ktr-text-primary decoration-ktr-text-primary underline-offset-4 transition-colors hover:underline">
-                        {item.title}
-                      </button>
+                      <p className="truncate text-sm font-semibold text-ktr-text-primary">{item.title}</p>
                       <p className="mt-1 truncate text-sm font-medium text-ktr-text-secondary">{item.target}</p>
                     </div>
-                    <span className="shrink-0 text-xs font-semibold text-ktr-info">{item.action}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleFollowUpAction(item)}
+                      className="shrink-0 cursor-pointer text-xs font-semibold text-ktr-info transition-colors hover:text-ktr-text-primary"
+                    >
+                      {item.action}
+                    </button>
                   </div>
                 ))}
               </div>
