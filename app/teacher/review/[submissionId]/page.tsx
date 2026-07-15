@@ -18,7 +18,7 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { toast } from "@/components/ui/toast";
 import { finalSubmissions, uploadProgress } from "@/components/teacher/mock-data";
 
-const uploadStatusOptions = ["Valid", "Perlu Klarifikasi", "Kurang Relevan"].map((label) => ({
+const uploadStatusOptions = ["Belum Direview", "Valid", "Perlu Klarifikasi", "Kurang Relevan"].map((label) => ({
   value: label.toLowerCase().replaceAll(" ", "-"),
   label,
 }));
@@ -29,13 +29,13 @@ const finalStatusOptions = ["Disetujui", "Perlu Revisi", "Belum Lengkap"].map((l
 
 export default function ReviewDetailPage() {
   const params = useParams<{ submissionId: string }>();
-  const upload = uploadProgress.find((item) => item.id === params.submissionId) || uploadProgress[0];
+  const upload = uploadProgress.find((item) => item.id === params.submissionId);
   const submission = finalSubmissions.find((item) => item.id === params.submissionId);
   const isFinal = Boolean(submission);
 
   const [feedback, setFeedback] = React.useState("");
   const [reviewStatus, setReviewStatus] = React.useState(
-    isFinal ? "disetujui" : upload.status === "Valid" ? "valid" : "belum-direview"
+    isFinal ? "disetujui" : upload?.status.toLowerCase().replaceAll(" ", "-") ?? "belum-direview"
   );
   const [sendOpen, setSendOpen] = React.useState(false);
   const [savingDraft, setSavingDraft] = React.useState(false);
@@ -59,11 +59,24 @@ export default function ReviewDetailPage() {
   function sendFeedback() {
     setSent(true);
     toast.success("Feedback berhasil dikirim", {
-      description: `${isFinal ? submission?.group : upload.student} akan menerima notifikasi feedback.`,
+      description: `${isFinal ? submission?.group ?? "kelompok" : upload?.student ?? "siswa"} akan menerima notifikasi feedback.`,
     });
   }
 
   if (loading) return <ReviewDetailSkeleton />;
+  if (!upload && !submission) {
+    return (
+      <div className="space-y-6">
+        <TeacherBackButton href="/teacher/review" label="Kembali ke daftar review" />
+        <Card className="rounded-[12px] border border-ktr-border-light bg-white">
+          <Card.Content className="px-6 py-10 text-center">
+            <h1 className="font-heading text-xl font-semibold text-ktr-text-primary">Review tidak ditemukan</h1>
+            <p className="mt-2 text-sm font-medium text-ktr-text-secondary">Item review ini belum tersedia atau sudah dipindahkan.</p>
+          </Card.Content>
+        </Card>
+      </div>
+    );
+  }
 
   if (sent) {
     return (
@@ -76,7 +89,7 @@ export default function ReviewDetailPage() {
             Feedback Terkirim!
           </h2>
           <p className="mt-2 text-sm font-medium text-ktr-text-secondary">
-            {isFinal ? submission?.group : upload.student} akan mendapatkan notifikasi segera.
+            {isFinal ? submission?.group ?? "kelompok" : upload?.student ?? "siswa"} akan mendapatkan notifikasi segera.
           </p>
         </div>
         <Link
@@ -99,13 +112,13 @@ export default function ReviewDetailPage() {
               {isFinal ? "Review Submit Final" : "Review Upload Progress"}
             </h1>
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <StatusBadge status={isFinal && submission ? submission.status : upload.status} />
+              <StatusBadge status={isFinal && submission ? submission.status : upload?.status ?? "Belum Direview"} />
               <span className="rounded-full border border-ktr-border-light bg-white px-3 py-1 text-xs font-semibold text-ktr-text-secondary">
-                {isFinal && submission ? submission.group : upload.student}
+                {isFinal && submission ? submission.group : upload?.student ?? "Siswa"}
               </span>
               {!isFinal && (
                 <span className="rounded-full border border-ktr-border-light bg-white px-3 py-1 text-xs font-semibold text-ktr-text-secondary">
-                  {upload.group}
+                  {upload?.group ?? "Kelompok"}
                 </span>
               )}
             </div>
@@ -147,20 +160,20 @@ export default function ReviewDetailPage() {
                   </>
                 ) : (
                   <>
-                    <DetailRow label="Siswa" value={upload.student} />
-                    <DetailRow label="Kelompok" value={upload.group} />
-                    <DetailRow label="Jenis Bukti" value={upload.evidenceType} />
-                    <DetailRow label="Waktu Upload" value={upload.time} />
+                    <DetailRow label="Siswa" value={upload?.student ?? "Siswa"} />
+                    <DetailRow label="Kelompok" value={upload?.group ?? "Kelompok"} />
+                    <DetailRow label="Jenis Bukti" value={upload?.evidenceType ?? "Bukti"} />
+                    <DetailRow label="Waktu Upload" value={upload?.time ?? "Belum ada"} />
                     <div>
                       <p className="text-xs font-semibold text-ktr-text-tertiary">
                         Isi Upload Progress
                       </p>
-                      <p className="mt-2 leading-6 text-ktr-text-secondary">{upload.summary}</p>
+                      <p className="mt-2 leading-6 text-ktr-text-secondary">{upload?.summary ?? "Belum ada ringkasan."}</p>
                     </div>
                     <div className="rounded-[12px] border border-ktr-border-light bg-ktr-surface-soft p-4">
                       <p className="text-xs font-semibold text-ktr-text-tertiary">Preview Bukti</p>
                       <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ktr-text-secondary">
-                        <span>{upload.evidenceType}</span><DotSeparator /><span>{upload.relevance}</span>
+                        <span>{upload?.evidenceType ?? "Bukti"}</span><DotSeparator /><span>{upload?.relevance ?? "Belum dicek"}</span>
                       </p>
                     </div>
                   </>
@@ -265,7 +278,7 @@ export default function ReviewDetailPage() {
         open={sendOpen}
         onOpenChange={setSendOpen}
         title="Kirim Feedback?"
-        description={`Feedback akan dikirim ke ${isFinal ? submission?.group ?? "kelompok" : upload.student}. Status review akan berubah menjadi "${reviewStatus.replaceAll("-", " ")}".`}
+        description={`Feedback akan dikirim ke ${isFinal ? submission?.group ?? "kelompok" : upload?.student ?? "siswa"}. Status review akan berubah menjadi "${reviewStatus.replaceAll("-", " ")}".`}
         confirmText="Kirim Sekarang"
         onConfirm={sendFeedback}
       />

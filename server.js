@@ -32,6 +32,26 @@ app.prepare().then(() => {
   io.on('connection', (socket) => {
     console.log('Socket connected:', socket.id);
 
+    socket.on('discussion:join', ({ discussionId }) => {
+      if (!discussionId) return;
+      socket.join(`discussion:${discussionId}`);
+    });
+
+    socket.on('discussion:message', ({ discussionId, message }) => {
+      if (!discussionId || !message) return;
+      socket.to(`discussion:${discussionId}`).emit('discussion:message', message);
+    });
+
+    socket.on('call:start', ({ discussionId, participantName }) => {
+      if (!discussionId) return;
+      io.to(`discussion:${discussionId}`).emit('call:started', { discussionId, participantName });
+    });
+
+    socket.on('call:end', ({ discussionId, participantName }) => {
+      if (!discussionId) return;
+      io.to(`discussion:${discussionId}`).emit('call:ended', { discussionId, participantName });
+    });
+
     socket.on('disconnect', () => {
       console.log('Socket disconnected:', socket.id);
     });

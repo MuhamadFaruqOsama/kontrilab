@@ -74,7 +74,7 @@ export default function ReviewPage() {
           placeholder="Cari siswa, kelompok, atau ringkasan..."
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          className="h-10 w-full max-w-md rounded-[10px] border border-ktr-border-light bg-white py-1.5 pl-10 pr-3.5 text-sm text-ktr-text-primary placeholder:text-ktr-text-secondary hover:border-ktr-border-input focus:border-ktr-text-primary focus:outline-none"
+          className="h-10 w-full max-w-md rounded-[10px] border border-ktr-border-light bg-white py-1.5 pl-10 pr-3.5 text-sm text-ktr-text-primary placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary focus:outline-none"
         />
       </div>
 

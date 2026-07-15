@@ -65,6 +65,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { studentSettingsStorage } from "@/lib/student-settings";
 import { getStudentProfileOverview, type RecentActivity, type StudentProfileOverview } from "@/lib/student-profile";
+import { useSocket } from "@/hooks/socket/useSocket";
 
 type Status = "Belum Dimulai" | "Sedang Berjalan" | "Revisi" | "Selesai";
 
@@ -84,6 +85,8 @@ type ApiStudentProject = {
   className: string;
   deadline?: string | null;
   status?: string | null;
+  group?: string;
+  members?: number;
 };
 
 const projects: Project[] = [
@@ -158,7 +161,7 @@ function Icon({ icon, className }: { icon: Parameters<typeof HugeiconsIcon>[0]["
 
 function ScreenShell({
   title,
-  subtitle,
+  onBack,
   children,
   action,
   showBottomNav = false,
@@ -168,17 +171,17 @@ function ScreenShell({
   subtitle?: string;
   children: React.ReactNode;
   action?: React.ReactNode;
+  onBack?: () => void;
   showBottomNav?: boolean;
   backHref?: string;
 }) {
   return (
     <main className={cn("relative min-h-dvh w-full bg-background pt-6 text-ktr-text-primary", showBottomNav ? "pb-[220px]" : "pb-8")}>
       <div className="mx-auto min-w-0 w-full max-w-[430px] px-4">
-        {!showBottomNav ? <AppBackButton href={backHref} className="mb-6" /> : null}
+        {!showBottomNav ? <AppBackButton href={backHref} onClick={onBack} className="mb-6" /> : null}
         <header className="mb-6 flex min-w-0 items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-[24px] font-semibold leading-[32px] text-ktr-text-primary">{title}</h1>
-            {subtitle ? <p className="mt-1 text-[14px] leading-[22px] text-ktr-text-secondary">{subtitle}</p> : null}
           </div>
           {action ? <div className="shrink-0">{action}</div> : null}
         </header>
@@ -226,14 +229,20 @@ function QuietButton({ children, className, onClick }: { children: React.ReactNo
   return <Button variant="outline" className={cn("h-11 min-w-0 overflow-hidden rounded-[10px] border-transparent bg-ktr-primary-soft text-[14px] font-semibold leading-5 text-ktr-primary hover:bg-ktr-primary-light hover:text-ktr-primary", className)} type="button" onClick={onClick}>{children}</Button>;
 }
 
-function Field({ label, placeholder, as = "input" }: { label: string; placeholder: string; as?: "input" | "textarea" }) {
+function Field({ label, placeholder, as = "input", value, onChange }: { label: string; placeholder: string; as?: "input" | "textarea"; value?: string; onChange?: (value: string) => void }) {
+  const sharedProps = {
+    value,
+    onChange: onChange ? (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(event.target.value) : undefined,
+    placeholder,
+  };
+
   return (
     <label className="block min-w-0">
       <span className="text-[12px] font-medium leading-4 text-ktr-text-primary">{label}</span>
       {as === "textarea" ? (
-        <textarea className="mt-2 min-h-28 w-full min-w-0 resize-none rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 py-3 text-[14px] leading-[22px] outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20" placeholder={placeholder} />
+        <textarea {...sharedProps} className="mt-2 min-h-28 w-full min-w-0 resize-none rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 py-3 text-[14px] leading-[22px] outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20" />
       ) : (
-        <input className="mt-2 h-12 w-full min-w-0 rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 text-[14px] leading-[22px] outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20" placeholder={placeholder} />
+        <input {...sharedProps} className="mt-2 h-12 w-full min-w-0 rounded-[12px] border border-ktr-border-input bg-ktr-primary-bg-form px-3 text-[14px] leading-[22px] outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ring/20" />
       )}
     </label>
   );
@@ -444,13 +453,12 @@ export function ProjectsPage() {
           const data = await res.json();
           // Map DB project to UI Project format
           const mapped: Project[] = (data as ApiStudentProject[]).map((p) => ({
-            id: p.id,
             title: p.title,
             className: p.className,
-            group: "Belum berkelompok",
-            members: "0 anggota",
-            deadline: p.deadline ? new Date(p.deadline).toLocaleDateString('id-ID') : "TBA",
-            status: (p.status === "IN_PROGRESS" ? "Sedang Berjalan" : p.status === "NOT_STARTED" ? "Belum Dimulai" : p.status === "FINISHED" ? "Selesai" : "Revisi") as Status
+            group: p.group ?? "Belum berkelompok",
+            members: `${p.members ?? 0} anggota`,
+            deadline: p.deadline ? new Date(p.deadline).toLocaleDateString("id-ID") : "TBA",
+            status: (p.status === "FINISHED" ? "Selesai" : p.status === "REVISION" ? "Revisi" : "Sedang Berjalan") as Status,
           }));
           setApiProjects(mapped);
         }
@@ -847,16 +855,33 @@ function JoinGroupSheet({ trigger }: { trigger: React.ReactNode }) {
 const discussionTopics = ["Ide Proyek", "Progres", "Kendala", "Revisi"];
 
 function CreateDiscussionSheet({ trigger }: { trigger: React.ReactNode }) {
+  const router = useRouter();
   const [title, setTitle] = React.useState("");
   const [topic, setTopic] = React.useState(discussionTopics[0]);
+  const [submitting, setSubmitting] = React.useState(false);
 
-  function submit() {
+  async function submit() {
     const trimmed = title.trim();
     if (!trimmed) {
       toast.warning("Judul diskusi belum diisi", { description: "Isi judul diskusi agar anggota tahu topik yang dibahas." });
       return;
     }
-    toast.success("Diskusi dimulai", { description: `${topic} siap dibahas bersama kelompok.` });
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/student/discussions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: trimmed, topic }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Diskusi belum bisa dibuat.");
+      toast.success("Diskusi dimulai", { description: `${topic} siap dibahas bersama kelompok.` });
+      router.push("/student/discussions/current");
+    } catch (error) {
+      toast.danger("Gagal membuat diskusi", { description: error instanceof Error ? error.message : "Coba lagi sebentar lagi." });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -889,7 +914,7 @@ function CreateDiscussionSheet({ trigger }: { trigger: React.ReactNode }) {
           </div>
           <p className="text-[12px] font-normal leading-[18px] text-ktr-text-tertiary">Setelah diskusi diakhiri, anggota akan mengisi umpan balik anggota untuk mencatat proses kontribusi sesi ini.</p>
         </div>
-        <SheetFooterActions primaryLabel="Mulai Diskusi" onPrimary={submit} />
+        <SheetFooterActions primaryLabel={submitting ? "Memulai..." : "Mulai Diskusi"} onPrimary={submit} />
       </BottomSheetContent>
     </BottomSheet>
   );
@@ -1429,11 +1454,52 @@ export function GroupDetailPage({ role = "member" }: { role?: DiscussionRole } =
   );
 }
 export function NewDiscussionPage({ role = "member" }: { role?: DiscussionRole } = {}) {
+  const router = useRouter();
+  const [title, setTitle] = React.useState("");
+  const [initialNote, setInitialNote] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+
   if (role !== "leader") {
     return <RoleRestrictedState title="Buat Diskusi Baru" description="Hanya ketua kelompok yang dapat membuat sesi diskusi baru." backHref="/student/group" />;
   }
 
-  return <ScreenShell title="Buat Diskusi Baru" subtitle="Mulai ruang diskusi untuk membahas ide, progres, kendala, atau revisi kelompokmu."><Card className="space-y-4"><Field label="Judul Diskusi" placeholder="Contoh: Pembahasan Konsep Landing Page" /><div><p className="mb-3 text-[16px] font-medium leading-[22px] text-ktr-text-primary">Topik Diskusi</p><Segments items={["Ide Proyek", "Progres", "Kendala", "Revisi", "Lainnya"]} /></div><Field label="Catatan Awal" placeholder="Tulis hal pertama yang ingin dibahas bersama kelompok." as="textarea" /><PrimaryButton href="/student/discussions/current" className="w-full" onClick={() => toast.success("Diskusi baru dibuat", { description: "Ruang diskusi sudah siap digunakan kelompok." })}>Buat Diskusi</PrimaryButton></Card></ScreenShell>;
+  async function submitDiscussion() {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      toast.warning("Judul diskusi belum diisi", { description: "Isi judul agar anggota tahu topik pembahasan." });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/student/discussions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: trimmedTitle, topic: "PROJECT_IDEA", initialNote }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Diskusi belum bisa dibuat.");
+      toast.success("Diskusi baru dibuat", { description: "Ruang diskusi sudah siap digunakan kelompok." });
+      router.push("/student/discussions/current");
+    } catch (error) {
+      toast.danger("Gagal membuat diskusi", { description: error instanceof Error ? error.message : "Coba lagi sebentar lagi." });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <ScreenShell title="Buat Diskusi Baru">
+      <Card className="space-y-4">
+        <Field label="Judul Diskusi" placeholder="Contoh: Pembahasan Konsep Landing Page" value={title} onChange={setTitle} />
+        <div>
+          <p className="mb-3 text-[16px] font-medium leading-[22px] text-ktr-text-primary">Topik Diskusi</p>
+          <Segments items={["Ide Proyek", "Progres", "Kendala", "Revisi", "Lainnya"]} />
+        </div>
+        <Field label="Catatan Awal" placeholder="Tulis hal pertama yang ingin dibahas bersama kelompok." as="textarea" value={initialNote} onChange={setInitialNote} />
+        <PrimaryButton className="w-full" onClick={submitDiscussion}>{submitting ? "Membuat..." : "Buat Diskusi"}</PrimaryButton>
+      </Card>
+    </ScreenShell>
+  );
 }
 
 type DiscussionRole = "leader" | "member";
@@ -1661,6 +1727,17 @@ type ChatMessage = {
   time: string;
   isSelf?: boolean;
   isUnreadDivider?: boolean;
+};
+
+type ApiDiscussionDetail = {
+  id: string;
+  title: string;
+  status: "pending" | "process" | "finish";
+  groupId: string;
+  groupName: string;
+  projectTitle: string;
+  members: typeof groupMembers;
+  messages: ChatMessage[];
 };
 
 const initialChatMessages: ChatMessage[] = [
@@ -1999,8 +2076,55 @@ export function DiscussionChatPage({
   const [endConfirmOpen, setEndConfirmOpen] = React.useState(false);
   const [startCallConfirmOpen, setStartCallConfirmOpen] = React.useState(false);
   const router = useRouter();
+  const socket = useSocket();
+  const [discussion, setDiscussion] = React.useState<ApiDiscussionDetail | null>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const discussionTitle = discussion?.title ?? "Pembahasan Konsep Landing Page";
 
+  function applyDiscussionData(data: ApiDiscussionDetail) {
+    setDiscussion(data);
+    if (data.messages.length) setMessages(data.messages);
+    if (data.status === "finish") setCallActive(false);
+  }
+
+  React.useEffect(() => {
+    let cancelled = false;
+    async function loadDiscussion() {
+      try {
+        const response = await fetch("/api/student/discussions", { cache: "no-store" });
+        const data = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(data?.error ?? "Diskusi belum bisa dimuat.");
+        if (!cancelled) applyDiscussionData(data as ApiDiscussionDetail);
+      } catch (error) {
+        toast.danger("Gagal memuat diskusi", { description: error instanceof Error ? error.message : "Coba lagi sebentar lagi." });
+      }
+    }
+    loadDiscussion();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!socket || !discussion?.id) return;
+    socket.emit("discussion:join", { discussionId: discussion.id });
+    const handleMessage = (message: ChatMessage) => {
+      setMessages((current) => current.some((item) => item.id === message.id) ? current : [...current, message]);
+    };
+    const handleCallStarted = () => setCallActive(true);
+    const handleCallEnded = () => {
+      setCallActive(false);
+      setInCall(false);
+    };
+    socket.on("discussion:message", handleMessage);
+    socket.on("call:started", handleCallStarted);
+    socket.on("call:ended", handleCallEnded);
+    return () => {
+      socket.off("discussion:message", handleMessage);
+      socket.off("call:started", handleCallStarted);
+      socket.off("call:ended", handleCallEnded);
+    };
+  }, [socket, discussion?.id]);
   React.useEffect(() => {
     if (!callActive) return;
     const timer = window.setInterval(() => setCallElapsed((s) => s + 1), 1000);
@@ -2019,30 +2143,49 @@ export function DiscussionChatPage({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  function startCall() {
+  async function startCall() {
     setCallSummaryDuration(null);
+    try {
+      const response = await fetch("/api/livekit/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomName: `discussion-${discussion?.id ?? "active"}`,
+          participantName: "Alya P.",
+        }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Token panggilan belum tersedia.");
+      socket?.emit("call:start", { discussionId: discussion?.id, participantName: "Alya P." });
+      toast.success("Panggilan dimulai", { description: data?.url ? "LiveKit token siap digunakan." : "Token siap, URL LiveKit belum diisi." });
+    } catch (error) {
+      toast.warning("Mode panggilan lokal", { description: error instanceof Error ? error.message : "Konfigurasi LiveKit belum lengkap." });
+    }
     setCallActive(true);
     setInCall(true);
   }
 
-  function sendMessage() {
+  async function sendMessage() {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
-    const now = new Date();
-    const time = `${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        author: "Alya P.",
-        initials: "AP",
-        avatarClass: "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]",
-        content: trimmed,
-        time,
-        isSelf: true,
-      },
-    ]);
     setInputValue("");
+    try {
+      const response = await fetch("/api/student/discussions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ discussionId: discussion?.id, message: trimmed }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Pesan belum bisa dikirim.");
+      const nextDiscussion = data as ApiDiscussionDetail;
+      const previousIds = new Set(messages.map((message) => message.id));
+      applyDiscussionData(nextDiscussion);
+      const latestMessage = nextDiscussion.messages.findLast((message) => !previousIds.has(message.id));
+      if (latestMessage) socket?.emit("discussion:message", { discussionId: nextDiscussion.id, message: latestMessage });
+    } catch (error) {
+      setInputValue(trimmed);
+      toast.danger("Gagal mengirim pesan", { description: error instanceof Error ? error.message : "Coba lagi sebentar lagi." });
+    }
   }
 
   function transferHostFromCurrentUser() {
@@ -2056,6 +2199,7 @@ export function DiscussionChatPage({
   }
 
   function endCall() {
+    socket?.emit("call:end", { discussionId: discussion?.id, participantName: "Alya P." });
     setCallSummaryDuration(callElapsed);
     setInCall(false);
     setCallActive(false);
@@ -2150,7 +2294,7 @@ export function DiscussionChatPage({
 
           {/* Title + active call badge */}
           <div className="px-4">
-            <h1 className="text-[18px] font-semibold leading-[28px] text-ktr-text-primary">Pembahasan Konsep Landing Page</h1>
+            <h1 className="text-[18px] font-semibold leading-[28px] text-ktr-text-primary">{discussionTitle}</h1>
             {callActive && (
               <div className="mt-2">
                 <ActiveCallBadge elapsed={callElapsed} onJoin={() => setInCall(true)} />
@@ -2272,10 +2416,22 @@ export function DiscussionChatPage({
         confirmText="Akhiri Diskusi"
         cancelText="Batal"
         tone="danger"
-        onConfirm={() => {
-          setCallActive(false);
-          toast.success("Diskusi diakhiri", { description: "Anggota sekarang dapat mengisi umpan balik anggota." });
-          router.push("/student/discussions/summary");
+        onConfirm={async () => {
+          try {
+            const response = await fetch("/api/student/discussions", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "finish", discussionId: discussion?.id, summary: discussionTitle }),
+            });
+            const data = await response.json().catch(() => null);
+            if (!response.ok) throw new Error(data?.error ?? "Diskusi belum bisa diakhiri.");
+            applyDiscussionData(data as ApiDiscussionDetail);
+            socket?.emit("call:end", { discussionId: discussion?.id, participantName: "Alya P." });
+            toast.success("Diskusi diakhiri", { description: "Anggota sekarang dapat mengisi umpan balik anggota." });
+            router.push("/student/discussions/summary");
+          } catch (error) {
+            toast.danger("Gagal mengakhiri diskusi", { description: error instanceof Error ? error.message : "Coba lagi sebentar lagi." });
+          }
         }}
       />
     </main>
@@ -2308,8 +2464,7 @@ export function DiscussionDetailPage({ role = "member", discussionStatus = "ongo
         </div>
 
         <header className="mb-6 space-y-2">
-          <h1 className="text-[18px] font-semibold leading-[28px] text-ktr-text-primary">Pembahasan Konsep Landing Page</h1>
-          <p className="text-[14px] font-normal leading-[22px] text-ktr-text-secondary">Dimulai oleh Alya P. Hari ini, 09.00</p>
+          <h1 className="text-[18px] font-semibold leading-[28px] text-ktr-text-primary">Pembahasan Konsep Landing Page</h1>`r`n          <p className="text-[14px] font-normal leading-[22px] text-ktr-text-secondary">Dimulai oleh Alya P. Hari ini, 09.00</p>
         </header>
 
         <div className="space-y-6">
@@ -2369,9 +2524,11 @@ export function ProgressInputPage() {
   const [evidenceLink, setEvidenceLink] = React.useState("");
   const [attachment, setAttachment] = React.useState<{ name: string; size: string } | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+  const [discardOpen, setDiscardOpen] = React.useState(false);
   const router = useRouter();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const canSubmit = progress.trim().length > 0 && (Boolean(attachment) || evidenceLink.trim().length > 0);
+  const isDirty = progress.trim().length > 0 || evidenceLink.trim().length > 0 || attachment !== null;
 
   function handleAttachmentChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -2379,6 +2536,19 @@ export function ProgressInputPage() {
 
     setAttachment({ name: file.name, size: formatAttachmentSize(file.size) });
     event.target.value = "";
+  }
+
+  function handleProgressBack() {
+    if (isDirty) {
+      setDiscardOpen(true);
+      return;
+    }
+    router.push("/student/projects");
+  }
+
+  function confirmDiscardProgress() {
+    setDiscardOpen(false);
+    router.push("/student/projects");
   }
 
   async function submitProgress() {
@@ -2406,7 +2576,8 @@ export function ProgressInputPage() {
   }
 
   return (
-    <ScreenShell title="Kirim Progres">
+    <>
+      <ScreenShell title="Kirim Progres" onBack={handleProgressBack}>
       <div className="space-y-5">
         <label className="block space-y-3">
           <span className="block text-[16px] font-medium leading-[22px] text-ktr-text-primary">Progres yang Dikerjakan</span>
@@ -2421,7 +2592,7 @@ export function ProgressInputPage() {
         <div>
           <p className="mb-3 text-[16px] font-medium leading-[22px] text-ktr-text-primary">Bukti Progres</p>
           {attachment ? (
-            <div className="flex items-center justify-between gap-3 rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3 py-2.5">
+            <div className="flex min-h-[96px] w-full items-center justify-between gap-3 rounded-[16px] border border-dashed border-ktr-border-input bg-ktr-primary-bg-form px-4 py-4 text-left">
               <span className="flex min-w-0 items-center gap-2.5">
                 <Image src="/icons/file-icon.svg" alt="" width={32} height={32} aria-hidden="true" className="size-8 shrink-0" />
                 <span className="min-w-0">
@@ -2465,8 +2636,16 @@ export function ProgressInputPage() {
         <div className="pt-5">
           <Button className="h-11 w-full rounded-[12px] text-[14px] font-semibold disabled:opacity-45" disabled={!canSubmit || submitting} onClick={submitProgress}>{submitting ? "Mengirim..." : "Kirim Progres"}</Button>
         </div>
-      </div>
-    </ScreenShell>
+        </div>
+      </ScreenShell>
+      <ConfirmModal
+        open={discardOpen}
+        onOpenChange={setDiscardOpen}
+        title="Batalkan progres?"
+        confirmText="Batalkan"
+        onConfirm={confirmDiscardProgress}
+      />
+    </>
   );
 }
 
@@ -2497,6 +2676,7 @@ function setPendingPeerAssessmentMember(name: string) {
 }
 
 const assessmentMembers = groupMembers.map((member) => ({
+  id: member.id,
   name: member.name === "Alya Putri Ramadhani" ? "Alya P." : member.name === "Bima Aditya Pratama" ? "Bima A." : member.name === "Raka Maulana Yusuf" ? "Raka M." : "Nadia S.",
   role: member.role,
   initials: member.initials,
@@ -2550,6 +2730,7 @@ export function PeerAssessmentPage({ currentUserInitials = "AP", allMembersCompl
   const [ratings, setRatings] = React.useState<AssessmentRatings>({});
   const [description, setDescription] = React.useState("");
   const [completedMembers, setCompletedMembers] = React.useState<string[]>([]);
+  const [submitting, setSubmitting] = React.useState(false);
   const assessableMembers = assessmentMembers.filter((item) => item.initials !== currentUserInitials);
   const selectedMember = assessableMembers.find((item) => item.name === member);
   const isComplete = Boolean(member) && assessmentQuestions.every((question) => ratings[question.key]) && description.trim().length > 0;
@@ -2576,20 +2757,35 @@ export function PeerAssessmentPage({ currentUserInitials = "AP", allMembersCompl
     setRatings((current) => ({ ...current, [key]: value }));
   }
 
-  function submit() {
-    if (!isComplete) {
+  async function submit() {
+    if (!isComplete || submitting) {
       toast.warning("Lengkapi semua penilaian terlebih dahulu.");
       return;
     }
 
-    const nextCompleted = Array.from(new Set([...completedMembers, member]));
-    setCompletedMembers(nextCompleted);
-    writePeerAssessmentCompleted(nextCompleted);
-    setRatings({});
-    setDescription("");
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/student/peer-assessment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subjectMemberId: selectedMember?.id, ratings, note: description }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Umpan balik belum bisa disimpan.");
 
-    toast.success("Umpan balik tersimpan", { description: (selectedMember?.name ?? "Anggota") + " sudah ditandai selesai." });
-    router.push(allMembersCompleted ? "/student/discussions/waiting" : "/student/discussions/summary");
+      const nextCompleted = Array.from(new Set([...completedMembers, member]));
+      setCompletedMembers(nextCompleted);
+      writePeerAssessmentCompleted(nextCompleted);
+      setRatings({});
+      setDescription("");
+
+      toast.success("Umpan balik tersimpan", { description: (selectedMember?.name ?? "Anggota") + " sudah ditandai selesai." });
+      router.push(allMembersCompleted ? "/student/discussions/waiting" : "/student/discussions/summary");
+    } catch (error) {
+      toast.danger("Gagal menyimpan umpan balik", { description: error instanceof Error ? error.message : "Coba lagi sebentar lagi." });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -2626,7 +2822,7 @@ export function PeerAssessmentPage({ currentUserInitials = "AP", allMembersCompl
             </label>
           </div>
 
-          <Button className="h-11 w-full rounded-[12px] text-[14px] font-medium disabled:opacity-45" disabled={!isComplete} onClick={submit}>Kirim Umpan Balik</Button>
+          <Button className="h-11 w-full rounded-[12px] text-[14px] font-medium disabled:opacity-45" disabled={!isComplete || submitting} onClick={submit}>{submitting ? "Mengirim..." : "Kirim Umpan Balik"}</Button>
         </div>
       ) : (
         <Card className="bg-ktr-secondary-bg-info-card p-3">

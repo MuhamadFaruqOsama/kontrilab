@@ -97,7 +97,7 @@ export default function TeacherDashboard() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <FilterSelect className="w-full sm:w-56" ariaLabel="Pilih semester" defaultValue="semester-genap-2026" options={semesterOptions} />
               <Link
-                href="/teacher/projects"
+                href="/teacher/projects?create=1"
                 className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-ktr-text-primary bg-ktr-text-primary px-4 text-sm font-semibold text-ktr-text-white transition-[border-color,background-color,transform] hover:bg-ktr-text-primary/95 active:scale-[0.997]"
               >
                 <HugeiconsIcon icon={PlusSignIcon} size={16} strokeWidth={2} />
@@ -140,7 +140,7 @@ export default function TeacherDashboard() {
                       <div key={project.id} className="grid gap-3 border-b border-ktr-border-light py-4 transition-colors first:pt-0 last:border-b-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_minmax(480px,0.9fr)] sm:items-center">
                         <div className="min-w-0">
                           <div className="flex min-w-0 items-center gap-3">
-                            <Link href={`/teacher/projects/${project.id}`} className="truncate text-[15px] font-semibold text-ktr-text-primary decoration-ktr-text-primary underline-offset-4 transition-colors hover:underline">
+                            <Link href={`/teacher/projects/${project.id}`} className="truncate text-[15px] font-semibold text-ktr-text-primary transition-colors hover:text-ktr-text-secondary">
                               {project.name}
                             </Link>
                             <StatusBadge status={project.status} />
@@ -189,7 +189,7 @@ export default function TeacherDashboard() {
                       <HugeiconsIcon icon={index % 2 === 0 ? CheckListIcon : MessageMultiple01Icon} size={16} strokeWidth={2} />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <button type="button" onClick={() => handleFollowUpAction(item)} className="block max-w-full cursor-pointer truncate text-sm font-semibold text-ktr-text-primary decoration-ktr-text-primary underline-offset-4 transition-colors hover:underline">{item.title}</button>
+                      <button type="button" onClick={() => handleFollowUpAction(item)} className="block max-w-full cursor-pointer truncate text-sm font-semibold text-ktr-text-primary transition-colors hover:text-ktr-text-secondary">{item.title}</button>
                       <span className="mt-1 block truncate text-xs font-medium text-ktr-text-secondary">{item.target}</span>
                     </span>
                     <span className="shrink-0 text-xs font-medium text-ktr-text-tertiary">10:{15 + index}</span>
@@ -232,7 +232,7 @@ function TeacherDashboardSkeleton() {
 
 function DashboardSkeletonPanel({ rows, compact = false }: { rows: number; compact?: boolean }) {
   return (
-    <Card className="overflow-hidden rounded-[22px] border border-ktr-border-light bg-white">
+    <Card className="overflow-hidden rounded-[12px] border border-ktr-border-light bg-white">
       <Card.Content className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
@@ -315,13 +315,12 @@ function DashboardListSkeleton({ rows }: { rows: number }) {
   );
 }
 
-function DashboardPanel({ title, subtitle, action, children }: { title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode }) {
+function DashboardPanel({ title, action, children }: { title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <Card className="rounded-[22px] border border-ktr-border-light bg-white">
+    <Card className="rounded-[12px] border border-ktr-border-light bg-white">
       <Card.Header className="flex items-center justify-between gap-4 px-6 py-4">
         <div className="min-w-0">
           <h2 className="truncate font-heading text-lg font-semibold text-ktr-text-primary">{title}</h2>
-          {subtitle ? <p className="mt-1 text-xs font-medium text-ktr-text-secondary">{subtitle}</p> : null}
         </div>
         {action}
       </Card.Header>

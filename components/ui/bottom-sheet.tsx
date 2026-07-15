@@ -165,17 +165,8 @@ function BottomSheetTitle({
   );
 }
 
-function BottomSheetDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof Dialog.Description>) {
-  return (
-    <Dialog.Description
-      data-slot="bottom-sheet-description"
-      className={cn("text-sm leading-ktr-normal text-ktr-text-secondary", className)}
-      {...props}
-    />
-  );
+function BottomSheetDescription(_props: React.ComponentProps<typeof Dialog.Description>) {
+  return null;
 }
 
 export {

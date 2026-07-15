@@ -1,4 +1,5 @@
-﻿const fs = require("node:fs");
+/* eslint-disable @typescript-eslint/no-require-imports */
+const fs = require("node:fs");
 const { createClient } = require("@supabase/supabase-js");
 
 function readEnv() {

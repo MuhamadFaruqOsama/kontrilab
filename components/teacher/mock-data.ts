@@ -37,7 +37,7 @@ export const teacherProjects = [
     id: "3",
     name: "Poster Kampanye Digital",
     className: "X Informatika",
-    status: "Akan Datang",
+    status: "Aktif",
     startDate: "28 Juli 2026",
     finalDeadline: "18 Agustus 2026",
     groups: 1,
@@ -46,7 +46,7 @@ export const teacherProjects = [
     pendingUploadReviews: 0,
     pendingFinalReviews: 0,
     inactiveGroups: 0,
-    announcement: "Proyek belum dimulai.",
+    announcement: "Proyek sudah dimulai dan kelompok dapat langsung mengirim Upload Progress.",
   },
 ];
 
@@ -103,12 +103,12 @@ export const teacherGroups = [
     id: "5",
     projectId: "3",
     name: "Kelompok 5",
-    status: "Akan Datang",
+    status: "Aktif",
     submitStatus: "Belum Submit" as SubmitStatus,
     latestUpload: "Belum ada",
     activeUploaders: "0 dari 4",
     pendingReviews: 0,
-    attention: "Belum dimulai",
+    attention: "Perlu progres awal",
     members: ["Doni N.", "Salsa L.", "Yuki K.", "Rama F."],
   },
 ];
@@ -122,14 +122,14 @@ export const teacherStudents = [
   { id: "6", name: "Siti Nur", className: "XI Desain Web", status: "Perlu Perhatian" as ActivityStatus, uploads: 1, latestUpload: "6 hari lalu", validatedEvidence: 0, feedbackResponse: "Perlu klarifikasi", activeProject: "Landing Page UMKM", reason: "Bukti perlu klarifikasi dan belum ada respons terbaru." },
   { id: "7", name: "Gilang Pratama", className: "XI Desain Web", status: "Sangat Aktif" as ActivityStatus, uploads: 7, latestUpload: "Hari ini, 10.05", validatedEvidence: 5, feedbackResponse: "Cepat merespons", activeProject: "Landing Page UMKM", reason: "Upload konsisten dengan bukti gambar dan link yang relevan." },
   { id: "8", name: "Laras Ayu", className: "XI Desain Web", status: "Aktif" as ActivityStatus, uploads: 3, latestUpload: "Kemarin, 13.20", validatedEvidence: 2, feedbackResponse: "Sudah merespons", activeProject: "Landing Page UMKM", reason: "Bukti kerja valid dan diskusi aktif." },
-  { id: "9", name: "Mei Wulandari", className: "X Informatika", status: "Tidak Ada Aktivitas Terbaru" as ActivityStatus, uploads: 0, latestUpload: "Belum ada", validatedEvidence: 0, feedbackResponse: "Belum ada feedback", activeProject: "Poster Kampanye Digital", reason: "Proyek belum dimulai sehingga belum ada aktivitas." },
+  { id: "9", name: "Mei Wulandari", className: "X Informatika", status: "Tidak Ada Aktivitas Terbaru" as ActivityStatus, uploads: 0, latestUpload: "Belum ada", validatedEvidence: 0, feedbackResponse: "Belum ada feedback", activeProject: "Poster Kampanye Digital", reason: "Belum mengirim Upload Progress meski proyek sudah berjalan." },
   { id: "10", name: "Reno Saputra", className: "X Informatika", status: "Aktif" as ActivityStatus, uploads: 2, latestUpload: "2 hari lalu", validatedEvidence: 1, feedbackResponse: "Sudah merespons", activeProject: "Landing Page UMKM", reason: "Bukti link sudah ditinjau sebagian." },
   { id: "11", name: "Hanif A.", className: "XI Desain Web", status: "Aktif" as ActivityStatus, uploads: 3, latestUpload: "2 hari lalu", validatedEvidence: 2, feedbackResponse: "Sudah merespons", activeProject: "Landing Page UMKM", reason: "Mengerjakan aset visual dan merespons catatan." },
   { id: "12", name: "Citra Dewi", className: "XI Desain Web", status: "Perlu Perhatian" as ActivityStatus, uploads: 1, latestUpload: "5 hari lalu", validatedEvidence: 1, feedbackResponse: "Lambat merespons", activeProject: "Landing Page UMKM", reason: "Respons terhadap feedback belum lengkap." },
   { id: "13", name: "Nanda Putri", className: "XI Desain Web", status: "Aktif" as ActivityStatus, uploads: 4, latestUpload: "Kemarin, 11.00", validatedEvidence: 3, feedbackResponse: "Cepat merespons", activeProject: "Landing Page UMKM", reason: "Konsisten mengunggah teks dan gambar." },
   { id: "14", name: "Arga R.", className: "XI Desain Web", status: "Perlu Perhatian" as ActivityStatus, uploads: 1, latestUpload: "8 hari lalu", validatedEvidence: 0, feedbackResponse: "Belum merespons", activeProject: "Landing Page UMKM", reason: "Belum ada aktivitas terbaru lebih dari 7 hari." },
-  { id: "15", name: "Doni N.", className: "X Informatika", status: "Tidak Ada Aktivitas Terbaru" as ActivityStatus, uploads: 0, latestUpload: "Belum ada", validatedEvidence: 0, feedbackResponse: "Belum ada feedback", activeProject: "Poster Kampanye Digital", reason: "Menunggu proyek dimulai." },
-  { id: "16", name: "Salsa L.", className: "X Informatika", status: "Tidak Ada Aktivitas Terbaru" as ActivityStatus, uploads: 0, latestUpload: "Belum ada", validatedEvidence: 0, feedbackResponse: "Belum ada feedback", activeProject: "Poster Kampanye Digital", reason: "Menunggu proyek dimulai." },
+  { id: "15", name: "Doni N.", className: "X Informatika", status: "Tidak Ada Aktivitas Terbaru" as ActivityStatus, uploads: 0, latestUpload: "Belum ada", validatedEvidence: 0, feedbackResponse: "Belum ada feedback", activeProject: "Poster Kampanye Digital", reason: "Perlu mulai mengirim bukti kerja dan terlibat dalam diskusi kelompok." },
+  { id: "16", name: "Salsa L.", className: "X Informatika", status: "Tidak Ada Aktivitas Terbaru" as ActivityStatus, uploads: 0, latestUpload: "Belum ada", validatedEvidence: 0, feedbackResponse: "Belum ada feedback", activeProject: "Poster Kampanye Digital", reason: "Perlu mulai mengirim bukti kerja dan terlibat dalam diskusi kelompok." },
 ];
 
 export const uploadProgress = [
@@ -140,6 +140,36 @@ export const uploadProgress = [
   { id: "u5", studentId: "6", student: "Siti Nur", group: "Kelompok 2", projectId: "1", summary: "Catatan singkat tanpa bukti yang cukup untuk diverifikasi.", evidenceType: "Teks", time: "6 hari lalu", status: "Kurang Relevan" as ReviewStatus, relevance: "Kurang relevan" },
 ];
 
+
+export const peerAssessmentScores = [
+  { studentId: "1", projectId: "1", peerScore: 92, discussionScore: 88 },
+  { studentId: "2", projectId: "1", peerScore: 84, discussionScore: 81 },
+  { studentId: "3", projectId: "1", peerScore: 80, discussionScore: 76 },
+  { studentId: "4", projectId: "1", peerScore: 46, discussionScore: 42 },
+  { studentId: "5", projectId: "2", peerScore: 38, discussionScore: 34 },
+  { studentId: "6", projectId: "1", peerScore: 50, discussionScore: 46 },
+  { studentId: "7", projectId: "2", peerScore: 94, discussionScore: 90 },
+  { studentId: "8", projectId: "2", peerScore: 78, discussionScore: 74 },
+  { studentId: "9", projectId: "3", peerScore: 35, discussionScore: 32 },
+  { studentId: "10", projectId: "2", peerScore: 72, discussionScore: 70 },
+  { studentId: "11", projectId: "2", peerScore: 75, discussionScore: 72 },
+  { studentId: "12", projectId: "2", peerScore: 48, discussionScore: 44 },
+  { studentId: "13", projectId: "2", peerScore: 82, discussionScore: 79 },
+  { studentId: "14", projectId: "2", peerScore: 42, discussionScore: 38 },
+  { studentId: "15", projectId: "3", peerScore: 40, discussionScore: 36 },
+  { studentId: "16", projectId: "3", peerScore: 43, discussionScore: 39 },
+];
+
+export function getStudentContributionBreakdown(studentId: string, projectId?: string) {
+  const signals = peerAssessmentScores.filter((item) => item.studentId === studentId && (!projectId || item.projectId === projectId));
+  const peerScore = signals.length ? Math.round(signals.reduce((total, item) => total + item.peerScore, 0) / signals.length) : 35;
+  const discussionScore = signals.length ? Math.round(signals.reduce((total, item) => total + item.discussionScore, 0) / signals.length) : 32;
+  const relevantUploads = uploadProgress.filter((item) => item.studentId === studentId && (!projectId || item.projectId === projectId));
+  const uploadScore = Math.min(100, Math.max(relevantUploads.length ? 45 : 24, relevantUploads.length * 22 + (relevantUploads.some((item) => item.status === "Valid") ? 24 : 10)));
+  const score = Math.round(peerScore * 0.4 + discussionScore * 0.3 + uploadScore * 0.3);
+
+  return { score, peerScore, discussionScore, uploadScore, uploadCount: relevantUploads.length };
+}
 export const finalSubmissions = [
   { id: "s1", projectId: "1", groupId: "1", group: "Kelompok 1", submittedAt: "Hari ini, 11.20", file: "website-profil-sekolah.vercel.app", members: "4 anggota", status: "Menunggu Review" as SubmitStatus },
   { id: "s2", projectId: "2", groupId: "3", group: "Kelompok 3", submittedAt: "Kemarin, 15.40", file: "landing-umkm-final.zip", members: "4 anggota", status: "Perlu Revisi" as SubmitStatus },

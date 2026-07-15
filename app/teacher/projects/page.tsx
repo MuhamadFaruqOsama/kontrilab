@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
   Alert01Icon,
-  ArchiveIcon,
+  Delete02Icon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
   Calendar03Icon,
@@ -28,7 +29,7 @@ type TeacherProjectCard = {
   id: string;
   name: string;
   className: string;
-  status: "Aktif" | "Akan Datang" | "Selesai" | "Diarsipkan";
+  status: "Aktif" | "Selesai" | "Diarsipkan";
   startDate: string;
   finalDeadline: string;
   dueDateInput: string;
@@ -65,6 +66,14 @@ const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Jul
 const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export default function ProjectsPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <ProjectsPageContent />
+    </React.Suspense>
+  );
+}
+
+function ProjectsPageContent() {
   const [projects, setProjects] = React.useState<TeacherProjectCard[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [search, setSearch] = React.useState("");
@@ -73,6 +82,9 @@ export default function ProjectsPage() {
   const [formMode, setFormMode] = React.useState<"create" | "edit" | null>(null);
   const [discardFormOpen, setDiscardFormOpen] = React.useState(false);
   const [draft, setDraft] = React.useState<ProjectDraft>(emptyDraft);
+  const [draftBaseline, setDraftBaseline] = React.useState<ProjectDraft>(emptyDraft);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -102,21 +114,23 @@ export default function ProjectsPage() {
     };
   }, []);
 
+  React.useEffect(() => {
+    if (searchParams.get("create") !== "1") return;
+    openCreateForm();
+    router.replace("/teacher/projects", { scroll: false });
+  }, [router, searchParams]);
   const filtered = projects.filter((p) => {
     const query = search.trim().toLowerCase();
     const matchSearch = query === "" || p.name.toLowerCase().includes(query) || p.className.toLowerCase().includes(query);
     const matchStatus =
       statusFilter === "semua" ||
       (statusFilter === "aktif" && p.status === "Aktif") ||
-      (statusFilter === "akan-datang" && p.status === "Akan Datang") ||
       (statusFilter === "selesai" && p.status === "Selesai") ||
       (statusFilter === "diarsipkan" && p.status === "Diarsipkan");
     return matchSearch && matchStatus;
   });
 
-  const isDraftDirty = Boolean(
-    draft.title.trim() || draft.startDate || draft.dueDate || draft.description.trim() || draft.className.trim() || draft.attachmentName
-  );
+  const isDraftDirty = !areDraftsEqual(draft, draftBaseline);
 
   function requestCloseForm() {
     if (formMode && isDraftDirty) {
@@ -125,29 +139,34 @@ export default function ProjectsPage() {
     }
     setFormMode(null);
     setDraft(emptyDraft);
+    setDraftBaseline(emptyDraft);
   }
 
   function confirmDiscardForm() {
     setDiscardFormOpen(false);
     setFormMode(null);
     setDraft(emptyDraft);
+    setDraftBaseline(emptyDraft);
   }
 
   function openCreateForm() {
     setDraft(emptyDraft);
+    setDraftBaseline(emptyDraft);
     setFormMode("create");
   }
 
   function openEditForm(project: TeacherProjectCard) {
-    setDraft({
+    const nextDraft = {
       id: project.id,
       title: project.name,
-      startDate: "",
+      startDate: displayDateToInputValue(project.startDate),
       className: project.className === "Belum ada kelompok" ? "" : project.className,
       dueDate: project.dueDateInput,
       description: project.description,
       attachmentName: "",
-    });
+    };
+    setDraft(nextDraft);
+    setDraftBaseline(nextDraft);
     setFormMode("edit");
   }
 
@@ -175,6 +194,7 @@ export default function ProjectsPage() {
       setProjects(Array.isArray(data) ? data : []);
       setFormMode(null);
       setDraft(emptyDraft);
+      setDraftBaseline(emptyDraft);
       toast.success(formMode === "edit" ? "Proyek diperbarui" : "Proyek dibuat", {
         description: formMode === "edit" ? "Perubahan tersimpan di Supabase." : "Data proyek baru tersimpan di Supabase.",
       });
@@ -190,13 +210,13 @@ export default function ProjectsPage() {
     try {
       const response = await fetch(`/api/teacher/projects?id=${encodeURIComponent(archiveTarget.id)}`, { method: "DELETE" });
       const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error ?? "Proyek belum bisa diarsipkan.");
+      if (!response.ok) throw new Error(data?.error ?? "Proyek belum bisa dihapus.");
       setProjects(Array.isArray(data) ? data : []);
-      toast.success("Proyek diarsipkan", {
-        description: `Proyek "${archiveTarget.name}" sudah dilepas dari daftar aktif Supabase.`,
+      toast.success("Proyek dihapus", {
+        description: `Proyek "${archiveTarget.name}" sudah dihapus dari daftar aktif Supabase.`,
       });
     } catch (error) {
-      toast.danger("Gagal mengarsipkan proyek", {
+      toast.danger("Gagal menghapus proyek", {
         description: error instanceof Error ? error.message : "Coba lagi sebentar lagi.",
       });
     } finally {
@@ -204,24 +224,10 @@ export default function ProjectsPage() {
     }
   }
 
-  async function handleDuplicate(project: TeacherProjectCard) {
-    try {
-      const response = await fetch("/api/teacher/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ duplicateFromId: project.id }),
-      });
-      const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error ?? "Proyek belum bisa diduplikat.");
-      setProjects(Array.isArray(data) ? data : []);
-      toast.success("Proyek diduplikat", {
-        description: `Salinan "${project.name}" tersimpan di Supabase.`,
-      });
-    } catch (error) {
-      toast.danger("Gagal menduplikat proyek", {
-        description: error instanceof Error ? error.message : "Coba lagi sebentar lagi.",
-      });
-    }
+  function copyProjectCode(project: TeacherProjectCard) {
+    const projectCode = `KTR-${project.id.padStart(3, "0")}`;
+    void navigator.clipboard?.writeText(projectCode);
+    toast.success("Kode proyek disalin", { description: projectCode });
   }
 
   if (loading) {
@@ -254,7 +260,7 @@ export default function ProjectsPage() {
               className="w-full sm:w-40"
               ariaLabel="Filter status"
               defaultValue="semua"
-              options={["Semua", "Aktif", "Akan Datang", "Selesai", "Diarsipkan"].map((label) => ({
+              options={["Semua", "Aktif", "Selesai", "Diarsipkan"].map((label) => ({
                 value: label.toLowerCase().replaceAll(" ", "-"),
                 label,
               }))}
@@ -290,7 +296,7 @@ export default function ProjectsPage() {
               key={project.id}
               project={project}
               onArchive={() => setArchiveTarget(project)}
-              onDuplicate={() => void handleDuplicate(project)}
+              onCopyCode={() => copyProjectCode(project)}
               onEdit={() => openEditForm(project)}
             />
           ))}
@@ -309,9 +315,9 @@ export default function ProjectsPage() {
         theme="teacher"
         open={archiveTarget !== null}
         onOpenChange={(open) => !open && setArchiveTarget(null)}
-        title="Arsipkan proyek ini?"
+        title="Hapus proyek ini?"
         description={`Proyek "${archiveTarget?.name ?? ""}" akan dihapus dari daftar aktif beserta data turunannya sesuai relasi Supabase.`}
-        confirmText="Arsipkan"
+        confirmText="Hapus"
         tone="danger"
         onConfirm={() => void handleArchiveConfirm()}
       />
@@ -328,19 +334,19 @@ export default function ProjectsPage() {
         closeOnConfirm={false}
         onConfirm={() => void submitProjectForm()}
       >
-        <div className="space-y-3">
+        <div className="space-y-4">
           <ProjectField label="Judul proyek" value={draft.title} placeholder="Masukkan judul proyek" onChange={(value) => setDraft((current) => ({ ...current, title: value }))} />
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <ProjectDateField label="Mulai" value={draft.startDate} placeholder="Pilih tanggal mulai" onChange={(value) => setDraft((current) => ({ ...current, startDate: value }))} />
             <ProjectDateField label="Deadline" value={draft.dueDate} placeholder="Pilih deadline" onChange={(value) => setDraft((current) => ({ ...current, dueDate: value }))} />
           </div>
-          <label className="block space-y-1.5 text-left">
-            <span className="text-xs font-semibold text-ktr-text-primary">Deskripsi atau soal</span>
+          <label className="block text-left">
+            <span className="mb-2 block text-xs font-semibold text-ktr-text-primary">Deskripsi atau soal</span>
             <textarea
               value={draft.description}
               placeholder="Tuliskan arahan, konteks, atau soal proyek"
               onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
-              className="min-h-24 w-full resize-none rounded-[10px] border border-ktr-border-light bg-white px-3 py-2 text-sm font-medium text-ktr-text-primary outline-none transition-colors placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
+              className="min-h-24 w-full resize-none rounded-[10px] border border-ktr-border-light bg-white px-3 py-2 text-sm leading-6 text-ktr-text-primary outline-none transition-colors placeholder:text-[13px] placeholder:font-normal placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
             />
           </label>
           <ProjectField label="Kelas" value={draft.className} placeholder="Contoh: XI - Desain Web" onChange={(value) => setDraft((current) => ({ ...current, className: value }))} />
@@ -413,12 +419,12 @@ function ProjectGridSkeleton() {
 function ProjectCard({
   project,
   onArchive,
-  onDuplicate,
+  onCopyCode,
   onEdit,
 }: {
   project: TeacherProjectCard;
   onArchive: () => void;
-  onDuplicate: () => void;
+  onCopyCode: () => void;
   onEdit: () => void;
 }) {
   const [moreOpen, setMoreOpen] = React.useState(false);
@@ -463,8 +469,8 @@ function ProjectCard({
             {moreOpen && (
               <div className="teacher-dropdown-popover absolute right-0 top-[calc(100%+8px)] z-30 w-44 rounded-[12px] border border-ktr-border-light bg-white p-1" role="menu">
                 <ProjectMenuItem icon={Edit01Icon} label="Edit" onClick={() => { setMoreOpen(false); onEdit(); }} />
-                <ProjectMenuItem icon={Copy01Icon} label="Duplikat" onClick={() => { setMoreOpen(false); onDuplicate(); }} />
-                <ProjectMenuItem icon={ArchiveIcon} label="Arsipkan" onClick={() => { setMoreOpen(false); onArchive(); }} />
+                <ProjectMenuItem icon={Copy01Icon} label="Copy kode" onClick={() => { setMoreOpen(false); onCopyCode(); }} />
+                <ProjectMenuItem icon={Delete02Icon} label="Hapus" onClick={() => { setMoreOpen(false); onArchive(); }} />
               </div>
             )}
           </div>
@@ -489,7 +495,6 @@ function ProjectCard({
 
 function statusClassName(status: string) {
   if (status === "Aktif" || status === "Selesai") return "text-ktr-success";
-  if (status === "Akan Datang") return "text-ktr-info";
   return "text-ktr-text-secondary";
 }
 
@@ -521,14 +526,14 @@ function InfoRow({ icon, label, value, valueClassName }: { icon: IconSvgElement;
 
 function ProjectField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
   return (
-    <label className="block space-y-1.5 text-left">
-      <span className="text-xs font-semibold text-ktr-text-primary">{label}</span>
+    <label className="block text-left">
+      <span className="mb-2 block text-xs font-semibold text-ktr-text-primary">{label}</span>
       <input
         type="text"
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="h-10 w-full rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm font-medium text-ktr-text-primary outline-none transition-colors placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
+        className="h-10 w-full rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm text-ktr-text-primary outline-none transition-colors placeholder:text-[13px] placeholder:font-normal placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
       />
     </label>
   );
@@ -537,6 +542,7 @@ function ProjectField({ label, value, onChange, placeholder }: { label: string; 
 function ProjectDateField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
   const [open, setOpen] = React.useState(false);
   const [viewDate, setViewDate] = React.useState(() => dateInputToDate(value) ?? new Date());
+  const [alignRight, setAlignRight] = React.useState(false);
   const fieldRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -555,19 +561,23 @@ function ProjectDateField({ label, value, onChange, placeholder }: { label: stri
   const cells = [...Array.from({ length: firstDay }, () => null), ...Array.from({ length: daysInMonth }, (_, index) => index + 1)];
 
   return (
-    <div ref={fieldRef} className="relative space-y-1.5 text-left">
-      <span className="text-xs font-semibold text-ktr-text-primary">{label}</span>
+    <div ref={fieldRef} className="relative text-left">
+      <span className="mb-2 block text-xs font-semibold text-ktr-text-primary">{label}</span>
       <button
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          const rect = fieldRef.current?.getBoundingClientRect();
+          setAlignRight(Boolean(rect && rect.left + 280 > window.innerWidth - 16));
+          setOpen((current) => !current);
+        }}
         className="flex h-10 w-full cursor-pointer items-center justify-between gap-3 rounded-[10px] border border-ktr-border-light bg-white px-3 text-left text-sm font-medium text-ktr-text-primary outline-none transition-colors hover:border-ktr-border-input focus:border-ktr-text-primary"
       >
-        <span className={value ? "text-ktr-text-primary" : "text-ktr-text-tertiary"}>{value ? formatDateInput(value) : placeholder}</span>
+        <span className={value ? "text-ktr-text-primary" : "text-[13px] font-normal text-ktr-text-tertiary"}>{value ? formatDateInput(value) : placeholder}</span>
         <HugeiconsIcon icon={Calendar03Icon} size={16} strokeWidth={2} className="text-ktr-text-primary" />
       </button>
 
       {open ? (
-        <div className="teacher-dropdown-popover absolute left-0 top-[calc(100%+8px)] z-50 w-[280px] rounded-[12px] border border-ktr-border-light bg-white p-3">
+        <div className={alignRight ? "teacher-dropdown-popover absolute right-0 top-[calc(100%+8px)] z-50 w-[280px] rounded-[12px] border border-ktr-border-light bg-white p-3" : "teacher-dropdown-popover absolute left-0 top-[calc(100%+8px)] z-50 w-[280px] rounded-[12px] border border-ktr-border-light bg-white p-3"}>
           <div className="mb-3 flex items-center justify-between gap-3">
             <button type="button" className="flex size-8 cursor-pointer items-center justify-center rounded-[10px] text-ktr-text-primary hover:bg-ktr-surface-soft" onClick={() => setViewDate(new Date(year, month - 1, 1))}>
               <HugeiconsIcon icon={ArrowLeft01Icon} size={16} strokeWidth={2} />
@@ -609,23 +619,68 @@ function ProjectDateField({ label, value, onChange, placeholder }: { label: stri
 
 function ProjectFileField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   const inputId = React.useId();
+  const [dragActive, setDragActive] = React.useState(false);
+
+  function handleFile(file?: File) {
+    if (file) onChange(file.name);
+  }
+
   return (
-    <div className="space-y-1.5 text-left">
-      <span className="text-xs font-semibold text-ktr-text-primary">Lampiran</span>
-      <label htmlFor={inputId} className="flex h-10 cursor-pointer items-center justify-between gap-3 rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm font-medium text-ktr-text-primary transition-colors hover:border-ktr-border-input">
-        <span className={value ? "truncate text-ktr-text-primary" : "truncate text-ktr-text-tertiary"}>{value || "Unggah lampiran proyek"}</span>
-        <HugeiconsIcon icon={FileAttachmentIcon} size={16} strokeWidth={2} className="shrink-0 text-ktr-text-primary" />
+    <div className="text-left">
+      <span className="mb-2 block text-xs font-semibold text-ktr-text-primary">Lampiran</span>
+      <label
+        htmlFor={inputId}
+        onDragEnter={(event) => {
+          event.preventDefault();
+          setDragActive(true);
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDragActive(true);
+        }}
+        onDragLeave={(event) => {
+          event.preventDefault();
+          setDragActive(false);
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          setDragActive(false);
+          handleFile(event.dataTransfer.files?.[0]);
+        }}
+        className={dragActive ? "flex min-h-[92px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed border-ktr-text-primary bg-ktr-surface-soft px-4 py-4 text-center transition-colors" : "flex min-h-[92px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed border-ktr-border-input bg-white px-4 py-4 text-center transition-colors hover:border-ktr-text-primary hover:bg-ktr-surface-soft/50"}
+      >
+        <HugeiconsIcon icon={FileAttachmentIcon} size={18} strokeWidth={2} className="text-ktr-text-primary" />
+        <span className={value ? "mt-2 max-w-full truncate text-sm font-semibold text-ktr-text-primary" : "mt-2 text-[13px] font-normal text-ktr-text-tertiary"}>
+          {value || "Klik atau drag lampiran ke sini"}
+        </span>
       </label>
       <input
         id={inputId}
         type="file"
         className="sr-only"
-        onChange={(event) => onChange(event.target.files?.[0]?.name ?? "")}
+        onChange={(event) => handleFile(event.target.files?.[0])}
       />
     </div>
   );
 }
+function areDraftsEqual(first: ProjectDraft, second: ProjectDraft) {
+  return first.id === second.id &&
+    first.title === second.title &&
+    first.startDate === second.startDate &&
+    first.dueDate === second.dueDate &&
+    first.description === second.description &&
+    first.className === second.className &&
+    first.attachmentName === second.attachmentName;
+}
 
+function displayDateToInputValue(value: string) {
+  const match = value.match(/^(\d{1,2})\s+([^\s]+)\s+(\d{4})$/);
+  if (!match) return value || "";
+  const day = match[1].padStart(2, "0");
+  const monthIndex = monthNames.findIndex((month) => month.toLowerCase() === match[2].toLowerCase());
+  if (monthIndex < 0) return "";
+  return `${match[3]}-${String(monthIndex + 1).padStart(2, "0")}-${day}`;
+}
 function dateInputToDate(value: string) {
   if (!value) return null;
   const [year, month, day] = value.split("-").map(Number);

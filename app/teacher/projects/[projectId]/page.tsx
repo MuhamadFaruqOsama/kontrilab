@@ -37,7 +37,7 @@ type TeacherProjectRecord = {
   id: string;
   name: string;
   className: string;
-  status: "Aktif" | "Akan Datang" | "Selesai" | "Diarsipkan";
+  status: "Aktif" | "Selesai" | "Diarsipkan";
   startDate: string;
   finalDeadline: string;
   dueDateInput: string;
@@ -74,10 +74,13 @@ export default function ProjectDetail() {
     attachmentName: project.attachmentName ?? "",
   }), [project.announcement, project.attachmentName, project.className, project.description, project.finalDeadline, project.name, project.startDate]);
   const [editDraft, setEditDraft] = React.useState<EditProjectDraft>(initialEditDraft);
-
-  React.useEffect(() => {
-    setEditDraft(initialEditDraft);
-  }, [initialEditDraft]);
+  const isEditDraftDirty =
+    editDraft.title !== initialEditDraft.title ||
+    editDraft.startDate !== initialEditDraft.startDate ||
+    editDraft.deadline !== initialEditDraft.deadline ||
+    editDraft.description !== initialEditDraft.description ||
+    editDraft.className !== initialEditDraft.className ||
+    editDraft.attachmentName !== initialEditDraft.attachmentName;
 
   React.useEffect(() => {
     let cancelled = false;
@@ -115,7 +118,7 @@ export default function ProjectDetail() {
   }
 
   function requestCloseDrawer() {
-    if (drawer === "edit") {
+    if (drawer === "edit" && isEditDraftDirty) {
       setDiscardOpen(true);
       return;
     }
@@ -181,10 +184,13 @@ export default function ProjectDetail() {
 
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-semibold">
-                <span className={project.status === "Aktif" ? "text-ktr-success" : project.status === "Akan Datang" ? "text-ktr-info" : "text-ktr-warning"}>{project.status}</span>
+              <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm font-semibold">
+                <span className={project.status === "Aktif" ? "text-ktr-success" : project.status === "Selesai" ? "text-ktr-info" : "text-ktr-warning"}>{project.status}</span>
+                <MetadataSeparator />
                 <ProjectHeaderMeta label={project.className} />
+                <MetadataSeparator />
                 <ProjectHeaderMeta icon={Calendar03Icon} label={project.startDate} />
+                <MetadataSeparator />
                 <ProjectHeaderMeta icon={CheckListIcon} label={project.finalDeadline} />
               </div>
               <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">{project.name}</h1>
@@ -200,7 +206,7 @@ export default function ProjectDetail() {
                 <HugeiconsIcon icon={Copy01Icon} size={16} strokeWidth={2} />
               </button>
               <TextAction icon={ClipboardPasteIcon} label="Project Brief" onClick={() => setDrawer("brief")} />
-              <IconAction icon={Edit01Icon} label="Edit proyek" onClick={() => setDrawer("edit")} />
+              <IconAction icon={Edit01Icon} label="Edit proyek" onClick={() => { setEditDraft(initialEditDraft); setDrawer("edit"); }} />
               <IconAction icon={Share01Icon} label="Bagikan proyek" onClick={shareProject} />
               <IconAction icon={Delete02Icon} label="Hapus proyek" onClick={() => setDeleteOpen(true)} danger />
             </div>
@@ -214,10 +220,10 @@ export default function ProjectDetail() {
               <Link key={group.id} href={`/teacher/projects/${project.id}/groups/${group.id}`} className="group block cursor-pointer rounded-[12px] border border-ktr-border-light bg-white p-5 transition-[border-color,transform] hover:border-ktr-border-input active:scale-[0.998]">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <h2 className="truncate font-heading text-lg font-semibold text-ktr-text-primary decoration-ktr-text-primary underline-offset-4 group-hover:underline">{group.name}</h2>
+                    <h2 className="truncate font-heading text-lg font-semibold text-ktr-text-primary">{group.name}</h2>
                     <p className="mt-1 text-sm font-medium text-ktr-text-secondary">Ketua: {leader}</p>
                   </div>
-                  <span className={group.status === "Aktif" ? "shrink-0 text-sm font-semibold text-ktr-success" : group.status === "Akan Datang" ? "shrink-0 text-sm font-semibold text-ktr-info" : "shrink-0 text-sm font-semibold text-ktr-warning"}>{group.status}</span>
+                  <span className={group.status === "Aktif" ? "shrink-0 text-sm font-semibold text-ktr-success" : group.status === "Selesai" ? "shrink-0 text-sm font-semibold text-ktr-info" : "shrink-0 text-sm font-semibold text-ktr-warning"}>{group.status}</span>
                 </div>
 
                 <div className="mt-5 space-y-3 text-sm font-medium">
@@ -260,20 +266,20 @@ export default function ProjectDetail() {
       </ProjectDrawer>
 
       <ProjectDrawer open={drawer === "edit"} title="Edit Proyek" onClose={requestCloseDrawer}>
-        <form className="space-y-5" onSubmit={submitEditProject}>
+        <form className="space-y-6" onSubmit={submitEditProject}>
           <TeacherField label="Judul proyek" value={editDraft.title} placeholder="Masukkan judul proyek" onChange={(value) => setEditDraft((current) => ({ ...current, title: value }))} />
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <TeacherDateField label="Mulai" value={editDraft.startDate} placeholder="Pilih tanggal mulai" onChange={(value) => setEditDraft((current) => ({ ...current, startDate: value }))} />
             <TeacherDateField label="Deadline" value={editDraft.deadline} placeholder="Pilih deadline" onChange={(value) => setEditDraft((current) => ({ ...current, deadline: value }))} />
           </div>
-          <label className="block space-y-2 text-sm font-semibold text-ktr-text-primary">
-            Deskripsi atau soal
+          <label className="block text-sm font-semibold text-ktr-text-primary">
+            <span className="mb-2 block">Deskripsi atau soal</span>
             <textarea
               value={editDraft.description}
               placeholder="Tuliskan arahan, konteks, atau soal proyek"
               onChange={(event) => setEditDraft((current) => ({ ...current, description: event.target.value }))}
               rows={5}
-              className="w-full resize-none rounded-[10px] border border-ktr-border-light bg-white px-3 py-2.5 text-sm font-medium leading-6 text-ktr-text-primary outline-none transition-colors placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
+              className="w-full resize-none rounded-[10px] border border-ktr-border-light bg-white px-3 py-2.5 text-sm leading-6 text-ktr-text-primary outline-none transition-colors placeholder:text-[13px] placeholder:font-normal placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
             />
           </label>
           <TeacherField label="Kelas" value={editDraft.className} placeholder="Contoh: X Informatika" onChange={(value) => setEditDraft((current) => ({ ...current, className: value }))} />
@@ -313,7 +319,7 @@ function normalizeProject(project: Partial<Omit<TeacherProjectRecord, "status">>
   const finalDeadline = project.finalDeadline || (project.dueDateInput ? formatDateInput(project.dueDateInput) : "Belum ditentukan");
   const startDate = project.startDate || "Belum ditentukan";
   const description = project.description || project.announcement || "";
-  const status = project.status === "Aktif" || project.status === "Akan Datang" || project.status === "Selesai" || project.status === "Diarsipkan" ? project.status : "Aktif";
+  const status = project.status === "Aktif" || project.status === "Selesai" || project.status === "Diarsipkan" ? project.status : "Aktif";
 
   return {
     id: String(project.id ?? ""),
@@ -334,6 +340,10 @@ function normalizeProject(project: Partial<Omit<TeacherProjectRecord, "status">>
     attachmentName: project.attachmentName || "",
   };
 }
+function MetadataSeparator() {
+  return <span className="size-1 rounded-full bg-ktr-text-tertiary/45" aria-hidden="true" />;
+}
+
 function ProjectHeaderMeta({ icon, label }: { icon?: IconSvgElement; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 text-ktr-text-secondary">
@@ -389,14 +399,14 @@ function BriefMeta({ icon, label }: { icon?: IconSvgElement; label: string }) {
 
 function TeacherField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
   return (
-    <label className="block space-y-2 text-sm font-semibold text-ktr-text-primary">
-      {label}
+    <label className="block text-sm font-semibold text-ktr-text-primary">
+      <span className="mb-2 block">{label}</span>
       <input
         type="text"
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="h-10 w-full rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm font-medium text-ktr-text-primary outline-none transition-colors placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
+        className="h-10 w-full rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm text-ktr-text-primary outline-none transition-colors placeholder:text-[13px] placeholder:font-normal placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
       />
     </label>
   );
@@ -404,6 +414,7 @@ function TeacherField({ label, value, onChange, placeholder }: { label: string; 
 function TeacherDateField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
   const [open, setOpen] = React.useState(false);
   const [viewDate, setViewDate] = React.useState(() => dateInputToDate(value) ?? new Date());
+  const [alignRight, setAlignRight] = React.useState(false);
   const fieldRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -414,11 +425,6 @@ function TeacherDateField({ label, value, onChange, placeholder }: { label: stri
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, []);
 
-  React.useEffect(() => {
-    const selected = dateInputToDate(value);
-    if (selected) setViewDate(selected);
-  }, [value]);
-
   const selectedDate = dateInputToDate(value);
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -427,19 +433,23 @@ function TeacherDateField({ label, value, onChange, placeholder }: { label: stri
   const cells = [...Array.from({ length: firstDay }, () => null), ...Array.from({ length: daysInMonth }, (_, index) => index + 1)];
 
   return (
-    <div ref={fieldRef} className="relative space-y-2 text-left text-sm font-semibold text-ktr-text-primary">
-      <span>{label}</span>
+    <div ref={fieldRef} className="relative text-left text-sm font-semibold text-ktr-text-primary">
+      <span className="mb-2 block">{label}</span>
       <button
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          const rect = fieldRef.current?.getBoundingClientRect();
+          setAlignRight(Boolean(rect && rect.left + 280 > window.innerWidth - 16));
+          setOpen((current) => !current);
+        }}
         className="flex h-10 w-full cursor-pointer items-center justify-between gap-3 rounded-[10px] border border-ktr-border-light bg-white px-3 text-left text-sm font-medium text-ktr-text-primary outline-none transition-colors hover:border-ktr-border-input focus:border-ktr-text-primary"
       >
-        <span className={value ? "text-ktr-text-primary" : "text-ktr-text-tertiary"}>{value ? formatDateInput(value) : placeholder}</span>
+        <span className={value ? "text-ktr-text-primary" : "text-[13px] font-normal text-ktr-text-tertiary"}>{value ? formatDateInput(value) : placeholder}</span>
         <HugeiconsIcon icon={Calendar03Icon} size={16} strokeWidth={2} className="text-ktr-text-primary" />
       </button>
 
       {open ? (
-        <div className="teacher-dropdown-popover absolute left-0 top-[calc(100%+8px)] z-50 w-[280px] rounded-[12px] border border-ktr-border-light bg-white p-3">
+        <div className={alignRight ? "teacher-dropdown-popover absolute right-0 top-[calc(100%+8px)] z-50 w-[280px] rounded-[12px] border border-ktr-border-light bg-white p-3" : "teacher-dropdown-popover absolute left-0 top-[calc(100%+8px)] z-50 w-[280px] rounded-[12px] border border-ktr-border-light bg-white p-3"}>
           <div className="mb-3 flex items-center justify-between gap-3">
             <button type="button" aria-label="Bulan sebelumnya" className="flex size-8 cursor-pointer items-center justify-center rounded-[10px] text-ktr-text-primary hover:bg-ktr-surface-soft" onClick={() => setViewDate(new Date(year, month - 1, 1))}>
               <HugeiconsIcon icon={ArrowLeft01Icon} size={16} strokeWidth={2} />
@@ -481,18 +491,45 @@ function TeacherDateField({ label, value, onChange, placeholder }: { label: stri
 
 function TeacherFileField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   const inputId = React.useId();
+  const [dragActive, setDragActive] = React.useState(false);
+
+  function handleFile(file?: File) {
+    if (file) onChange(file.name);
+  }
+
   return (
-    <div className="space-y-2 text-left text-sm font-semibold text-ktr-text-primary">
-      <span>Lampiran</span>
-      <label htmlFor={inputId} className="flex h-10 cursor-pointer items-center justify-between gap-3 rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm font-medium text-ktr-text-primary transition-colors hover:border-ktr-border-input">
-        <span className={value ? "truncate text-ktr-text-primary" : "truncate text-ktr-text-tertiary"}>{value || "Unggah lampiran proyek"}</span>
-        <HugeiconsIcon icon={FileAttachmentIcon} size={16} strokeWidth={2} className="shrink-0 text-ktr-text-primary" />
+    <div className="text-left text-sm font-semibold text-ktr-text-primary">
+      <span className="mb-2 block">Lampiran</span>
+      <label
+        htmlFor={inputId}
+        onDragEnter={(event) => {
+          event.preventDefault();
+          setDragActive(true);
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDragActive(true);
+        }}
+        onDragLeave={(event) => {
+          event.preventDefault();
+          setDragActive(false);
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          setDragActive(false);
+          handleFile(event.dataTransfer.files?.[0]);
+        }}
+        className={dragActive ? "flex min-h-[92px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed border-ktr-text-primary bg-ktr-surface-soft px-4 py-4 text-center transition-colors" : "flex min-h-[92px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed border-ktr-border-input bg-white px-4 py-4 text-center transition-colors hover:border-ktr-text-primary hover:bg-ktr-surface-soft/50"}
+      >
+        <HugeiconsIcon icon={FileAttachmentIcon} size={18} strokeWidth={2} className="text-ktr-text-primary" />
+        <span className={value ? "mt-2 max-w-full truncate text-sm font-semibold text-ktr-text-primary" : "mt-2 text-[13px] font-normal text-ktr-text-tertiary"}>
+          {value || "Klik atau drag lampiran ke sini"}
+        </span>
       </label>
-      <input id={inputId} type="file" className="sr-only" onChange={(event) => onChange(event.target.files?.[0]?.name ?? "")} />
+      <input id={inputId} type="file" className="sr-only" onChange={(event) => handleFile(event.target.files?.[0])} />
     </div>
   );
 }
-
 function dateInputToDate(value: string) {
   if (!value) return null;
   const [year, month, day] = value.split("-").map(Number);
@@ -522,23 +559,12 @@ function displayDateToInputValue(value: string) {
   return dateToInputValue(new Date(year, month, day));
 }
 function ProjectDrawer({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: React.ReactNode }) {
-  const [mounted, setMounted] = React.useState(open);
-
-  React.useEffect(() => {
-    if (open) {
-      setMounted(true);
-      return;
-    }
-    const closeTimer = window.setTimeout(() => setMounted(false), 180);
-    return () => window.clearTimeout(closeTimer);
-  }, [open]);
-
-  if (!mounted) return null;
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50">
-      <button type="button" aria-label="Tutup drawer" onClick={onClose} className={cn("absolute inset-0 bg-ktr-neutral-1000/20 transition-opacity duration-200", open ? "opacity-100" : "opacity-0")} />
-      <aside className={cn("absolute right-0 top-0 flex h-full w-full max-w-[440px] flex-col border-l border-ktr-border-light bg-white p-5 text-ktr-text-primary transition-transform duration-200", open ? "translate-x-0" : "translate-x-full")}>
+      <button type="button" aria-label="Tutup drawer" onClick={onClose} className={cn("absolute inset-0 bg-ktr-neutral-1000/20 transition-opacity duration-200", "opacity-100")} />
+      <aside className={cn("absolute right-0 top-0 flex h-full w-full max-w-[440px] flex-col border-l border-ktr-border-light bg-white p-5 text-ktr-text-primary transition-transform duration-200", "translate-x-0")}>
         <div className="flex items-center justify-between gap-4 border-b border-ktr-border-light pb-4">
           <h2 className="font-heading text-xl font-semibold text-ktr-text-primary">{title}</h2>
           <button type="button" onClick={onClose} className="inline-flex size-9 items-center justify-center rounded-[10px] text-ktr-text-secondary transition-colors hover:bg-ktr-surface-soft hover:text-ktr-text-primary" aria-label="Tutup">

@@ -62,7 +62,7 @@ export class AIService {
     const discussionScore = levelToScore(assessment.discussionActivity);
     const progressScore = levelToScore(assessment.sharedProgress);
 
-    let finalScore = (participationScore * 0.20) + (discussionScore * 0.40) + (progressScore * 0.40);
+    const finalScore = (participationScore * 0.20) + (discussionScore * 0.40) + (progressScore * 0.40);
 
     // Apply Gemini API cross validation step
     // If mismatch found in text vs peer assessment, lower score.

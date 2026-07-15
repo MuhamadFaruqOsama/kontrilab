@@ -21,7 +21,7 @@ export default function SearchInput({ placeholder = "Cari...", className = "", v
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="h-10 w-full rounded-[10px] border border-ktr-border-light bg-white py-1.5 pl-10 pr-3.5 text-sm text-ktr-text-primary transition-[border-color] placeholder:text-ktr-text-secondary hover:border-ktr-border-input focus:border-ktr-text-primary focus:outline-none"
+        className="h-10 w-full rounded-[10px] border border-ktr-border-light bg-white py-1.5 pl-10 pr-3.5 text-sm text-ktr-text-primary transition-[border-color] placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary focus:outline-none"
       />
     </div>
   );

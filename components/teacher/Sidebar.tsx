@@ -48,17 +48,17 @@ export default function Sidebar() {
 
       <div className="px-4 pb-5 xl:px-5">
         <div className="flex items-center justify-center gap-3 rounded-[12px] px-1 py-3 xl:justify-start xl:px-2">
-          <div className="size-10 shrink-0 overflow-hidden rounded-full ring-1 ring-ktr-border-light">
-            <Image src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Foto profil guru" width={40} height={40} className="size-full object-cover" unoptimized />
+          <div className="size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-ktr-border-light">
+            <Image src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Foto profil guru" width={32} height={32} className="size-full object-cover" unoptimized />
           </div>
           <div className="hidden min-w-0 xl:block">
             <p className="truncate text-sm font-semibold leading-5 text-ktr-text-primary">Guru KontriLab</p>
           </div>
         </div>
-        <button className="mt-2 flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm font-semibold text-ktr-text-primary transition-colors hover:border-ktr-border-input active:scale-[0.997] xl:justify-start" aria-label="Keluar">
+        <Link href="/login" className="mt-2 flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm font-semibold text-ktr-text-primary transition-colors hover:border-ktr-border-input active:scale-[0.997] xl:justify-start" aria-label="Keluar">
           <HugeiconsIcon icon={LogoutSquare01Icon} size={18} strokeWidth={2} />
           <span className="hidden xl:inline">Keluar</span>
-        </button>
+        </Link>
       </div>
     </div>
   );

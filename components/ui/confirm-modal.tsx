@@ -24,7 +24,6 @@ function ConfirmModal({
   open,
   onOpenChange,
   title,
-  description,
   confirmText = "Konfirmasi",
   cancelText = "Batal",
   tone = "primary",
@@ -54,15 +53,12 @@ function ConfirmModal({
               isTeacher && "font-sans [font-family:var(--font-inter),Inter,system-ui,sans-serif]"
             )}
           >
-            <Modal.Header className="space-y-1 pr-8">
+            <Modal.Header className="pr-8">
               <Modal.Heading className="text-[18px] font-semibold leading-[26px] text-ktr-text-primary">
                 {title}
               </Modal.Heading>
-              {description ? (
-                <p className="text-[13px] font-normal leading-[20px] text-ktr-text-secondary">{description}</p>
-              ) : null}
             </Modal.Header>
-            {children ? <Modal.Body className="mt-4 text-[14px] font-normal leading-[22px] text-ktr-text-secondary">{children}</Modal.Body> : null}
+            {children ? <Modal.Body className="mt-6 text-[14px] font-normal leading-[22px] text-ktr-text-secondary">{children}</Modal.Body> : null}
             <Modal.Footer className="mt-5 grid grid-cols-2 gap-2">
               <Button
                 type="button"

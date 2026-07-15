@@ -40,6 +40,35 @@ export type StudentGroupOverview = {
   discussions: SqlDiscussionItem[];
 };
 
+export type StudentProjectCard = {
+  id: string;
+  title: string;
+  className: string;
+  deadline: string | null;
+  status: "IN_PROGRESS" | "REVISION" | "FINISHED";
+  group: string;
+  members: number;
+};
+
+export type StudentDiscussionDetail = {
+  id: string;
+  title: string;
+  status: "pending" | "process" | "finish";
+  groupId: string;
+  groupName: string;
+  projectTitle: string;
+  members: SqlGroupMember[];
+  messages: Array<{
+    id: string;
+    author: string;
+    initials: string;
+    avatarClass: string;
+    content: string;
+    time: string;
+    isSelf: boolean;
+  }>;
+};
+
 const avatarClasses = [
   "bg-[linear-gradient(135deg,#d7f1ff,#57c186_52%,#2b3033)]",
   "bg-[linear-gradient(135deg,#233046,#5b8fb9_48%,#f5a623)]",
@@ -99,7 +128,7 @@ function relativeTime(value: unknown) {
 function statusLabel(status: string) {
   if (status === "process") return "Sedang Berjalan";
   if (status === "finish") return "Selesai";
-  return "Belum Dimulai";
+  return "Sedang Berjalan";
 }
 
 function discussionStatus(row: DbRow) {
@@ -114,7 +143,7 @@ const fallback: StudentGroupOverview = {
     title: "Landing Page UMKM",
     className: "XI - Desain Web",
     dueDate: "25 Juni 2026",
-    status: "Belum Dimulai",
+    status: "Sedang Berjalan",
   },
   members: [
     { id: "1", name: "Alya Putri Ramadhani", role: "Ketua", initials: "AP", avatarClass: avatarClasses[0] },
@@ -137,6 +166,240 @@ const fallback: StudentGroupOverview = {
   ],
 };
 
+
+function studentProjectStatus(status: string): StudentProjectCard["status"] {
+  if (status === "finish") return "FINISHED";
+  if (status === "revision") return "REVISION";
+  return "IN_PROGRESS";
+}
+
+function clockTime(value: unknown) {
+  const raw = asString(value);
+  const date = raw ? new Date(raw) : new Date();
+  const safeDate = Number.isNaN(date.getTime()) ? new Date() : date;
+  return `${String(safeDate.getHours()).padStart(2, "0")}.${String(safeDate.getMinutes()).padStart(2, "0")}`;
+}
+
+function scoreEnumFromRating(value: unknown) {
+  const score = typeof value === "number" ? value : Number(value);
+  if (score >= 4) return "very good";
+  if (score >= 3) return "good";
+  if (score >= 2) return "enough";
+  return "less";
+}
+
+export async function getStudentProjectCards(): Promise<StudentProjectCard[]> {
+  const { data: projectData, error } = await supabaseAdmin
+    .from("project")
+    .select("id,title,due_date,created_at")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  const projectRows = asRows(projectData);
+  const projectIds = projectRows.map((row) => asNumberId(row.id)).filter((id): id is number => id !== null);
+  const { data: groupData } = projectIds.length
+    ? await supabaseAdmin.from("project_group").select("id,id_project,name,progres,created_at").in("id_project", projectIds)
+    : { data: [] };
+  const groupRows = asRows(groupData);
+  const groupIds = groupRows.map((row) => asNumberId(row.id)).filter((id): id is number => id !== null);
+  const { data: memberData } = groupIds.length
+    ? await supabaseAdmin.from("group_member").select("id_project_group,id_user").in("id_project_group", groupIds)
+    : { data: [] };
+  const memberRows = asRows(memberData);
+
+  return projectRows.map((project) => {
+    const projectId = asNumberId(project.id);
+    const projectGroups = groupRows.filter((group) => asNumberId(group.id_project) === projectId);
+    const primaryGroup = projectGroups[0] ?? {};
+    const primaryGroupId = asNumberId(primaryGroup.id);
+    const members = primaryGroupId === null ? 0 : memberRows.filter((member) => asNumberId(member.id_project_group) === primaryGroupId).length;
+
+    return {
+      id: String(projectId ?? project.id ?? ""),
+      title: asString(project.title, "Proyek"),
+      className: asString(primaryGroup.name, "Belum ada kelas"),
+      deadline: dateInput(project.due_date) || null,
+      status: studentProjectStatus(asString(primaryGroup.progres, "process")),
+      group: primaryGroupId === null ? "Belum berkelompok" : asString(primaryGroup.name, "Kelompok"),
+      members,
+    };
+  });
+}
+
+async function getDiscussionDetail(discussionId: number): Promise<StudentDiscussionDetail> {
+  const { data: discussionData, error: discussionError } = await supabaseAdmin
+    .from("discussion_session")
+    .select("id,id_project_group,title,status,created_at")
+    .eq("id", discussionId)
+    .single();
+  if (discussionError) throw discussionError;
+
+  const discussion = discussionData as DbRow;
+  const groupId = asNumberId(discussion.id_project_group);
+  if (groupId === null) throw new Error("Kelompok diskusi tidak ditemukan.");
+
+  const [{ data: groupData }, { data: memberData }, { data: chatData }] = await Promise.all([
+    supabaseAdmin.from("project_group").select("id,id_project,name").eq("id", groupId).single(),
+    supabaseAdmin.from("group_member").select("id,id_user,role,created_at").eq("id_project_group", groupId).order("created_at", { ascending: true }),
+    supabaseAdmin.from("discussion_chat").select("id,id_user,message,created_at").eq("id_discussion_session", discussionId).order("created_at", { ascending: true }),
+  ]);
+
+  const group = groupData && typeof groupData === "object" && !Array.isArray(groupData) ? groupData as DbRow : {};
+  const projectId = asNumberId(group.id_project);
+  const { data: projectData } = projectId !== null
+    ? await supabaseAdmin.from("project").select("title").eq("id", projectId).maybeSingle()
+    : { data: null };
+  const project = projectData && typeof projectData === "object" && !Array.isArray(projectData) ? projectData as DbRow : {};
+
+  const memberRows = asRows(memberData);
+  const userIds = Array.from(new Set([
+    ...memberRows.map((row) => asNumberId(row.id_user)),
+    ...asRows(chatData).map((row) => asNumberId(row.id_user)),
+  ].filter((id): id is number => id !== null)));
+  const { data: usersData } = userIds.length
+    ? await supabaseAdmin.from("users").select("id,username,email").in("id", userIds)
+    : { data: [] };
+  const users = new Map(asRows(usersData).map((row) => [asNumberId(row.id), row]));
+  const currentUserId = await getPrimaryGroupUserId(groupId).catch(() => null);
+
+  const members = memberRows.map((row, index) => {
+    const user = users.get(asNumberId(row.id_user)) ?? {};
+    const name = asString(user.username, asString(user.email, `Anggota ${index + 1}`));
+    return {
+      id: String(asNumberId(row.id) ?? index),
+      name,
+      role: asString(row.role) === "leader" ? "Ketua" as const : "Anggota" as const,
+      initials: initials(name),
+      avatarClass: avatarClasses[index % avatarClasses.length],
+    };
+  });
+
+  const messages = asRows(chatData).map((row, index) => {
+    const userId = asNumberId(row.id_user);
+    const user = users.get(userId) ?? {};
+    const author = asString(user.username, asString(user.email, `Anggota ${index + 1}`));
+    return {
+      id: String(asNumberId(row.id) ?? index),
+      author,
+      initials: initials(author),
+      avatarClass: avatarClasses[index % avatarClasses.length],
+      content: asString(row.message),
+      time: clockTime(row.created_at),
+      isSelf: currentUserId !== null && userId === currentUserId,
+    };
+  });
+
+  return {
+    id: String(discussionId),
+    title: asString(discussion.title, "Diskusi Kelompok"),
+    status: asString(discussion.status, "process") as StudentDiscussionDetail["status"],
+    groupId: String(groupId),
+    groupName: asString(group.name, "Kelompok"),
+    projectTitle: asString(project.title, "Proyek"),
+    members,
+    messages,
+  };
+}
+
+export async function getActiveStudentDiscussion(): Promise<StudentDiscussionDetail> {
+  const groupId = await getPrimaryStudentGroup();
+  const { data: discussions, error } = await supabaseAdmin
+    .from("discussion_session")
+    .select("id")
+    .eq("id_project_group", groupId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  if (error) throw error;
+  const discussionId = asNumberId(asRows(discussions)[0]?.id);
+  if (discussionId !== null) return getDiscussionDetail(discussionId);
+  return createStudentDiscussion({ title: "Diskusi Kelompok" });
+}
+
+export async function createStudentDiscussion(input: { title?: string; topic?: string; initialNote?: string }): Promise<StudentDiscussionDetail> {
+  const groupId = await getPrimaryStudentGroup();
+  const title = asString(input.title).trim() || "Diskusi Kelompok";
+  const userId = await getPrimaryGroupUserId(groupId);
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data: inserted, error } = await supabaseAdmin
+    .from("discussion_session")
+    .insert({ id_project_group: groupId, title, date: today, status: "process", type: "online", discussion_result: asString(input.initialNote).trim() || null })
+    .select("id")
+    .single();
+  if (error) throw error;
+  const discussionId = asNumberId((inserted as DbRow | null)?.id);
+  if (discussionId === null) throw new Error("Diskusi berhasil dibuat, tetapi ID tidak ditemukan.");
+
+  await supabaseAdmin.from("participant").insert({ id_discussion_session: discussionId, id_user: userId });
+  return getDiscussionDetail(discussionId);
+}
+
+export async function saveStudentDiscussionChat(input: { discussionId?: string; message?: string }): Promise<StudentDiscussionDetail> {
+  const message = asString(input.message).trim();
+  if (!message) throw new Error("Pesan tidak boleh kosong.");
+
+  const detail = input.discussionId ? await getDiscussionDetail(Number(input.discussionId)) : await getActiveStudentDiscussion();
+  const discussionId = Number(detail.id);
+  if (!Number.isFinite(discussionId)) throw new Error("ID diskusi tidak valid.");
+  const userId = await getPrimaryGroupUserId(Number(detail.groupId));
+
+  const { error } = await supabaseAdmin.from("discussion_chat").insert({ id_discussion_session: discussionId, id_user: userId, message });
+  if (error) throw error;
+  return getDiscussionDetail(discussionId);
+}
+
+export async function finishStudentDiscussion(input: { discussionId?: string; summary?: string }): Promise<StudentDiscussionDetail> {
+  const detail = input.discussionId ? await getDiscussionDetail(Number(input.discussionId)) : await getActiveStudentDiscussion();
+  const discussionId = Number(detail.id);
+  if (!Number.isFinite(discussionId)) throw new Error("ID diskusi tidak valid.");
+
+  const { error } = await supabaseAdmin
+    .from("discussion_session")
+    .update({ status: "finish", discussion_result: asString(input.summary).trim() || detail.title })
+    .eq("id", discussionId);
+  if (error) throw error;
+  return getDiscussionDetail(discussionId);
+}
+
+export async function submitStudentPeerAssessment(input: { subjectMemberId?: string; ratings?: Record<string, unknown>; note?: string }) {
+  const groupId = await getPrimaryStudentGroup();
+  const userId = await getPrimaryGroupUserId(groupId);
+  const detail = await getActiveStudentDiscussion();
+  const discussionId = Number(detail.id);
+  if (!Number.isFinite(discussionId)) throw new Error("ID diskusi tidak valid.");
+
+  const subjectMemberId = Number(input.subjectMemberId);
+  if (!Number.isFinite(subjectMemberId)) throw new Error("Anggota yang dinilai wajib dipilih.");
+  const { data: memberData, error: memberError } = await supabaseAdmin
+    .from("group_member")
+    .select("id_user")
+    .eq("id", subjectMemberId)
+    .single();
+  if (memberError) throw memberError;
+  const subjectUserId = asNumberId((memberData as DbRow | null)?.id_user);
+  if (subjectUserId === null) throw new Error("User anggota yang dinilai tidak ditemukan.");
+
+  const ratings = input.ratings ?? {};
+  const numericRatings = Object.values(ratings).map((value) => Number(value)).filter((value) => Number.isFinite(value));
+  if (!numericRatings.length) throw new Error("Nilai peer assessment wajib diisi.");
+  const average = numericRatings.reduce((total, value) => total + value, 0) / numericRatings.length;
+
+  const { error: participantError } = await supabaseAdmin.from("participant").insert({ id_discussion_session: discussionId, id_user: subjectUserId });
+  if (participantError && !String(participantError.message).toLowerCase().includes("duplicate")) throw participantError;
+
+  const { error } = await supabaseAdmin
+    .from("participant_score")
+    .insert({ id_discussion_session: discussionId, id_user: subjectUserId, score: scoreEnumFromRating(average) });
+  if (error) throw error;
+
+  return {
+    ok: true,
+    subjectUserId: String(subjectUserId),
+    authorUserId: String(userId),
+    score: Math.round((average / 4) * 100),
+    note: asString(input.note).trim(),
+  };
+}
 export async function getStudentGroupOverview(): Promise<StudentGroupOverview> {
   const { data: groups, error: groupError } = await supabaseAdmin
     .from("project_group")
@@ -224,7 +487,7 @@ export type TeacherProjectCard = {
   id: string;
   name: string;
   className: string;
-  status: "Aktif" | "Akan Datang" | "Selesai" | "Diarsipkan";
+  status: "Aktif" | "Selesai" | "Diarsipkan";
   startDate: string;
   finalDeadline: string;
   dueDateInput: string;

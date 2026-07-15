@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card } from "@heroui/react/card";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -19,24 +18,73 @@ import {
   getProject,
   teacherStudents,
   uploadProgress,
+  getStudentContributionBreakdown,
 } from "@/components/teacher/mock-data";
 
+type MemberRow = {
+  id: string;
+  name: string;
+  status: string;
+  latestUpload: string;
+  validatedEvidence: number;
+  feedbackResponse: string;
+  activeProject: string;
+  reason: string;
+  role: "Ketua" | "Anggota";
+  contribution: ReturnType<typeof getStudentContributionBreakdown>;
+};
+
+type TimelineItem = {
+  id: string;
+  student: string;
+  summary: string;
+  evidenceType: string;
+  time: string;
+  relevance: string;
+};
 export default function GroupDetail() {
   const params = useParams<{ projectId: string; groupId: string }>();
   const project = getProject(params.projectId);
   const group = getGroup(project.id, params.groupId);
-  const memberRows = teacherStudents
-    .filter((s) =>
-      group.members.some((m) => s.name.startsWith(m.split(" ")[0]))
-    )
-    .slice(0, group.members.length);
+  const memberRows: MemberRow[] = group.members.map((member, index) => {
+    const student = teacherStudents.find((item) => item.name === member || item.name.startsWith(member.split(" ")[0]));
+    return {
+      id: student?.id ?? `member-${index}`,
+      name: student?.name ?? member,
+      status: student?.status ?? "Tidak Ada Aktivitas Terbaru",
+      latestUpload: student?.latestUpload ?? "Belum ada",
+      validatedEvidence: student?.validatedEvidence ?? 0,
+      feedbackResponse: student?.feedbackResponse ?? "Belum ada feedback",
+      activeProject: student?.activeProject ?? project.name,
+      reason: student?.reason ?? "Belum ada aktivitas yang tercatat.",
+      role: index === 0 ? "Ketua" : "Anggota",
+      contribution: getStudentContributionBreakdown(student?.id ?? `member-${index}`, project.id),
+    };
+  });
 
-  const groupUploads = uploadProgress.filter((u) => u.projectId === project.id);
+  const groupUploads = uploadProgress.filter((u) => u.projectId === project.id && group.members.some((member) => u.student.startsWith(member.split(" ")[0])));
+  const timelineItems: TimelineItem[] = groupUploads.length > 0 ? groupUploads.map((item) => ({
+    id: item.id,
+    student: item.student,
+    summary: item.summary,
+    evidenceType: item.evidenceType,
+    time: item.time,
+    relevance: item.relevance,
+  })) : group.members.map((member, index) => ({
+    id: `dummy-${group.id}-${index}`,
+    student: member,
+    summary: index === 0 ? "Menyiapkan pembagian tugas awal dan mengumpulkan referensi proyek." : index === 1 ? "Mencatat kebutuhan aset dan bukti kerja yang perlu dilampirkan." : "Mulai mengirim progres awal agar kontribusi dapat terbaca.",
+    evidenceType: index === 0 ? "Catatan" : index === 1 ? "Checklist" : "Status",
+    time: index === 0 ? "Hari ini" : index === 1 ? "Kemarin" : "Perlu progres",
+    relevance: project.name,
+  }));
 
   const [notes, setNotes] = React.useState("");
   const [saveOpen, setSaveOpen] = React.useState(false);
   const [savedNotes, setSavedNotes] = React.useState("");
   const [loading, setLoading] = React.useState(true);
+  const [selectedMember, setSelectedMember] = React.useState<MemberRow | null>(null);
+  const [selectedTimeline, setSelectedTimeline] = React.useState<TimelineItem | null>(null);
 
   React.useEffect(() => {
     const loadingTimer = window.setTimeout(() => setLoading(false), 120);
@@ -61,12 +109,12 @@ export default function GroupDetail() {
             <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">
               {group.name}
             </h1>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full border border-ktr-border-light bg-white px-3 py-1 text-xs font-semibold text-ktr-text-secondary">
-                {project.name}
-              </span>
-              <StatusBadge status={group.status} />
-              <StatusBadge status={group.submitStatus} />
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-semibold">
+              <span className="text-ktr-text-secondary">{project.name}</span>
+              <DotSeparator />
+              <span className={group.status === "Aktif" ? "text-ktr-success" : group.status === "Selesai" ? "text-ktr-info" : "text-ktr-warning"}>{group.status}</span>
+              <DotSeparator />
+              <span className="text-ktr-info">{group.submitStatus}</span>
             </div>
           </div>
 
@@ -137,8 +185,11 @@ export default function GroupDetail() {
                   <tbody className="divide-y divide-ktr-border-light">
                     {memberRows.map((student) => (
                       <tr key={student.id} className="transition-colors hover:bg-ktr-surface-soft/50">
-                        <td className="px-5 py-4 font-semibold text-ktr-text-primary">
-                          {student.name}
+                        <td className="px-5 py-4">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <span className="font-semibold text-ktr-text-primary">{student.name}</span>
+                            {student.role === "Ketua" ? <span className="rounded-full bg-ktr-surface-soft px-2 py-0.5 text-[11px] font-semibold text-ktr-text-secondary">Ketua</span> : null}
+                          </div>
                         </td>
                         <td className="px-5 py-4">
                           <StatusBadge status={student.status} />
@@ -148,13 +199,14 @@ export default function GroupDetail() {
                           {student.validatedEvidence}
                         </td>
                         <td className="px-5 py-4">
-                          <Link
-                            href={`/teacher/students/${student.id}`}
-                            className="inline-flex items-center gap-1 text-sm font-semibold text-ktr-text-primary hover:underline"
+                          <button
+                            type="button"
+                            onClick={() => setSelectedMember(student)}
+                            className="inline-flex items-center gap-1 text-sm font-semibold text-ktr-text-primary transition-colors hover:text-ktr-text-secondary"
                           >
                             Detail
                             <HugeiconsIcon icon={ArrowRight01Icon} size={12} strokeWidth={2} />
-                          </Link>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -171,29 +223,22 @@ export default function GroupDetail() {
                 </h2>
               </Card.Header>
               <Card.Content className="divide-y divide-ktr-border-light p-0">
-                {groupUploads.slice(0, 5).map((item) => (
-                  <Link
+                {timelineItems.slice(0, 5).map((item) => (
+                  <button
                     key={item.id}
-                    href={`/teacher/review/${item.id}`}
-                    className="block px-6 py-4 transition-colors hover:bg-ktr-surface-soft/60"
+                    type="button"
+                    onClick={() => setSelectedTimeline(item)}
+                    className="block w-full cursor-pointer px-6 py-4 text-left transition-colors hover:bg-ktr-surface-soft/60"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-ktr-text-primary">{item.student}</p>
-                        <p className="mt-1 text-sm leading-5 text-ktr-text-secondary">{item.summary}</p>
-                        <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ktr-text-tertiary">
-                          <span>{item.evidenceType}</span><DotSeparator /><span>{item.time}</span>
-                        </p>
-                      </div>
-                      <StatusBadge status={item.status} />
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-ktr-text-primary">{item.student}</p>
+                      <p className="mt-1 text-sm leading-5 text-ktr-text-secondary">{item.summary}</p>
+                      <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ktr-text-tertiary">
+                        <span>{item.evidenceType}</span><DotSeparator /><span>{item.time}</span>
+                      </p>
                     </div>
-                  </Link>
+                  </button>
                 ))}
-                {groupUploads.length === 0 && (
-                  <div className="px-6 py-6 text-sm text-ktr-text-secondary">
-                    Belum ada upload progress untuk kelompok ini.
-                  </div>
-                )}
               </Card.Content>
             </Card>
           </div>
@@ -245,7 +290,7 @@ export default function GroupDetail() {
                   placeholder="Tambahkan catatan internal untuk kelompok ini. Catatan ini tidak terlihat oleh siswa."
                 />
                 {savedNotes && (
-                  <p className="mt-2 text-xs text-ktr-success">✓ Catatan tersimpan</p>
+                  <p className="mt-2 text-xs text-ktr-success">Catatan tersimpan</p>
                 )}
                 <button
                   type="button"
@@ -262,6 +307,9 @@ export default function GroupDetail() {
         </div>
       </div>
 
+      <MemberDetailDrawer member={selectedMember} onClose={() => setSelectedMember(null)} />
+      <TimelineDetailDrawer item={selectedTimeline} projectName={project.name} onClose={() => setSelectedTimeline(null)} />
+
       <ConfirmModal
         theme="teacher"
         open={saveOpen}
@@ -276,7 +324,108 @@ export default function GroupDetail() {
 }
 
 function DotSeparator() {
-  return <span className="size-1 rounded-full bg-ktr-text-tertiary/35" aria-hidden="true" />;
+  return <span className="size-1 rounded-full bg-ktr-text-tertiary/45" aria-hidden="true" />;
+}
+
+function MemberDetailDrawer({ member, onClose }: { member: MemberRow | null; onClose: () => void }) {
+  if (!member) return null;
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <button type="button" aria-label="Tutup detail anggota" onClick={onClose} className="absolute inset-0 bg-ktr-neutral-1000/20" />
+      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[560px] flex-col border-l border-ktr-border-light bg-white p-5 text-ktr-text-primary">
+        <div className="flex items-start justify-between gap-4 border-b border-ktr-border-light pb-4">
+          <div className="min-w-0">
+            <h2 className="font-heading text-xl font-semibold text-ktr-text-primary">{member.name}</h2>
+            <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-ktr-text-secondary">
+              <span>{member.role}</span>
+              <DotSeparator />
+              <span>{member.activeProject}</span>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} className="flex size-9 items-center justify-center rounded-[10px] text-ktr-text-secondary hover:bg-ktr-surface-soft" aria-label="Tutup">x</button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto py-6">
+          <div className="rounded-[12px] bg-ktr-surface-soft p-4">
+            <p className="text-xs font-semibold uppercase tracking-normal text-ktr-text-tertiary">Nilai kontribusi</p>
+            <div className="mt-3 flex items-end justify-between gap-4">
+              <p className="font-heading text-4xl font-semibold leading-none text-ktr-text-primary">{member.contribution.score}%</p>
+              <p className="max-w-[210px] text-right text-xs font-medium leading-5 text-ktr-text-secondary">Berdasarkan peer assessment, diskusi, dan Upload Progress.</p>
+            </div>
+            <div className="mt-4 h-2 rounded-full bg-white">
+              <div className="h-full rounded-full bg-ktr-text-primary" style={{ width: `${member.contribution.score}%` }} />
+            </div>
+          </div>
+
+          <div className="mt-7 space-y-6 text-sm">
+            <DrawerSection title="Peer assessment" value={`${member.contribution.peerScore}%`} description="Rata-rata penilaian anggota kelompok terhadap kontribusi siswa ini." />
+            <DrawerSection title="Diskusi kelompok" value={`${member.contribution.discussionScore}%`} description="Mengukur keterlibatan di diskusi, baik chat maupun panggilan kelompok." />
+            <DrawerSection title="Upload Progress" value={`${member.contribution.uploadScore}%`} description={`${member.contribution.uploadCount} bukti progress terhubung dengan proyek ini.`} />
+            <DrawerSection title="Respons feedback" value={member.feedbackResponse} description={member.reason} />
+          </div>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+
+function TimelineDetailDrawer({ item, projectName, onClose }: { item: TimelineItem | null; projectName: string; onClose: () => void }) {
+  if (!item) return null;
+
+  const isEvidenceSpecific = item.evidenceType !== "Status" && item.summary.length > 48;
+  const analysis = isEvidenceSpecific
+    ? "Bukti ini cukup terbaca untuk dianalisis. Guru dapat mencocokkan ringkasan, jenis bukti, dan relevansi proyek sebelum menentukan validitas kontribusi."
+    : "Progress ini masih perlu konteks tambahan. Guru dapat melihatnya sebagai sinyal awal, lalu menunggu bukti kerja yang lebih spesifik untuk analisis validitas.";
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <button type="button" aria-label="Tutup detail kontribusi" onClick={onClose} className="absolute inset-0 bg-ktr-neutral-1000/20" />
+      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[560px] flex-col border-l border-ktr-border-light bg-white p-6 text-ktr-text-primary">
+        <div className="flex items-start justify-between gap-4 border-b border-ktr-border-light pb-4">
+          <div className="min-w-0">
+            <h2 className="font-heading text-xl font-semibold text-ktr-text-primary">Detail Kontribusi</h2>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-ktr-text-secondary">
+              <span>{item.student}</span>
+              <DotSeparator />
+              <span>{projectName}</span>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} className="flex size-9 items-center justify-center rounded-[10px] text-ktr-text-secondary hover:bg-ktr-surface-soft" aria-label="Tutup">x</button>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto py-6">
+          <div className="rounded-[12px] bg-ktr-surface-soft p-4">
+            <p className="text-xs font-semibold uppercase tracking-normal text-ktr-text-tertiary">Ringkasan progress</p>
+            <p className="mt-3 text-base font-semibold leading-7 text-ktr-text-primary">{item.summary}</p>
+          </div>
+
+          <div className="mt-7 space-y-6 text-sm">
+            <DrawerSection title="Jenis bukti" value={item.evidenceType} description="Kategori bukti yang dikirim atau dicatat pada timeline kontribusi." />
+            <DrawerSection title="Waktu kontribusi" value={item.time} description="Waktu progress tercatat dalam aktivitas kelompok." />
+            <DrawerSection title="Relevansi proyek" value={item.relevance} description="Konteks proyek yang menjadi rujukan kontribusi ini." />
+            <section>
+              <h3 className="font-heading text-base font-semibold text-ktr-text-primary">Analisis validitas</h3>
+              <p className="mt-1 text-sm leading-6 text-ktr-text-secondary">{analysis}</p>
+            </section>
+          </div>
+        </div>
+      </aside>
+    </div>
+  );
+}
+function DrawerSection({ title, value, description }: { title: string; value: string; description: string }) {
+  return (
+    <section>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h3 className="font-heading text-base font-semibold text-ktr-text-primary">{title}</h3>
+          <p className="mt-1 text-sm leading-6 text-ktr-text-secondary">{description}</p>
+        </div>
+        <span className="shrink-0 text-sm font-semibold text-ktr-text-primary">{value}</span>
+      </div>
+    </section>
+  );
 }
 
 function GroupDetailSkeleton() {
@@ -338,3 +487,4 @@ function GroupDetailSkeleton() {
     </div>
   );
 }
+
