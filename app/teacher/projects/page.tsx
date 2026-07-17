@@ -2,68 +2,114 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
   Alert01Icon,
-  Delete02Icon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
+  Delete02Icon,
   Calendar03Icon,
   CheckListIcon,
-  Copy01Icon,
-  Edit01Icon,
   FileAttachmentIcon,
   Folder01Icon,
   MoreVerticalCircle01Icon,
+  Copy01Icon,
   PlusSignIcon,
   UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
 import { Card } from "@heroui/react/card";
-import FilterSelect from "@/components/teacher/FilterSelect";
-import SearchInput from "@/components/teacher/SearchInput";
+
+import { AppFormField } from "@/components/ui/app-form-field";
+import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { toast } from "@/components/ui/toast";
+import { useNProgress } from "@/components/ui/nprogress";
+import { supabase } from "@/lib/supabase/client";
 
 type TeacherProjectCard = {
   id: string;
-  name: string;
-  className: string;
-  status: "Aktif" | "Selesai" | "Diarsipkan";
-  startDate: string;
-  finalDeadline: string;
-  dueDateInput: string;
+  title: string;
   description: string;
+  deadline: string | null;
+  deadlineLabel: string;
+  fileName: string | null;
+  createdAt: string;
+  status: "Aktif" | "Selesai" | "Diarsipkan";
   groups: number;
   students: number;
-  individualUploads: number;
-  pendingUploadReviews: number;
-  pendingFinalReviews: number;
-  inactiveGroups: number;
-  announcement?: string;
 };
 
-type ProjectDraft = {
-  id?: string;
+type ProjectsResponse = {
+  projects: TeacherProjectCard[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+};
+
+type MergeProjectOption = {
+  id: string;
   title: string;
-  startDate: string;
-  dueDate: string;
+  deadlineLabel: string;
+};
+
+type MergeProjectCard = {
+  id: string;
+  title: string;
   description: string;
-  className: string;
-  attachmentName: string;
+  createdAt: string;
+  projectCount: number;
+  groupCount: number;
+  finishedGroups: number;
+  students: number;
+  projectIds: string[];
+  projects: Array<{
+    id: string;
+    title: string;
+    className: string;
+    status: "Aktif" | "Selesai";
+    deadlineLabel: string;
+    groups: number;
+    finishedGroups: number;
+    students: number;
+  }>;
 };
 
-const emptyDraft: ProjectDraft = {
+type MergedProjectsResponse = {
+  merges: MergeProjectCard[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+};
+
+type DraftState = {
+  title: string;
+  description: string;
+  deadline: string;
+  fileName: string;
+};
+
+type MergeDraftState = {
+  title: string;
+  description: string;
+  projectIds: string[];
+};
+
+const emptyDraft: DraftState = {
   title: "",
-  startDate: "",
-  dueDate: "",
   description: "",
-  className: "",
-  attachmentName: "",
+  deadline: "",
+  fileName: "",
 };
 
-const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+const emptyMergeDraft: MergeDraftState = {
+  title: "",
+  description: "",
+  projectIds: [""],
+};
+
+const formatNumber = new Intl.NumberFormat("id-ID");
 
 export default function ProjectsPage() {
   return (
@@ -74,362 +120,688 @@ export default function ProjectsPage() {
 }
 
 function ProjectsPageContent() {
+  const { start, done } = useNProgress();
+
   const [projects, setProjects] = React.useState<TeacherProjectCard[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState("semua");
-  const [archiveTarget, setArchiveTarget] = React.useState<TeacherProjectCard | null>(null);
-  const [formMode, setFormMode] = React.useState<"create" | "edit" | null>(null);
-  const [discardFormOpen, setDiscardFormOpen] = React.useState(false);
-  const [draft, setDraft] = React.useState<ProjectDraft>(emptyDraft);
-  const [draftBaseline, setDraftBaseline] = React.useState<ProjectDraft>(emptyDraft);
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const [projectLoading, setProjectLoading] = React.useState(true);
+  const [projectPage, setProjectPage] = React.useState(1);
+  const [projectPageSize, setProjectPageSize] = React.useState(6);
+  const [projectTotalItems, setProjectTotalItems] = React.useState(0);
+  const [projectTotalPages, setProjectTotalPages] = React.useState(1);
+
+  const [mergedProjects, setMergedProjects] = React.useState<MergeProjectCard[]>([]);
+  const [mergedLoading, setMergedLoading] = React.useState(true);
+  const [mergedPage, setMergedPage] = React.useState(1);
+  const [mergedPageSize, setMergedPageSize] = React.useState(6);
+  const [mergedTotalItems, setMergedTotalItems] = React.useState(0);
+  const [mergedTotalPages, setMergedTotalPages] = React.useState(1);
+
+  const [createOpen, setCreateOpen] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [draft, setDraft] = React.useState<DraftState>(emptyDraft);
+
+  const [mergeOpen, setMergeOpen] = React.useState(false);
+  const [mergeSubmitting, setMergeSubmitting] = React.useState(false);
+  const [mergeDraft, setMergeDraft] = React.useState<MergeDraftState>(emptyMergeDraft);
+  const [mergeOptions, setMergeOptions] = React.useState<MergeProjectOption[]>([]);
+  const [mergeOptionsLoading, setMergeOptionsLoading] = React.useState(false);
+
+  const [deleteTarget, setDeleteTarget] = React.useState<TeacherProjectCard | null>(null);
+
+  async function getAuthHeaders() {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : undefined;
+  }
 
   React.useEffect(() => {
     let cancelled = false;
 
-    async function fetchProjects() {
+    async function loadProjects() {
+      setProjectLoading(true);
+      start();
+
       try {
-        const response = await fetch("/api/teacher/projects", { cache: "no-store" });
-        if (!response.ok) throw new Error("Gagal mengambil data proyek.");
-        const data = await response.json();
-        if (!cancelled) setProjects(Array.isArray(data) ? data : []);
+        const response = await fetch(`/api/teacher/projects?page=${projectPage}`, {
+          cache: "no-store",
+          headers: await getAuthHeaders(),
+        });
+        const data = (await response.json().catch(() => null)) as ProjectsResponse & { error?: string } | null;
+        if (!response.ok) throw new Error(data?.error ?? "Gagal mengambil data proyek.");
+
+        if (!cancelled && data) {
+          setProjects(Array.isArray(data.projects) ? data.projects : []);
+          setProjectPageSize(data.pageSize || 6);
+          setProjectTotalItems(data.totalItems || 0);
+          setProjectTotalPages(Math.max(1, data.totalPages || 1));
+        }
       } catch (error) {
         if (!cancelled) {
+          setProjects([]);
+          setProjectTotalItems(0);
+          setProjectTotalPages(1);
           toast.danger("Data proyek belum bisa dimuat", {
             description: error instanceof Error ? error.message : "Coba muat ulang halaman.",
           });
-          setProjects([]);
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setProjectLoading(false);
+          done();
+        }
       }
     }
 
-    void fetchProjects();
+    void loadProjects();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [done, projectPage, start]);
 
   React.useEffect(() => {
-    if (searchParams.get("create") !== "1") return;
-    openCreateForm();
-    router.replace("/teacher/projects", { scroll: false });
-  }, [router, searchParams]);
-  const filtered = projects.filter((p) => {
-    const query = search.trim().toLowerCase();
-    const matchSearch = query === "" || p.name.toLowerCase().includes(query) || p.className.toLowerCase().includes(query);
-    const matchStatus =
-      statusFilter === "semua" ||
-      (statusFilter === "aktif" && p.status === "Aktif") ||
-      (statusFilter === "selesai" && p.status === "Selesai") ||
-      (statusFilter === "diarsipkan" && p.status === "Diarsipkan");
-    return matchSearch && matchStatus;
-  });
+    let cancelled = false;
 
-  const isDraftDirty = !areDraftsEqual(draft, draftBaseline);
+    async function loadMergedProjects() {
+      setMergedLoading(true);
+      start();
 
-  function requestCloseForm() {
-    if (formMode && isDraftDirty) {
-      setDiscardFormOpen(true);
-      return;
+      try {
+        const response = await fetch(`/api/teacher/merged-projects?page=${mergedPage}`, {
+          cache: "no-store",
+          headers: await getAuthHeaders(),
+        });
+        const data = (await response.json().catch(() => null)) as MergedProjectsResponse & { error?: string } | null;
+        if (!response.ok) throw new Error(data?.error ?? "Gagal mengambil data gabungan proyek.");
+
+        if (!cancelled && data) {
+          setMergedProjects(Array.isArray(data.merges) ? data.merges : []);
+          setMergedPageSize(data.pageSize || 6);
+          setMergedTotalItems(data.totalItems || 0);
+          setMergedTotalPages(Math.max(1, data.totalPages || 1));
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setMergedProjects([]);
+          setMergedTotalItems(0);
+          setMergedTotalPages(1);
+          toast.danger("Data gabungan proyek belum bisa dimuat", {
+            description: error instanceof Error ? error.message : "Coba muat ulang halaman.",
+          });
+        }
+      } finally {
+        if (!cancelled) {
+          setMergedLoading(false);
+          done();
+        }
+      }
     }
-    setFormMode(null);
-    setDraft(emptyDraft);
-    setDraftBaseline(emptyDraft);
-  }
 
-  function confirmDiscardForm() {
-    setDiscardFormOpen(false);
-    setFormMode(null);
-    setDraft(emptyDraft);
-    setDraftBaseline(emptyDraft);
-  }
+    void loadMergedProjects();
 
-  function openCreateForm() {
-    setDraft(emptyDraft);
-    setDraftBaseline(emptyDraft);
-    setFormMode("create");
-  }
-
-  function openEditForm(project: TeacherProjectCard) {
-    const nextDraft = {
-      id: project.id,
-      title: project.name,
-      startDate: displayDateToInputValue(project.startDate),
-      className: project.className === "Belum ada kelompok" ? "" : project.className,
-      dueDate: project.dueDateInput,
-      description: project.description,
-      attachmentName: "",
+    return () => {
+      cancelled = true;
     };
-    setDraft(nextDraft);
-    setDraftBaseline(nextDraft);
-    setFormMode("edit");
+  }, [done, mergedPage, start]);
+
+  React.useEffect(() => {
+    if (!mergeOpen) return;
+
+    let cancelled = false;
+
+    async function loadMergeOptions() {
+      setMergeOptionsLoading(true);
+
+      try {
+        const response = await fetch("/api/teacher/projects?options=1", {
+          cache: "no-store",
+          headers: await getAuthHeaders(),
+        });
+        const data = (await response.json().catch(() => null)) as { projects?: MergeProjectOption[]; error?: string } | null;
+        if (!response.ok) throw new Error(data?.error ?? "Gagal mengambil opsi proyek.");
+        if (!cancelled) setMergeOptions(Array.isArray(data?.projects) ? data.projects : []);
+      } catch (error) {
+        if (!cancelled) {
+          setMergeOptions([]);
+          toast.danger("Opsi proyek belum bisa dimuat", {
+            description: error instanceof Error ? error.message : "Coba lagi sebentar lagi.",
+          });
+        }
+      } finally {
+        if (!cancelled) setMergeOptionsLoading(false);
+      }
+    }
+
+    void loadMergeOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mergeOpen]);
+
+  function openCreateModal() {
+    setDraft(emptyDraft);
+    setCreateOpen(true);
   }
 
-  async function submitProjectForm() {
+  function closeCreateModal() {
+    if (submitting) return;
+    setCreateOpen(false);
+    setDraft(emptyDraft);
+  }
+
+  function openMergeModal() {
+    setMergeDraft(emptyMergeDraft);
+    setMergeOptions([]);
+    setMergeOpen(true);
+  }
+
+  function closeMergeModal() {
+    if (mergeSubmitting) return;
+    setMergeOpen(false);
+    setMergeDraft(emptyMergeDraft);
+    setMergeOptions([]);
+  }
+
+  async function submitCreateProject() {
+    if (submitting) return;
     const title = draft.title.trim();
     if (!title) {
       toast.danger("Judul proyek wajib diisi");
       return;
     }
 
+    start();
+    setSubmitting(true);
+
     try {
       const response = await fetch("/api/teacher/projects", {
-        method: formMode === "edit" ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
         body: JSON.stringify({
-          id: draft.id,
           title,
-          className: draft.className.trim(),
-          dueDate: draft.dueDate,
           description: draft.description.trim(),
+          deadline: draft.deadline || null,
+          fileName: draft.fileName || null,
         }),
       });
-      const data = await response.json().catch(() => null);
+      const data = (await response.json().catch(() => null)) as { error?: string } | null;
       if (!response.ok) throw new Error(data?.error ?? "Proyek belum bisa disimpan.");
-      setProjects(Array.isArray(data) ? data : []);
-      setFormMode(null);
+
+      toast.success("Proyek dibuat", { description: "Perubahan berhasil disimpan." });
+      setCreateOpen(false);
       setDraft(emptyDraft);
-      setDraftBaseline(emptyDraft);
-      toast.success(formMode === "edit" ? "Proyek diperbarui" : "Proyek dibuat", {
-        description: formMode === "edit" ? "Perubahan tersimpan di Supabase." : "Data proyek baru tersimpan di Supabase.",
-      });
+      setProjectPage(1);
     } catch (error) {
       toast.danger("Gagal menyimpan proyek", {
         description: error instanceof Error ? error.message : "Periksa koneksi Supabase lalu coba lagi.",
       });
+    } finally {
+      setSubmitting(false);
+      done();
     }
   }
 
-  async function handleArchiveConfirm() {
-    if (!archiveTarget) return;
+  async function submitMergeProject() {
+    if (mergeSubmitting) return;
+    const title = mergeDraft.title.trim();
+    const projectIds = Array.from(new Set(mergeDraft.projectIds.map((item) => item.trim()).filter(Boolean)));
+
+    if (!title) {
+      toast.danger("Judul gabungan proyek wajib diisi");
+      return;
+    }
+    if (!projectIds.length) {
+      toast.danger("Minimal satu proyek harus dipilih");
+      return;
+    }
+
+    start();
+    setMergeSubmitting(true);
+
     try {
-      const response = await fetch(`/api/teacher/projects?id=${encodeURIComponent(archiveTarget.id)}`, { method: "DELETE" });
-      const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error ?? "Proyek belum bisa dihapus.");
-      setProjects(Array.isArray(data) ? data : []);
-      toast.success("Proyek dihapus", {
-        description: `Proyek "${archiveTarget.name}" sudah dihapus dari daftar aktif Supabase.`,
+      const response = await fetch("/api/teacher/merged-projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
+        body: JSON.stringify({
+          title,
+          description: mergeDraft.description.trim(),
+          projectIds,
+        }),
       });
+      const data = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) throw new Error(data?.error ?? "Gabungan proyek belum bisa disimpan.");
+
+      toast.success("Gabungan proyek dibuat", { description: "Perubahan berhasil disimpan." });
+      setMergeOpen(false);
+      setMergeDraft(emptyMergeDraft);
+      setMergedPage(1);
+      setProjectPage(1);
+    } catch (error) {
+      toast.danger("Gagal menyimpan gabungan proyek", {
+        description: error instanceof Error ? error.message : "Periksa koneksi Supabase lalu coba lagi.",
+      });
+    } finally {
+      setMergeSubmitting(false);
+      done();
+    }
+  }
+
+  async function handleDeleteProject() {
+    if (!deleteTarget) return;
+
+    start();
+    try {
+      const response = await fetch(`/api/teacher/projects?id=${encodeURIComponent(deleteTarget.id)}`, {
+        method: "DELETE",
+        headers: await getAuthHeaders(),
+      });
+      const data = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) throw new Error(data?.error ?? "Proyek belum bisa dihapus.");
+
+      toast.success("Proyek dihapus", {
+        description: `Proyek "${deleteTarget.title}" sudah dihapus dari daftar aktif.`,
+      });
+      setDeleteTarget(null);
+      setProjectPage(1);
     } catch (error) {
       toast.danger("Gagal menghapus proyek", {
         description: error instanceof Error ? error.message : "Coba lagi sebentar lagi.",
       });
     } finally {
-      setArchiveTarget(null);
+      done();
     }
   }
 
-  function copyProjectCode(project: TeacherProjectCard) {
-    const projectCode = `KTR-${project.id.padStart(3, "0")}`;
-    void navigator.clipboard?.writeText(projectCode);
-    toast.success("Kode proyek disalin", { description: projectCode });
-  }
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <ProjectsHeaderSkeleton />
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-          <ProjectGridSkeleton />
-        </div>
-      </div>
-    );
-  }
+  const projectShowingStart = projectTotalItems === 0 ? 0 : (projectPage - 1) * projectPageSize + 1;
+  const projectShowingEnd = projectTotalItems === 0 ? 0 : Math.min(projectTotalItems, projectShowingStart + projects.length - 1);
+  const mergedShowingStart = mergedTotalItems === 0 ? 0 : (mergedPage - 1) * mergedPageSize + 1;
+  const mergedShowingEnd = mergedTotalItems === 0 ? 0 : Math.min(mergedTotalItems, mergedShowingStart + mergedProjects.length - 1);
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">Proyek</h1>
-        </div>
+      <div className="space-y-8">
+        <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-2">
+            <h1 className="font-heading text-3xl font-semibold tracking-normal text-ktr-text-primary">Proyek</h1>
+            <p className="text-sm text-ktr-text-secondary">
+              Mengelola proyek aktif, dan gabungan proyek yang belum tergabung.
+            </p>
+          </div>
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <SearchInput
-            placeholder="Cari proyek"
-            className="w-full lg:max-w-sm"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-            <FilterSelect
-              className="w-full sm:w-40"
-              ariaLabel="Filter status"
-              defaultValue="semua"
-              options={["Semua", "Aktif", "Selesai", "Diarsipkan"].map((label) => ({
-                value: label.toLowerCase().replaceAll(" ", "-"),
-                label,
-              }))}
-              onChange={(v) => setStatusFilter(v)}
-            />
-            <button
-              type="button"
-              onClick={openCreateForm}
-              className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-ktr-text-primary bg-ktr-text-primary px-4 text-sm font-semibold text-ktr-text-white transition-[background-color,transform] hover:bg-ktr-text-primary/95 active:scale-[0.997]"
-            >
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" onClick={openMergeModal} className="h-10 rounded-[10px] bg-ktr-text-primary px-4 text-sm font-semibold text-white hover:bg-ktr-text-primary/95">
+              <HugeiconsIcon icon={Folder01Icon} size={16} strokeWidth={2} />
+              Kelompokkan Projek
+            </Button>
+            <Button type="button" onClick={openCreateModal} className="h-10 rounded-[10px] bg-ktr-text-primary px-4 text-sm font-semibold text-white hover:bg-ktr-text-primary/95">
               <HugeiconsIcon icon={PlusSignIcon} size={16} strokeWidth={2} />
               Buat Proyek
-            </button>
+            </Button>
           </div>
-        </div>
+        </section>
 
-        <div className="flex items-center gap-2 text-sm font-medium text-ktr-text-secondary">
-          <span className="font-semibold text-ktr-text-primary">{filtered.length}</span>
-          <span>proyek ditemukan</span>
-          {filtered.some((p) => p.pendingUploadReviews + p.pendingFinalReviews > 0) && (
-            <>
-              <span className="mx-1 size-1 rounded-full bg-ktr-text-tertiary/35" aria-hidden="true" />
-              <span className="font-semibold text-ktr-warning">
-                {filtered.reduce((t, p) => t + p.pendingUploadReviews + p.pendingFinalReviews, 0)} review tertunda
-              </span>
-            </>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-          {filtered.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onArchive={() => setArchiveTarget(project)}
-              onCopyCode={() => copyProjectCode(project)}
-              onEdit={() => openEditForm(project)}
-            />
-          ))}
-          {filtered.length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center gap-3 rounded-[12px] border border-dashed border-ktr-border-light bg-white py-16 text-center">
-              <span className="flex size-12 items-center justify-center rounded-[10px] text-ktr-text-primary">
-                <HugeiconsIcon icon={Folder01Icon} size={22} strokeWidth={2} />
-              </span>
-              <p className="text-sm font-medium text-ktr-text-secondary">Belum ada proyek dari Supabase.</p>
+        <section className="space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-1">
+              <h2 className="font-heading text-2xl font-semibold text-ktr-text-primary">Gabungan Proyek</h2>
+              <p className="text-sm text-ktr-text-secondary">
+                Menampilkan <span className="font-semibold text-ktr-text-primary">{formatNumber.format(mergedShowingStart)}</span>
+                {mergedShowingEnd > 0 ? ` - ${formatNumber.format(mergedShowingEnd)}` : ""} dari{" "}
+                <span className="font-semibold text-ktr-text-primary">{formatNumber.format(mergedTotalItems)}</span> gabungan.
+              </p>
             </div>
+            <p className="text-sm text-ktr-text-tertiary">6 kartu per halaman</p>
+          </div>
+
+          {mergedLoading ? (
+            <MergedProjectsGridSkeleton />
+          ) : mergedProjects.length ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {mergedProjects.map((merge) => (
+                <MergedProjectCardView key={merge.id} merge={merge} />
+              ))}
+            </div>
+          ) : (
+            <EmptyMergedProjectsState onCreate={openMergeModal} />
           )}
-        </div>
+
+          <div className="flex flex-col items-center justify-between gap-3 rounded-[12px] border border-ktr-border-light bg-white px-4 py-3 sm:flex-row">
+            <p className="text-sm text-ktr-text-secondary">
+              Halaman <span className="font-semibold text-ktr-text-primary">{mergedPage}</span> dari{" "}
+              <span className="font-semibold text-ktr-text-primary">{mergedTotalPages}</span>
+            </p>
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={mergedPage <= 1 || mergedLoading} onClick={() => setMergedPage((current) => Math.max(1, current - 1))}>
+                <HugeiconsIcon icon={ArrowLeft01Icon} size={14} strokeWidth={2} />
+                Sebelumnya
+              </Button>
+              <Button type="button" variant="outline" size="sm" disabled={mergedPage >= mergedTotalPages || mergedLoading} onClick={() => setMergedPage((current) => Math.min(mergedTotalPages, current + 1))}>
+                Berikutnya
+                <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={2} />
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-1">
+              <h2 className="font-heading text-2xl font-semibold text-ktr-text-primary">Proyek Belum Digabung</h2>
+              <p className="text-sm text-ktr-text-secondary">
+                Menampilkan <span className="font-semibold text-ktr-text-primary">{formatNumber.format(projectShowingStart)}</span>
+                {projectShowingEnd > 0 ? ` - ${formatNumber.format(projectShowingEnd)}` : ""} dari{" "}
+                <span className="font-semibold text-ktr-text-primary">{formatNumber.format(projectTotalItems)}</span> proyek.
+              </p>
+            </div>
+            <p className="text-sm text-ktr-text-tertiary">6 kartu per halaman</p>
+          </div>
+
+          {projectLoading ? (
+            <ProjectsGridSkeleton />
+          ) : projects.length ? (
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onDelete={() => setDeleteTarget(project)}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyProjectsState onCreate={openCreateModal} />
+          )}
+
+          <div className="flex flex-col items-center justify-between gap-3 rounded-[12px] border border-ktr-border-light bg-white px-4 py-3 sm:flex-row">
+            <p className="text-sm text-ktr-text-secondary">
+              Halaman <span className="font-semibold text-ktr-text-primary">{projectPage}</span> dari{" "}
+              <span className="font-semibold text-ktr-text-primary">{projectTotalPages}</span>
+            </p>
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={projectPage <= 1 || projectLoading} onClick={() => setProjectPage((current) => Math.max(1, current - 1))}>
+                <HugeiconsIcon icon={ArrowLeft01Icon} size={14} strokeWidth={2} />
+                Sebelumnya
+              </Button>
+              <Button type="button" variant="outline" size="sm" disabled={projectPage >= projectTotalPages || projectLoading} onClick={() => setProjectPage((current) => Math.min(projectTotalPages, current + 1))}>
+                Berikutnya
+                <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={2} />
+              </Button>
+            </div>
+          </div>
+        </section>
       </div>
 
       <ConfirmModal
         theme="teacher"
-        open={archiveTarget !== null}
-        onOpenChange={(open) => !open && setArchiveTarget(null)}
-        title="Hapus proyek ini?"
-        description={`Proyek "${archiveTarget?.name ?? ""}" akan dihapus dari daftar aktif beserta data turunannya sesuai relasi Supabase.`}
-        confirmText="Hapus"
-        tone="danger"
-        onConfirm={() => void handleArchiveConfirm()}
-      />
-
-      <ConfirmModal
-        theme="teacher"
-        open={formMode !== null}
+        open={createOpen}
         onOpenChange={(open) => {
-          if (!open) requestCloseForm();
+          if (!open) closeCreateModal();
         }}
-        title={formMode === "edit" ? "Edit Proyek" : "Buat Proyek"}
-        description="Isi data utama proyek. Detail tambahan bisa dilengkapi setelah proyek dibuat."
-        confirmText={formMode === "edit" ? "Simpan" : "Buat"}
+        title="Buat Proyek"
+        description="Isi judul, deskripsi, deadline, dan file untuk proyek baru."
+        confirmText={submitting ? "Menyimpan..." : "Simpan"}
         closeOnConfirm={false}
-        onConfirm={() => void submitProjectForm()}
+        onConfirm={() => void submitCreateProject()}
       >
         <div className="space-y-4">
-          <ProjectField label="Judul proyek" value={draft.title} placeholder="Masukkan judul proyek" onChange={(value) => setDraft((current) => ({ ...current, title: value }))} />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ProjectDateField label="Mulai" value={draft.startDate} placeholder="Pilih tanggal mulai" onChange={(value) => setDraft((current) => ({ ...current, startDate: value }))} />
-            <ProjectDateField label="Deadline" value={draft.dueDate} placeholder="Pilih deadline" onChange={(value) => setDraft((current) => ({ ...current, dueDate: value }))} />
-          </div>
-          <label className="block text-left">
-            <span className="mb-2 block text-xs font-semibold text-ktr-text-primary">Deskripsi atau soal</span>
+          <AppFormField
+            label="Judul"
+            placeholder="Contoh: Website Profil Sekolah"
+            value={draft.title}
+            onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
+          />
+
+          <label className="block space-y-2">
+            <span className="block text-[14px] font-medium leading-ktr-snug text-ktr-text-primary">Deskripsi</span>
             <textarea
               value={draft.description}
-              placeholder="Tuliskan arahan, konteks, atau soal proyek"
               onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
-              className="min-h-24 w-full resize-none rounded-[10px] border border-ktr-border-light bg-white px-3 py-2 text-sm leading-6 text-ktr-text-primary outline-none transition-colors placeholder:text-[13px] placeholder:font-normal placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
+              placeholder="Tulis arahan, konteks, atau soal proyek"
+              className="min-h-28 w-full resize-none rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3.5 py-3 text-[14px] leading-[22px] text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ktr-primary/12"
             />
           </label>
-          <ProjectField label="Kelas" value={draft.className} placeholder="Contoh: XI - Desain Web" onChange={(value) => setDraft((current) => ({ ...current, className: value }))} />
-          <ProjectFileField value={draft.attachmentName} onChange={(value) => setDraft((current) => ({ ...current, attachmentName: value }))} />
+
+          <AppFormField
+            label="Deadline"
+            type="date"
+            value={draft.deadline}
+            onChange={(event) => setDraft((current) => ({ ...current, deadline: event.target.value }))}
+          />
+
+          <label className="block space-y-2">
+            <span className="block text-[14px] font-medium leading-ktr-snug text-ktr-text-primary">File</span>
+            <div className="flex items-center gap-3 rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3.5 py-3">
+              <HugeiconsIcon icon={FileAttachmentIcon} size={18} strokeWidth={2} className="shrink-0 text-ktr-text-primary" />
+              <input
+                type="file"
+                className="min-w-0 flex-1 text-[14px] text-ktr-text-secondary file:mr-3 file:rounded-[10px] file:border-0 file:bg-ktr-primary-soft file:px-3 file:py-2 file:text-[13px] file:font-semibold file:text-ktr-primary"
+                onChange={(event) => setDraft((current) => ({ ...current, fileName: event.target.files?.[0]?.name ?? "" }))}
+              />
+            </div>
+            <p className="text-[12px] text-ktr-text-tertiary">
+              {draft.fileName ? `File terpilih: ${draft.fileName}` : "Pilih file pendukung jika sudah siap."}
+            </p>
+          </label>
         </div>
       </ConfirmModal>
 
       <ConfirmModal
         theme="teacher"
-        open={discardFormOpen}
-        onOpenChange={setDiscardFormOpen}
-        title="Batalkan pengisian?"
-        description="Perubahan yang belum disimpan akan hilang."
-        confirmText="Ya, batalkan"
-        cancelText="Lanjut isi"
+        open={mergeOpen}
+        onOpenChange={(open) => {
+          if (!open) closeMergeModal();
+        }}
+        title="Kelompokkan Projek"
+        description="Gabungkan beberapa proyek yang belum tergabung menjadi satu kelompok proyek."
+        confirmText={mergeSubmitting ? "Menyimpan..." : "Simpan"}
+        closeOnConfirm={false}
+        onConfirm={() => void submitMergeProject()}
+      >
+        <div className="space-y-4">
+          <AppFormField
+            label="Judul"
+            placeholder="Contoh: Paket Proyek Web"
+            value={mergeDraft.title}
+            onChange={(event) => setMergeDraft((current) => ({ ...current, title: event.target.value }))}
+          />
+
+          <label className="block space-y-2">
+            <span className="block text-[14px] font-medium leading-ktr-snug text-ktr-text-primary">Deskripsi</span>
+            <textarea
+              value={mergeDraft.description}
+              onChange={(event) => setMergeDraft((current) => ({ ...current, description: event.target.value }))}
+              placeholder="Tulis alasan atau konteks penggabungan proyek"
+              className="min-h-24 w-full resize-none rounded-[12px] border border-ktr-border-light bg-ktr-surface-card px-3.5 py-3 text-[14px] leading-[22px] text-ktr-text-primary outline-none placeholder:text-ktr-text-tertiary focus:border-ktr-border-focus focus:ring-3 focus:ring-ktr-primary/12"
+            />
+          </label>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[14px] font-medium leading-ktr-snug text-ktr-text-primary">Proyek yang Digabung</span>
+            </div>
+
+            <div className="space-y-2">
+              {mergeDraft.projectIds.map((projectId, index) => (
+                <div key={`${index}-${projectId}`} className="flex items-center gap-2">
+                  <select
+                    value={projectId}
+                    onChange={(event) =>
+                      setMergeDraft((current) => {
+                        const next = [...current.projectIds];
+                        next[index] = event.target.value;
+                        return { ...current, projectIds: next };
+                      })
+                    }
+                    className="h-10 min-w-0 flex-1 rounded-[12px] border border-ktr-border-light bg-white px-3 text-[14px] text-ktr-text-primary outline-none focus:border-ktr-border-focus"
+                  >
+                    <option value="">{mergeOptionsLoading ? "Memuat proyek..." : "Pilih proyek"}</option>
+                    {mergeOptions.map((option) => {
+                      const isTaken = mergeDraft.projectIds.some((selected, selectedIndex) => selected === option.id && selectedIndex !== index);
+                      return (
+                        <option key={option.id} value={option.id} disabled={isTaken}>
+                          {option.title} - {option.deadlineLabel}
+                        </option>
+                      );
+                    })}
+                  </select>
+
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setMergeDraft((current) => ({ ...current, projectIds: [...current.projectIds, ""] }))}
+                      className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-ktr-border-light bg-white text-lg font-semibold text-ktr-text-primary hover:border-ktr-border-input"
+                      aria-label="Tambah proyek"
+                    >
+                      +
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMergeDraft((current) => {
+                          if (current.projectIds.length <= 1) return current;
+                          return { ...current, projectIds: current.projectIds.filter((_, projectIndex) => projectIndex !== index) };
+                        })
+                      }
+                      className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-ktr-border-light bg-white text-lg font-semibold text-ktr-text-primary hover:border-ktr-border-input disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Kurangi proyek"
+                      disabled={mergeDraft.projectIds.length <= 1}
+                    >
+                      -
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </ConfirmModal>
+
+      <ConfirmModal
+        theme="teacher"
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title="Hapus proyek ini?"
+        description={`Proyek "${deleteTarget?.title ?? ""}" akan dihapus dari daftar guru.`}
+        confirmText="Hapus"
         tone="danger"
-        onConfirm={confirmDiscardForm}
+        onConfirm={() => void handleDeleteProject()}
       />
     </>
   );
 }
 
-function ProjectsHeaderSkeleton() {
+function MergedProjectCardView({ merge }: { merge: MergeProjectCard }) {
+  const previewProjects = merge.projects.slice(0, 3);
+  const remaining = Math.max(0, merge.projects.length - previewProjects.length);
+
   return (
-    <>
-      <div className="teacher-skeleton h-9 w-32" />
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="teacher-skeleton h-10 w-full lg:max-w-sm" />
-        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-          <div className="teacher-skeleton h-10 w-full sm:w-40" />
-          <div className="teacher-skeleton h-10 w-full sm:w-36" />
+    <Card className="group rounded-[12px] border border-ktr-border-light bg-white transition-[border-color,transform] hover:border-ktr-border-input active:scale-[0.998]">
+      <Card.Content className="relative p-5">
+        <Link
+          href={`/teacher/projects/merge/${merge.id}`}
+          className="absolute inset-0 cursor-pointer rounded-[12px] focus-visible:outline-none focus-visible:border-ktr-text-primary"
+          aria-label={`Lihat detail gabungan ${merge.title}`}
+        />
+
+        <div className="pointer-events-none relative z-10 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="truncate font-heading text-base font-semibold text-ktr-text-primary">{merge.title}</h2>
+            <p className="mt-1 text-sm font-medium text-ktr-text-secondary">{merge.description || "Belum ada deskripsi gabungan proyek."}</p>
+          </div>
+
+          <div className="inline-flex h-9 items-center rounded-[12px] bg-ktr-surface-soft px-3 text-xs font-semibold text-ktr-text-primary">
+            {merge.projectCount} proyek
+          </div>
         </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="teacher-skeleton h-5 w-32" />
-        <div className="teacher-skeleton h-5 w-28" />
-      </div>
-    </>
+
+        <div className="pointer-events-none relative z-0 mt-7 space-y-4 text-sm font-medium">
+          <InfoRow icon={CheckListIcon} label="Kelompok" value={`${merge.groupCount} kelompok`} />
+          <InfoRow icon={Calendar03Icon} label="Selesai" value={`${merge.finishedGroups} kelompok`} />
+          <InfoRow icon={UserMultiple02Icon} label="Siswa" value={`${merge.students} siswa`} />
+          <InfoRow icon={Alert01Icon} label="Proyek" value={previewProjects.map((project) => project.title).join(", ") || "Belum ada proyek"} valueClassName="text-ktr-text-primary" />
+          {remaining > 0 ? <InfoRow icon={Folder01Icon} label="Lainnya" value={`+${remaining} proyek`} valueClassName="text-ktr-text-secondary" /> : null}
+        </div>
+      </Card.Content>
+    </Card>
   );
 }
 
-function ProjectGridSkeleton() {
+function MergedProjectsGridSkeleton() {
   return (
-    <>
-      {Array.from({ length: 3 }).map((_, index) => (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, index) => (
         <Card key={index} className="rounded-[12px] border border-ktr-border-light bg-white">
           <Card.Content className="p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 flex-1">
-                <div className="teacher-skeleton h-5 w-44" />
-                <div className="teacher-skeleton mt-3 h-4 w-28" />
-              </div>
-              <div className="teacher-skeleton size-9 rounded-[10px]" />
+            <div className="space-y-3">
+              <div className="teacher-skeleton h-3 w-28" />
+              <div className="teacher-skeleton h-7 w-52" />
+              <div className="teacher-skeleton h-4 w-full" />
             </div>
-            <div className="mt-7 space-y-4">
-              {Array.from({ length: 5 }).map((_, row) => (
-                <div key={row} className="flex items-center justify-between gap-4">
-                  <div className="teacher-skeleton h-4 w-24" />
-                  <div className="teacher-skeleton h-4 w-28" />
-                </div>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((__, innerIndex) => (
+                <div key={innerIndex} className="teacher-skeleton h-14 w-full rounded-[10px]" />
               ))}
             </div>
           </Card.Content>
         </Card>
       ))}
-    </>
+    </div>
   );
 }
 
-function ProjectCard({
-  project,
-  onArchive,
-  onCopyCode,
-  onEdit,
-}: {
-  project: TeacherProjectCard;
-  onArchive: () => void;
-  onCopyCode: () => void;
-  onEdit: () => void;
-}) {
+function EmptyMergedProjectsState({ onCreate }: { onCreate: () => void }) {
+  return (
+    <Card className="rounded-[12px] border border-dashed border-ktr-border-light bg-white">
+      <Card.Content className="flex flex-col items-start gap-4 p-6">
+        <div className="space-y-1">
+          <h3 className="font-heading text-xl font-semibold text-ktr-text-primary">Belum ada gabungan proyek</h3>
+          <p className="text-sm text-ktr-text-secondary">Buat kelompok proyek pertama dari proyek yang belum tergabung.</p>
+        </div>
+        <Button type="button" onClick={onCreate} className="h-10 rounded-[10px] bg-ktr-text-primary px-4 text-sm font-semibold text-white hover:bg-ktr-text-primary/95">
+          <HugeiconsIcon icon={Folder01Icon} size={16} strokeWidth={2} />
+          Kelompokkan Projek
+        </Button>
+      </Card.Content>
+    </Card>
+  );
+}
+
+function ProjectsGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Card key={index} className="rounded-[12px] border border-ktr-border-light bg-white">
+          <Card.Content className="p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 space-y-2">
+                <div className="teacher-skeleton h-6 w-52" />
+                <div className="teacher-skeleton h-4 w-32" />
+              </div>
+              <div className="teacher-skeleton h-8 w-20 rounded-[10px]" />
+            </div>
+            <div className="mt-5 space-y-3">
+              <div className="teacher-skeleton h-4 w-full" />
+              <div className="teacher-skeleton h-4 w-5/6" />
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((__, innerIndex) => (
+                <div key={innerIndex} className="teacher-skeleton h-10 w-full rounded-[10px]" />
+              ))}
+            </div>
+          </Card.Content>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function ProjectCard({ project, onDelete }: { project: TeacherProjectCard; onDelete: () => void }) {
   const [moreOpen, setMoreOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
-  const pendingReviews = project.pendingUploadReviews + project.pendingFinalReviews;
+  const pendingReviews = 0;
 
   React.useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -439,19 +811,25 @@ function ProjectCard({
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, []);
 
+  function copyProjectCode() {
+    const projectCode = `KTR-${project.id.padStart(3, "0")}`;
+    void navigator.clipboard?.writeText(projectCode);
+    toast.success("Kode proyek disalin", { description: projectCode });
+  }
+
   return (
     <Card className="group rounded-[12px] border border-ktr-border-light bg-white transition-[border-color,transform] hover:border-ktr-border-input active:scale-[0.998]">
       <Card.Content className="relative p-5">
         <Link
           href={`/teacher/projects/${project.id}`}
           className="absolute inset-0 cursor-pointer rounded-[12px] focus-visible:outline-none focus-visible:border-ktr-text-primary"
-          aria-label={`Lihat detail ${project.name}`}
+          aria-label={`Lihat detail ${project.title}`}
         />
 
         <div className="pointer-events-none relative z-10 flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="truncate font-heading text-base font-semibold text-ktr-text-primary">{project.name}</h2>
-            <p className="mt-1 text-sm font-medium text-ktr-text-secondary">{project.className}</p>
+            <h2 className="truncate font-heading text-base font-semibold text-ktr-text-primary">{project.title}</h2>
+            <p className="mt-1 text-sm font-medium text-ktr-text-secondary">{project.description || "Belum ada deskripsi proyek."}</p>
           </div>
 
           <div ref={menuRef} className="pointer-events-auto relative">
@@ -466,28 +844,40 @@ function ProjectCard({
               <HugeiconsIcon icon={MoreVerticalCircle01Icon} size={18} strokeWidth={2} />
             </button>
 
-            {moreOpen && (
+            {moreOpen ? (
               <div className="teacher-dropdown-popover absolute right-0 top-[calc(100%+8px)] z-30 w-44 rounded-[12px] border border-ktr-border-light bg-white p-1" role="menu">
-                <ProjectMenuItem icon={Edit01Icon} label="Edit" onClick={() => { setMoreOpen(false); onEdit(); }} />
-                <ProjectMenuItem icon={Copy01Icon} label="Copy kode" onClick={() => { setMoreOpen(false); onCopyCode(); }} />
-                <ProjectMenuItem icon={Delete02Icon} label="Hapus" onClick={() => { setMoreOpen(false); onArchive(); }} />
+                <ProjectMenuItem icon={Copy01Icon} label="Copy kode" onClick={() => { setMoreOpen(false); copyProjectCode(); }} />
+                <ProjectMenuItem icon={Delete02Icon} label="Hapus" onClick={() => { setMoreOpen(false); onDelete(); }} />
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
         <div className="pointer-events-none relative z-0 mt-7 space-y-4 text-sm font-medium">
           <InfoRow icon={CheckListIcon} label="Status" value={project.status} valueClassName={statusClassName(project.status)} />
-          <InfoRow icon={Calendar03Icon} label="Deadline" value={project.finalDeadline} />
+          <InfoRow icon={Calendar03Icon} label="Deadline" value={project.deadlineLabel} />
           <InfoRow icon={UserMultiple02Icon} label="Kelompok" value={`${project.groups} kelompok`} />
-          <InfoRow icon={CheckListIcon} label="Review" value={pendingReviews > 0 ? `${pendingReviews} tertunda` : "Tidak ada"} valueClassName={pendingReviews > 0 ? "text-ktr-warning" : undefined} />
-          <InfoRow
-            icon={Alert01Icon}
-            label="Perhatian"
-            value={project.inactiveGroups > 0 ? `${project.inactiveGroups} kelompok pasif` : "Aman"}
-            valueClassName={project.inactiveGroups > 0 ? "text-ktr-warning" : "text-ktr-success"}
-          />
+          <InfoRow icon={CheckListIcon} label="Siswa" value={`${project.students} siswa`} />
+          <InfoRow icon={Alert01Icon} label="File" value={project.fileName || "Belum ada file"} valueClassName={project.fileName ? "text-ktr-text-primary" : "text-ktr-warning"} />
+          <InfoRow icon={Alert01Icon} label="Review" value={pendingReviews > 0 ? `${pendingReviews} tertunda` : "Tidak ada"} valueClassName={pendingReviews > 0 ? "text-ktr-warning" : "text-ktr-success"} />
         </div>
+      </Card.Content>
+    </Card>
+  );
+}
+
+function EmptyProjectsState({ onCreate }: { onCreate: () => void }) {
+  return (
+    <Card className="rounded-[12px] border border-dashed border-ktr-border-light bg-white">
+      <Card.Content className="flex flex-col items-start gap-4 p-6">
+        <div className="space-y-1">
+          <h3 className="font-heading text-xl font-semibold text-ktr-text-primary">Belum ada proyek</h3>
+          <p className="text-sm text-ktr-text-secondary">Mulai dengan membuat proyek baru untuk siswa.</p>
+        </div>
+        <Button type="button" onClick={onCreate} className="h-10 rounded-[10px] bg-ktr-text-primary px-4 text-sm font-semibold text-white hover:bg-ktr-text-primary/95">
+          <HugeiconsIcon icon={PlusSignIcon} size={16} strokeWidth={2} />
+          Buat Proyek
+        </Button>
       </Card.Content>
     </Card>
   );
@@ -522,181 +912,4 @@ function InfoRow({ icon, label, value, valueClassName }: { icon: IconSvgElement;
       <span className={`shrink-0 text-right font-semibold ${valueClassName ?? "text-ktr-text-primary"}`}>{value}</span>
     </div>
   );
-}
-
-function ProjectField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
-  return (
-    <label className="block text-left">
-      <span className="mb-2 block text-xs font-semibold text-ktr-text-primary">{label}</span>
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-10 w-full rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm text-ktr-text-primary outline-none transition-colors placeholder:text-[13px] placeholder:font-normal placeholder:text-ktr-text-tertiary hover:border-ktr-border-input focus:border-ktr-text-primary"
-      />
-    </label>
-  );
-}
-
-function ProjectDateField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
-  const [open, setOpen] = React.useState(false);
-  const [viewDate, setViewDate] = React.useState(() => dateInputToDate(value) ?? new Date());
-  const [alignRight, setAlignRight] = React.useState(false);
-  const fieldRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
-      if (!fieldRef.current?.contains(event.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, []);
-
-  const selectedDate = dateInputToDate(value);
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const cells = [...Array.from({ length: firstDay }, () => null), ...Array.from({ length: daysInMonth }, (_, index) => index + 1)];
-
-  return (
-    <div ref={fieldRef} className="relative text-left">
-      <span className="mb-2 block text-xs font-semibold text-ktr-text-primary">{label}</span>
-      <button
-        type="button"
-        onClick={() => {
-          const rect = fieldRef.current?.getBoundingClientRect();
-          setAlignRight(Boolean(rect && rect.left + 280 > window.innerWidth - 16));
-          setOpen((current) => !current);
-        }}
-        className="flex h-10 w-full cursor-pointer items-center justify-between gap-3 rounded-[10px] border border-ktr-border-light bg-white px-3 text-left text-sm font-medium text-ktr-text-primary outline-none transition-colors hover:border-ktr-border-input focus:border-ktr-text-primary"
-      >
-        <span className={value ? "text-ktr-text-primary" : "text-[13px] font-normal text-ktr-text-tertiary"}>{value ? formatDateInput(value) : placeholder}</span>
-        <HugeiconsIcon icon={Calendar03Icon} size={16} strokeWidth={2} className="text-ktr-text-primary" />
-      </button>
-
-      {open ? (
-        <div className={alignRight ? "teacher-dropdown-popover absolute right-0 top-[calc(100%+8px)] z-50 w-[280px] rounded-[12px] border border-ktr-border-light bg-white p-3" : "teacher-dropdown-popover absolute left-0 top-[calc(100%+8px)] z-50 w-[280px] rounded-[12px] border border-ktr-border-light bg-white p-3"}>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <button type="button" className="flex size-8 cursor-pointer items-center justify-center rounded-[10px] text-ktr-text-primary hover:bg-ktr-surface-soft" onClick={() => setViewDate(new Date(year, month - 1, 1))}>
-              <HugeiconsIcon icon={ArrowLeft01Icon} size={16} strokeWidth={2} />
-            </button>
-            <p className="text-sm font-semibold text-ktr-text-primary">{monthNames[month]} {year}</p>
-            <button type="button" className="flex size-8 cursor-pointer items-center justify-center rounded-[10px] text-ktr-text-primary hover:bg-ktr-surface-soft" onClick={() => setViewDate(new Date(year, month + 1, 1))}>
-              <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={2} />
-            </button>
-          </div>
-          <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-ktr-text-tertiary">
-            {dayNames.map((day) => <span key={day} className="py-1">{day}</span>)}
-          </div>
-          <div className="mt-1 grid grid-cols-7 gap-1">
-            {cells.map((day, index) => {
-              const date = day ? new Date(year, month, day) : null;
-              const inputValue = date ? dateToInputValue(date) : "";
-              const active = selectedDate && date && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day;
-              return day ? (
-                <button
-                  key={inputValue}
-                  type="button"
-                  onClick={() => {
-                    onChange(inputValue);
-                    setOpen(false);
-                  }}
-                  className={active ? "flex h-8 cursor-pointer items-center justify-center rounded-[10px] bg-ktr-text-primary text-xs font-semibold text-ktr-text-white" : "flex h-8 cursor-pointer items-center justify-center rounded-[10px] text-xs font-semibold text-ktr-text-primary hover:bg-ktr-surface-soft"}
-                >
-                  {day}
-                </button>
-              ) : <span key={`blank-${index}`} />;
-            })}
-          </div>
-          <button type="button" onClick={() => { onChange(""); setOpen(false); }} className="mt-3 h-8 w-full cursor-pointer rounded-[10px] text-xs font-semibold text-ktr-text-secondary hover:bg-ktr-surface-soft">Kosongkan</button>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function ProjectFileField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  const inputId = React.useId();
-  const [dragActive, setDragActive] = React.useState(false);
-
-  function handleFile(file?: File) {
-    if (file) onChange(file.name);
-  }
-
-  return (
-    <div className="text-left">
-      <span className="mb-2 block text-xs font-semibold text-ktr-text-primary">Lampiran</span>
-      <label
-        htmlFor={inputId}
-        onDragEnter={(event) => {
-          event.preventDefault();
-          setDragActive(true);
-        }}
-        onDragOver={(event) => {
-          event.preventDefault();
-          setDragActive(true);
-        }}
-        onDragLeave={(event) => {
-          event.preventDefault();
-          setDragActive(false);
-        }}
-        onDrop={(event) => {
-          event.preventDefault();
-          setDragActive(false);
-          handleFile(event.dataTransfer.files?.[0]);
-        }}
-        className={dragActive ? "flex min-h-[92px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed border-ktr-text-primary bg-ktr-surface-soft px-4 py-4 text-center transition-colors" : "flex min-h-[92px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed border-ktr-border-input bg-white px-4 py-4 text-center transition-colors hover:border-ktr-text-primary hover:bg-ktr-surface-soft/50"}
-      >
-        <HugeiconsIcon icon={FileAttachmentIcon} size={18} strokeWidth={2} className="text-ktr-text-primary" />
-        <span className={value ? "mt-2 max-w-full truncate text-sm font-semibold text-ktr-text-primary" : "mt-2 text-[13px] font-normal text-ktr-text-tertiary"}>
-          {value || "Klik atau drag lampiran ke sini"}
-        </span>
-      </label>
-      <input
-        id={inputId}
-        type="file"
-        className="sr-only"
-        onChange={(event) => handleFile(event.target.files?.[0])}
-      />
-    </div>
-  );
-}
-function areDraftsEqual(first: ProjectDraft, second: ProjectDraft) {
-  return first.id === second.id &&
-    first.title === second.title &&
-    first.startDate === second.startDate &&
-    first.dueDate === second.dueDate &&
-    first.description === second.description &&
-    first.className === second.className &&
-    first.attachmentName === second.attachmentName;
-}
-
-function displayDateToInputValue(value: string) {
-  const match = value.match(/^(\d{1,2})\s+([^\s]+)\s+(\d{4})$/);
-  if (!match) return value || "";
-  const day = match[1].padStart(2, "0");
-  const monthIndex = monthNames.findIndex((month) => month.toLowerCase() === match[2].toLowerCase());
-  if (monthIndex < 0) return "";
-  return `${match[3]}-${String(monthIndex + 1).padStart(2, "0")}-${day}`;
-}
-function dateInputToDate(value: string) {
-  if (!value) return null;
-  const [year, month, day] = value.split("-").map(Number);
-  if (!year || !month || !day) return null;
-  return new Date(year, month - 1, day);
-}
-
-function dateToInputValue(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function formatDateInput(value: string) {
-  const date = dateInputToDate(value);
-  if (!date) return value;
-  return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }

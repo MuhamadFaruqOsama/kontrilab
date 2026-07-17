@@ -19,6 +19,7 @@ import {
 import TeacherBackButton from "@/components/teacher/BackButton";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { toast } from "@/components/ui/toast";
+import { supabase } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { getProject, teacherGroups } from "@/components/teacher/mock-data";
 
@@ -82,16 +83,22 @@ export default function ProjectDetail() {
     editDraft.className !== initialEditDraft.className ||
     editDraft.attachmentName !== initialEditDraft.attachmentName;
 
+  async function getAuthHeaders() {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : undefined;
+  }
+
   React.useEffect(() => {
     let cancelled = false;
 
     async function fetchProject() {
       setLoading(true);
       try {
-        const response = await fetch("/api/teacher/projects", { cache: "no-store" });
+        const response = await fetch(`/api/teacher/projects?id=${params.projectId}`, { cache: "no-store", headers: await getAuthHeaders() });
         if (!response.ok) throw new Error("Gagal mengambil data proyek.");
         const data = await response.json();
-        const found = Array.isArray(data) ? data.find((item) => String(item.id) === String(params.projectId)) : null;
+        const found = data?.project ?? (Array.isArray(data) ? data.find((item) => String(item.id) === String(params.projectId)) : null);
         if (!cancelled) setProject(found ? normalizeProject(found) : fallbackProject);
       } catch {
         if (!cancelled) setProject(fallbackProject);
@@ -134,15 +141,17 @@ export default function ProjectDetail() {
     }
 
     try {
+      const authHeaders = await getAuthHeaders();
       const response = await fetch("/api/teacher/projects", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({
           id: project.id,
           title,
           className: editDraft.className.trim(),
           description: editDraft.description.trim(),
           dueDate: editDraft.deadline,
+          fileName: editDraft.attachmentName.trim() || null,
         }),
       });
       const data = await response.json().catch(() => null);
@@ -314,7 +323,7 @@ export default function ProjectDetail() {
   );
 }
 
-function normalizeProject(project: Partial<Omit<TeacherProjectRecord, "status">> & { name?: string; title?: string; status?: string; finalDeadline?: string; dueDateInput?: string; description?: string; announcement?: string }): TeacherProjectRecord {
+function normalizeProject(project: Partial<Omit<TeacherProjectRecord, "status">> & { name?: string; title?: string; status?: string; finalDeadline?: string; dueDateInput?: string; description?: string; announcement?: string; fileName?: string }): TeacherProjectRecord {
   const name = project.name || project.title || "Proyek";
   const finalDeadline = project.finalDeadline || (project.dueDateInput ? formatDateInput(project.dueDateInput) : "Belum ditentukan");
   const startDate = project.startDate || "Belum ditentukan";
@@ -337,7 +346,7 @@ function normalizeProject(project: Partial<Omit<TeacherProjectRecord, "status">>
     pendingFinalReviews: project.pendingFinalReviews ?? 0,
     inactiveGroups: project.inactiveGroups ?? 0,
     announcement: project.announcement || description,
-    attachmentName: project.attachmentName || "",
+    attachmentName: project.attachmentName || project.fileName || "",
   };
 }
 function MetadataSeparator() {

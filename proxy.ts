@@ -1,29 +1,43 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedPrefixes = ["/student", "/teacher"];
-const authCookieNames = ["kontrilab-auth"];
+export function proxy(_request: NextRequest) {
+  // Middleware role teacher/siswa sementara dimatikan.
+  // Nanti bisa aktif lagi kalau alur auth dan role sudah final.
+  /*
+  const { pathname } = _request.nextUrl;
+  const isProtected = ["/student", "/teacher"].some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+  const session = getAuthSession(_request);
 
-function hasAuthCookie(request: NextRequest) {
-  if (authCookieNames.some((name) => request.cookies.has(name))) {
-    return true;
+  if ((pathname === "/login" || pathname === "/register") && session) {
+    return NextResponse.redirect(new URL(getDashboardPath(session.role), _request.url));
   }
 
-  return request.cookies.getAll().some((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"));
-}
-
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const isProtected = protectedPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-
-  if (!isProtected || hasAuthCookie(request)) {
+  if (!isProtected) {
     return NextResponse.next();
   }
 
-  const loginUrl = new URL("/login", request.url);
-  loginUrl.searchParams.set("redirectTo", pathname);
-  return NextResponse.redirect(loginUrl);
+  if (!session) {
+    const loginUrl = new URL("/login", _request.url);
+    loginUrl.searchParams.set("redirectTo", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (pathname.startsWith("/teacher") && session.role !== AppRole.GURU) {
+    return NextResponse.redirect(new URL(getDashboardPath(session.role), _request.url));
+  }
+
+  if (pathname.startsWith("/student") && session.role !== AppRole.SISWA) {
+    return NextResponse.redirect(new URL(getDashboardPath(session.role), _request.url));
+  }
+  */
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/student/:path*", "/teacher/:path*"],
+  // Middleware role teacher/siswa sementara dimatikan.
+  // Untuk mengaktifkan lagi, kembalikan matcher di bawah.
+  // matcher: ["/login", "/register", "/student/:path*", "/teacher/:path*"],
+  matcher: [],
 };

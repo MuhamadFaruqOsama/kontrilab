@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { AppRole } from "@/lib/auth/session";
 import { appConfig, getAppUrl } from "@/lib/env";
 import { sendVerificationEmail } from "@/lib/mailer";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
         data: {
           username,
           name: username,
-          role: "student",
+          role: AppRole.SISWA,
           appName: appConfig.name,
         },
       },

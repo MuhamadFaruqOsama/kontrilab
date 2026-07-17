@@ -29,6 +29,7 @@ import { AppFormField } from "@/components/ui/app-form-field";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { toast } from "@/components/ui/toast";
+import { clearAuthCookie } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import {
   CallAudioPreferences,
@@ -87,7 +88,7 @@ function TextArea({ value, onChange, placeholder, error }: { value: string; onCh
 
 export function SettingsHomePage() {
   const [confirmOpen, setConfirmOpen] = React.useState(false);
-  function logout() { if (typeof window !== "undefined") { Object.keys(window.localStorage).forEach((key) => { if (key.toLowerCase().includes("token") || key.toLowerCase().includes("session") || key.toLowerCase().includes("auth")) window.localStorage.removeItem(key); }); window.location.replace("/login"); } }
+  function logout() { if (typeof window !== "undefined") { Object.keys(window.localStorage).forEach((key) => { if (key.toLowerCase().includes("token") || key.toLowerCase().includes("session") || key.toLowerCase().includes("auth")) window.localStorage.removeItem(key); }); document.cookie = `${clearAuthCookie().name}=; path=/; max-age=0; samesite=lax`; window.location.replace("/login"); } }
   return <SettingsShell title="Pengaturan" backHref="/student/profile"><div className="space-y-5"><Section title="Akun"><SettingsItem href="/settings/profile" icon={UserSettings01Icon} title="Edit Profil" /><RowDivider /><SettingsItem href="/settings/password" icon={LockPasswordIcon} title="Ubah Kata Sandi" /></Section><Section title="Preferensi"><SettingsItem href="/settings/notifications" icon={Notification01Icon} title="Notifikasi" /><RowDivider /><SettingsItem href="/settings/call-audio" icon={Call02Icon} title="Panggilan dan Audio" /></Section><Section title="Bantuan"><SettingsItem href="/settings/help" icon={HelpCircleIcon} title="Pusat Bantuan" /><RowDivider /><SettingsItem href="/settings/report" icon={Alert02Icon} title="Laporkan Masalah" /><RowDivider /><SettingsItem href="/settings/about" icon={InformationCircleIcon} title="Tentang KontriLab" /></Section><Section title="Akun"><SettingsItem icon={LogoutSquare01Icon} title="Keluar" tone="danger" onClick={() => setConfirmOpen(true)} /></Section></div><ConfirmModal open={confirmOpen} onOpenChange={setConfirmOpen} title="Keluar dari akun?" description="Kamu perlu masuk kembali untuk membuka KontriLab." confirmText="Keluar" cancelText="Batal" tone="danger" onConfirm={logout} /></SettingsShell>;
 }
 

@@ -1,21 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Nunito_Sans } from "next/font/google";
+import type { CSSProperties } from "react";
 import "./globals.css";
 import SocketProvider from "./components/providers/SocketProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { appConfig } from "@/lib/env";
-
-const nunitoSans = Nunito_Sans({
-  variable: "--font-nunito-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 const hideNextDevToolsScript = `
 (() => {
@@ -42,7 +30,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${nunitoSans.variable} ${inter.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className="h-full antialiased"
+      style={
+        {
+          "--font-nunito-sans": 'Nunito Sans, system-ui, sans-serif',
+          "--font-inter": 'Inter, system-ui, sans-serif',
+        } as CSSProperties
+      }
+    >
       <body className="flex min-h-full flex-col">
         <script dangerouslySetInnerHTML={{ __html: hideNextDevToolsScript }} />
         <SocketProvider>{children}</SocketProvider>

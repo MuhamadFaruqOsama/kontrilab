@@ -10,7 +10,6 @@ import {
   CheckListIcon,
   Folder01Icon,
   MessageMultiple01Icon,
-  PlusSignIcon,
   UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
 import { Card } from "@heroui/react/card";
@@ -19,7 +18,9 @@ import StatCard from "@/components/teacher/StatCard";
 import StatusBadge from "@/components/teacher/StatusBadge";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { toast } from "@/components/ui/toast";
+import { useNProgress } from "@/components/ui/nprogress";
 import { teacherProjects, followUps } from "@/components/teacher/mock-data";
+import { supabase } from "@/lib/supabase/client";
 
 const semesterOptions = [
   "Semester Genap 2026",
@@ -28,46 +29,90 @@ const semesterOptions = [
 ].map((label) => ({ value: label.toLowerCase().replaceAll(" ", "-"), label }));
 
 type FollowUpItem = (typeof followUps)[number];
+type TeacherProjectCard = {
+  id: string;
+  name: string;
+  className: string;
+  status: "Aktif" | "Selesai" | "Diarsipkan";
+  startDate: string;
+  finalDeadline: string;
+  groups: number;
+  finishedGroups: number;
+  students: number;
+  individualUploads: number;
+  pendingUploadReviews: number;
+  pendingFinalReviews: number;
+  inactiveGroups: number;
+  announcement?: string;
+};
+
+type ProjectsResponse = {
+  projects?: TeacherProjectCard[];
+};
+
+const fallbackProjects: TeacherProjectCard[] = teacherProjects.map((project) => ({
+  ...project,
+  status: project.status as TeacherProjectCard["status"],
+  finishedGroups: project.groups - project.inactiveGroups,
+}));
 
 export default function TeacherDashboard() {
-  const [projects, setProjects] = React.useState<typeof teacherProjects>(teacherProjects);
+  const [projects, setProjects] = React.useState<TeacherProjectCard[]>(fallbackProjects);
   const [loading, setLoading] = React.useState(true);
   const router = useRouter();
+  const { start, done } = useNProgress();
   const [reminderOpen, setReminderOpen] = React.useState(false);
   const [reminderTarget, setReminderTarget] = React.useState("");
 
   React.useEffect(() => {
     let cancelled = false;
-    fetch("/api/teacher/projects", { cache: "no-store" })
-      .then((response) => response.ok ? response.json() : null)
-      .then((data: typeof teacherProjects | null) => {
-        if (!cancelled && Array.isArray(data) && data.length > 0) setProjects(data);
-      })
+
+    async function loadProjects() {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      const response = await fetch("/api/teacher/projects", {
+        cache: "no-store",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+
+      if (!response.ok) return;
+
+      const data = (await response.json().catch(() => null)) as ProjectsResponse | TeacherProjectCard[] | null;
+      const nextProjects = Array.isArray(data) ? data : data?.projects;
+      if (!cancelled && Array.isArray(nextProjects) && nextProjects.length > 0) setProjects(nextProjects);
+    }
+
+    void loadProjects()
       .catch(() => undefined)
       .finally(() => {
         if (!cancelled) setLoading(false);
+        if (!cancelled) done();
       });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [done]);
 
-  const pendingReviews = projects.reduce((total, project) => total + project.pendingUploadReviews + project.pendingFinalReviews, 0);
-  const activeProjects = projects.filter((project) => project.status === "Aktif");
-  const inactiveGroups = projects.reduce((total, project) => total + project.inactiveGroups, 0);
-  const completionRate = projects.length ? Math.max(0, Math.round(((projects.length - inactiveGroups) / projects.length) * 100)) : 0;
-  const topFollowUps = followUps.slice(0, 3);
+  const totalProjects = projects.length;
+  const totalGroups = projects.reduce((total, project) => total + project.groups, 0);
+  const totalStudents = projects.reduce((total, project) => total + project.students, 0);
+  const latestProject = projects[0];
+  const latestProjectProgress = latestProject ? `${latestProject.finishedGroups}/${latestProject.groups}` : "0/0";
+  const recentProjects = projects.slice(0, 3);
 
   function handleFollowUpAction(item: FollowUpItem) {
     if (item.action === "Kirim Pengingat") {
       setReminderTarget(item.target);
       setReminderOpen(true);
     } else if (item.action === "Review") {
+      start();
       router.push("/teacher/review");
     } else if (item.action === "Lihat Kelompok") {
+      start();
       router.push("/teacher/projects/1/groups/2");
     } else if (item.action === "Lihat Siswa") {
+      start();
       router.push("/teacher/students");
     }
   }
@@ -96,13 +141,6 @@ export default function TeacherDashboard() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <FilterSelect className="w-full sm:w-56" ariaLabel="Pilih semester" defaultValue="semester-genap-2026" options={semesterOptions} />
-              <Link
-                href="/teacher/projects?create=1"
-                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-ktr-text-primary bg-ktr-text-primary px-4 text-sm font-semibold text-ktr-text-white transition-[border-color,background-color,transform] hover:bg-ktr-text-primary/95 active:scale-[0.997]"
-              >
-                <HugeiconsIcon icon={PlusSignIcon} size={16} strokeWidth={2} />
-                Proyek Baru
-              </Link>
             </div>
           </section>
         )}
@@ -111,20 +149,20 @@ export default function TeacherDashboard() {
           <DashboardStatSkeleton />
         ) : (
           <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <StatCard title="Proyek Aktif" value={activeProjects.length} icon={Folder01Icon} tone="neutral" note="Sedang dipantau" />
-            <StatCard title="Review Tertunda" value={pendingReviews} icon={CheckListIcon} tone="amber" note="Butuh tinjauan" />
-            <StatCard title="Kelompok Perhatian" value={inactiveGroups} icon={UserMultiple02Icon} tone="rose" note="Perlu follow up" />
-            <StatCard title="Efisiensi" value={`${completionRate}%`} icon={MessageMultiple01Icon} tone="green" note="Target stabil" />
+            <StatCard title="Gabungan Proyek" value={totalGroups} icon={Folder01Icon} tone="neutral" note="Total kelompok" />
+            <StatCard title="Semua Proyek" value={totalProjects} icon={CheckListIcon} tone="amber" note="Proyek terdaftar" />
+            <StatCard title="Jumlah Siswa" value={totalStudents} icon={UserMultiple02Icon} tone="rose" note="Siswa terlibat" />
+            <StatCard title="Proyek Terakhir" value={latestProjectProgress} icon={MessageMultiple01Icon} tone="green" note={latestProject?.name ?? "Belum ada proyek"} />
           </section>
         )}
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-6">
             <DashboardPanel
-              title="Proyek Aktif"
-              subtitle={`${activeProjects.length} proyek berjalan`}
+              title="Proyek Terakhir"
+              subtitle={`${recentProjects.length} proyek terbaru`}
               action={
-                <Link href="/teacher/projects" className="inline-flex cursor-pointer items-center gap-1 text-sm font-semibold text-ktr-text-primary">
+                <Link href="/teacher/projects" onClick={start} className="inline-flex cursor-pointer items-center gap-1 text-sm font-semibold text-ktr-text-primary">
                   Semua proyek
                   <HugeiconsIcon icon={ArrowRight01Icon} size={15} strokeWidth={2} />
                 </Link>
@@ -134,13 +172,13 @@ export default function TeacherDashboard() {
                 <DashboardListSkeleton rows={3} />
               ) : (
                 <div className="space-y-0">
-                  {activeProjects.slice(0, 4).map((project) => {
+                  {recentProjects.map((project) => {
                     const reviews = project.pendingUploadReviews + project.pendingFinalReviews;
                     return (
                       <div key={project.id} className="grid gap-3 border-b border-ktr-border-light py-4 transition-colors first:pt-0 last:border-b-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_minmax(480px,0.9fr)] sm:items-center">
                         <div className="min-w-0">
                           <div className="flex min-w-0 items-center gap-3">
-                            <Link href={`/teacher/projects/${project.id}`} className="truncate text-[15px] font-semibold text-ktr-text-primary transition-colors hover:text-ktr-text-secondary">
+                            <Link href={`/teacher/projects/${project.id}`} onClick={start} className="truncate text-[15px] font-semibold text-ktr-text-primary transition-colors hover:text-ktr-text-secondary">
                               {project.name}
                             </Link>
                             <StatusBadge status={project.status} />
@@ -159,7 +197,7 @@ export default function TeacherDashboard() {
               )}
             </DashboardPanel>
 
-            <DashboardPanel title="Prioritas Hari Ini" subtitle={`${topFollowUps.length} item memerlukan perhatian`}>
+            {/* <DashboardPanel title="Prioritas Hari Ini" subtitle={`${topFollowUps.length} item memerlukan perhatian`}>
               <div className="space-y-0">
                 {topFollowUps.map((item) => (
                   <div key={item.title} className="flex w-full items-center justify-between gap-4 border-b border-ktr-border-light py-4 text-left transition-colors first:pt-0 last:border-b-0 last:pb-0">
@@ -177,7 +215,7 @@ export default function TeacherDashboard() {
                   </div>
                 ))}
               </div>
-            </DashboardPanel>
+            </DashboardPanel> */}
           </div>
 
           <aside className="space-y-6">

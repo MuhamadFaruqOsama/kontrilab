@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { AppFormField } from "@/components/ui/app-form-field";
+import { AppRole, AUTH_COOKIE_NAME, getDashboardPath, serializeAuthSession } from "@/lib/auth/session";
 import { publicAppConfig } from "@/lib/env";
 import { supabase } from "@/lib/supabase/client";
 import { getFriendlyAuthError } from "@/lib/copy/auth";
@@ -33,7 +34,7 @@ export default function LoginPage() {
     }
 
     setIsSubmitting(true);
-    const { error: signInError } = await supabase.auth.signInWithPassword(parsed.data);
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword(parsed.data);
     setIsSubmitting(false);
 
     if (signInError) {
@@ -42,10 +43,35 @@ export default function LoginPage() {
       return;
     }
 
-    document.cookie = "kontrilab-auth=1; path=/; max-age=604800; samesite=lax";
+    const accessToken = signInData.session?.access_token;
+    if (!accessToken) {
+      setError("Sesi login belum bisa dibuat. Coba masuk lagi.");
+      return;
+    }
+
+    const sessionResponse = await fetch("/api/auth/session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ accessToken }),
+    });
+    const sessionResult = (await sessionResponse.json().catch(() => null)) as { userId?: string; email?: string; role?: AppRole; name?: string; message?: string } | null;
+    if (!sessionResponse.ok || !sessionResult?.email || !sessionResult?.role) {
+      setError(getFriendlyAuthError(sessionResult?.message || "Sesi belum bisa dibuat."));
+      return;
+    }
+
+    const sessionCookie = serializeAuthSession({
+      email: sessionResult.email,
+      role: sessionResult.role,
+      userId: sessionResult.userId,
+      name: sessionResult.name,
+    });
+    document.cookie = `${AUTH_COOKIE_NAME}=${encodeURIComponent(sessionCookie)}; path=/; max-age=604800; samesite=lax`;
     toast.success("Masuk berhasil", { description: "Selamat datang kembali. Yuk lanjutkan progres kelompokmu." });
     const redirectTo = new URLSearchParams(window.location.search).get("redirectTo");
-    router.push(redirectTo || "/student");
+    router.push(redirectTo || getDashboardPath(sessionResult.role));
   }
 
   return (

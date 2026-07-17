@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { DashboardSquare01Icon, Folder01Icon, LogoutSquare01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { AUTH_COOKIE_NAME } from "@/lib/auth/session";
+import { useNProgress } from "@/components/ui/nprogress";
 
 const navigation = [
   { name: "Dashboard", href: "/teacher", icon: DashboardSquare01Icon },
@@ -15,6 +17,14 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { start } = useNProgress();
+
+  function handleLogout() {
+    document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; samesite=lax`;
+    start();
+    router.replace("/login");
+  }
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -32,6 +42,9 @@ export default function Sidebar() {
               key={item.name}
               href={item.href}
               title={item.name}
+              onClick={() => {
+                if (!isActive) start();
+              }}
               className={cn(
                 "group flex h-10 cursor-pointer items-center justify-center gap-3 rounded-[10px] px-3 text-sm font-medium transition-[background,color,border-color,transform] duration-150 focus-visible:outline-none focus-visible:border-ktr-text-primary active:scale-[0.997] xl:justify-start xl:px-4",
                 isActive
@@ -55,10 +68,10 @@ export default function Sidebar() {
             <p className="truncate text-sm font-semibold leading-5 text-ktr-text-primary">Guru KontriLab</p>
           </div>
         </div>
-        <Link href="/login" className="mt-2 flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm font-semibold text-ktr-text-primary transition-colors hover:border-ktr-border-input active:scale-[0.997] xl:justify-start" aria-label="Keluar">
+        <button type="button" onClick={handleLogout} className="mt-2 flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-[10px] border border-ktr-border-light bg-white px-3 text-sm font-semibold text-ktr-text-primary transition-colors hover:border-ktr-border-input active:scale-[0.997] xl:justify-start" aria-label="Keluar">
           <HugeiconsIcon icon={LogoutSquare01Icon} size={18} strokeWidth={2} />
           <span className="hidden xl:inline">Keluar</span>
-        </Link>
+        </button>
       </div>
     </div>
   );
